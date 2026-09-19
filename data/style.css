@@ -25,6 +25,10 @@
  * - goal-bar.low / progressbar.low > trough > progress (amber progress fill)
  * - chart-legend-swatch (11×11 rounded swatch in the chart legend)
  * - chart-day-label (10px, 40% opacity day-of-week letters beside the heatmap)
+ *
+ * Phase 6 (catch-up dialog, design-spec §5):
+ * - catchup-row.missed (already listed above; bg #fdf2f2, border #f0d7d9) + .date (#a51d2d)
+ * - catchup-goal-list (already listed above; radius 9, border 1px #f0d7d9)
  */
 
 .colour-dot {
@@ -126,4 +130,18 @@ progressbar.low > trough > progress {
 .chart-day-label {
   font-size: 10px;
   opacity: 0.4;
+}
+
+.catchup-row.missed {
+  background-color: #fdf2f2;
+  border-color: #f0d7d9;
+}
+
+.catchup-row.missed .date {
+  color: #a51d2d;
+}
+
+.catchup-goal-list {
+  border-radius: 9px;
+  border: 1px solid #f0d7d9;
 }

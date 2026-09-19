@@ -13,6 +13,7 @@ gi.require_version("Adw", "1")
 from gi.repository import Adw, Gio, GLib, Gtk
 
 from streaks import clock, engine, models
+from streaks.catchup_dialog import StreaksCatchupDialog
 from streaks.empty_view import StreaksEmptyView  # noqa: F401  registers $StreaksEmptyView
 from streaks.models import Streak
 from streaks.sidebar_row import StreaksSidebarRow
@@ -57,6 +58,7 @@ class StreaksWindow(Adw.ApplicationWindow):
         self._current_streak_id = 0
         self.end_streak_dialog: Adw.AlertDialog | None = None
         self.delete_streak_dialog: Adw.AlertDialog | None = None
+        self.catchup_dialog: StreaksCatchupDialog | None = None
 
         self._install_actions()
         self.sidebar_list.set_header_func(self._header_func)
@@ -177,7 +179,9 @@ class StreaksWindow(Adw.ApplicationWindow):
             self.today_view.scroll_to_streak(streak_id)
 
     def _on_streak_catch_up(self, _view: StreaksStreakView, streak_id: int) -> None:
-        _logger.info("catch-up requested for streak %s (not yet implemented)", streak_id)
+        dialog = StreaksCatchupDialog(self.state, streak_id)
+        self.catchup_dialog = dialog
+        dialog.present(self)
 
     # -- header ---------------------------------------------------------------------
 

@@ -745,3 +745,19 @@ def test_fixture_today_view(seeded, today, settings):
         "No snoozing the alarm",
         "Clip fingernails",
     ]
+
+
+def test_kept_answer_counts_as_all_goals_done(seeded, today, settings):
+    """A day answered "Kept" (e.g. via catch-up) renders as a full cell and counts every goal."""
+    from streaks.engine import CHART_FULL, Answer, AnswerData, Status, _cell_for_result, evaluate
+
+    hard = next(s for s in load_all(today) if s.name == "75 Hard")
+    day = date(2026, 9, 10)
+    assert not any(a.day == day for a in hard.answers)
+    with_answer = dataclasses.replace(
+        hard, answers=(*hard.answers, AnswerData(day=day, status=Answer.KEPT, missed_goal_ids=()))
+    )
+    result = next(pr for pr in evaluate(with_answer, today, settings) if pr.period.start == day)
+    assert result.status == Status.KEPT
+    assert result.done == result.total == 5
+    assert _cell_for_result(result).fill == CHART_FULL

@@ -162,6 +162,53 @@ def _build_streak_lifetime(ctx: BuildContext) -> Gtk.Widget:
     return window
 
 
+def _build_catch_up(ctx: BuildContext) -> Gtk.Widget:
+    from streaks.catchup_dialog import StreaksCatchupDialog
+
+    window = StreaksWindow(application=ctx.app)
+    ctx.window = window
+    window.present()
+    _process_events()
+
+    streak = next(s for s in window.state.streaks if s.name == "75 Hard")
+    dialog = StreaksCatchupDialog(window.state, streak.id)
+    dialog.present(window)
+    _process_events()
+
+    child = dialog.get_child()
+    dialog.set_child(None)
+    return child
+
+
+def _build_catch_up_missed(ctx: BuildContext) -> Gtk.Widget:
+    from streaks.catchup_dialog import StreaksCatchupDialog
+
+    window = StreaksWindow(application=ctx.app)
+    ctx.window = window
+    window.present()
+    _process_events()
+
+    streak = next(s for s in window.state.streaks if s.name == "75 Hard")
+    dialog = StreaksCatchupDialog(window.state, streak.id)
+    dialog.present(window)
+    _process_events()
+
+    rows = {row.day: row for row in dialog._rows}
+    rows[date(2026, 9, 9)].kept_button.set_active(True)
+
+    fri_row = rows[date(2026, 9, 11)]
+    fri_row.missed_button.set_active(True)
+    _, goal2_check = fri_row._goal_checks[2]  # "45 min second workout"
+    goal2_check.set_active(False)
+
+    rows[date(2026, 9, 12)].kept_button.set_active(True)
+    _process_events()
+
+    child = dialog.get_child()
+    dialog.set_child(None)
+    return child
+
+
 def _build_today_quiet(ctx: BuildContext) -> Gtk.Widget:
     from streaks.engine import Answer
     from streaks.models import Streak, answer_day
@@ -186,6 +233,10 @@ SCREENS: dict[str, Screen] = {
     "streak": Screen(name="streak", width=1160, height=760, build=_build_streak),
     "streak-lifetime": Screen(
         name="streak-lifetime", width=1160, height=760, build=_build_streak_lifetime
+    ),
+    "catch-up": Screen(name="catch-up", width=560, height=580, build=_build_catch_up),
+    "catch-up-missed": Screen(
+        name="catch-up-missed", width=560, height=730, build=_build_catch_up_missed
     ),
 }
 

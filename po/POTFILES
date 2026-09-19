@@ -37,3 +37,7 @@ src/streaks/ui/goal_bar_row.blp
 src/streaks/goal_bar_row.py
 src/streaks/ui/run_row.blp
 src/streaks/run_row.py
+src/streaks/ui/catchup_dialog.blp
+src/streaks/catchup_dialog.py
+src/streaks/ui/catchup_row.blp
+src/streaks/catchup_row.py

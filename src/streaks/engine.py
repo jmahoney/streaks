@@ -402,7 +402,13 @@ def evaluate(streak: StreakData, today: date, settings: Settings) -> list[Period
         done, total = _period_totals(streak, period, goals, checks_by_goal)
         answer = _find_answer(period, answers_by_day)
         if answer is not None:
-            status = Status.MISSED if answer.status == Answer.MISSED else Status.KEPT
+            if answer.status == Answer.MISSED:
+                status = Status.MISSED
+            else:
+                # An explicit "Kept" answer means every goal was done that day, whether or
+                # not the goals were ticked individually (catch-up: "All five goals").
+                status = Status.KEPT
+                done = max(done, total)
             results.append(PeriodResult(period, status, done, total))
             continue
 

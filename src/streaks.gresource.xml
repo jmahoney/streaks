@@ -2,6 +2,8 @@
 <gresources>
   <gresource prefix="/com/cheerschopper/Streaks">
     <file>streaks/ui/window.ui</file>
+    <file>streaks/ui/catchup_row.ui</file>
+    <file>streaks/ui/catchup_dialog.ui</file>
     <file>streaks/ui/run_row.ui</file>
     <file>streaks/ui/goal_bar_row.ui</file>
     <file>streaks/ui/streak_view.ui</file>

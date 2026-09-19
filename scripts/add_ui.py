@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Add a new UI component to the application."""
 
+import re
 import sys
 from pathlib import Path
 
@@ -70,11 +71,13 @@ def add_to_files_list(content: str, anchor: str, entry: str) -> str:
     if entry in content:
         return content
     anchor_pos = content.index(anchor)
-    close = content.index("\n)", anchor_pos)
-    before = content[:close].rstrip()
+    close = re.compile(r"\n([ \t]*)\)").search(content, anchor_pos)
+    assert close is not None, f"no closing paren after {anchor!r}"
+    indent = close.group(1)
+    before = content[: close.start()].rstrip()
     if not before.endswith(","):
         before += ","
-    return f"{before}\n  {entry},\n)" + content[close + 2 :]
+    return f"{before}\n{indent}  {entry},\n{indent})" + content[close.end() :]
 
 
 meson_content = meson_file.read_text()
