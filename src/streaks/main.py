@@ -17,11 +17,9 @@ class StreaksApplication(Adw.Application):
 
     def __init__(self, **kwargs):
         """Initialize the application."""
-        super().__init__(
-            application_id="com.cheerschopper.Streaks",
-            flags=Gio.ApplicationFlags.DEFAULT_FLAGS,
-            **kwargs,
-        )
+        kwargs.setdefault("application_id", "com.cheerschopper.Streaks")
+        kwargs.setdefault("flags", Gio.ApplicationFlags.DEFAULT_FLAGS)
+        super().__init__(**kwargs)
         self.resource_base_path = "/com/cheerschopper/Streaks"
         self.window = None
 

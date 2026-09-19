@@ -26,6 +26,7 @@ if "STREAKS_DATA_DIR" not in os.environ:
 os.environ.setdefault("GSK_RENDERER", "cairo")
 os.environ.setdefault("GDK_SCALE", "1")
 os.environ.setdefault("ADW_DISABLE_PORTAL", "1")
+os.environ.setdefault("GTK_A11Y", "none")
 os.environ.setdefault("STREAKS_FAKE_TODAY", "2026-09-13")
 
 

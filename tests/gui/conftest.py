@@ -6,7 +6,8 @@ gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 
 import pytest
-from gi.repository import Adw, GLib, Gtk
+from gi.repository import Gio, GLib
+from render import configure_for_rendering
 
 from streaks.resources import load_resources
 
@@ -33,17 +34,11 @@ def app():
     """Create and register the test application."""
     from streaks.main import StreaksApplication
 
-    # Set up style manager for testing
-    style_manager = Adw.StyleManager.get_default()
-    style_manager.set_color_scheme(Adw.ColorScheme.FORCE_LIGHT)
-
-    # Set up font for testing
-    settings = Gtk.Settings.get_default()
-    settings.set_property("gtk-font-name", "Cantarell 11")
-    settings.set_property("gtk-enable-animations", False)
+    configure_for_rendering()
 
     # Create and register the app
-    app = StreaksApplication()
+    # NON_UNIQUE: never attach to (or block on) a real running Streaks instance on the bus.
+    app = StreaksApplication(flags=Gio.ApplicationFlags.NON_UNIQUE)
     app.register()
 
     return app
