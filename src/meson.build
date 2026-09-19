@@ -4,7 +4,11 @@ gnome = import('gnome')
 python = import('python')
 
 blueprints = custom_target('blueprints',
-  input: files('streaks/ui/window.blp'),
+  input: files(
+    'streaks/ui/window.blp',
+    'streaks/ui/sidebar_row.blp',
+    'streaks/ui/empty_view.blp',
+  ),
   output: '.',
   command: [find_program('blueprint-compiler'), 'batch-compile', '@OUTPUT@', '@CURRENT_SOURCE_DIR@', '@INPUT@'],
 )
@@ -24,13 +28,24 @@ streaks_sources = files(
   'streaks/__init__.py',
   'streaks/__main__.py',
   'streaks/clock.py',
+  'streaks/empty_view.py',
   'streaks/engine.py',
   'streaks/export.py',
   'streaks/main.py',
   'streaks/models.py',
   'streaks/resources.py',
+  'streaks/settings.py',
+  'streaks/sidebar_row.py',
+  'streaks/state.py',
   'streaks/window.py',
   'streaks/words.py'
 )
 install_data(streaks_sources, install_dir: moduledir)
+
+streaks_widgets_sources = files(
+  'streaks/widgets/__init__.py',
+  'streaks/widgets/grid_widgets.py',
+)
+install_data(streaks_widgets_sources, install_dir: moduledir / 'widgets')
+
 install_data(files('../data/style.css'), install_dir: pkgdatadir)

@@ -68,8 +68,22 @@ def _build_window(ctx: BuildContext) -> Gtk.Widget:
     return window
 
 
+def _build_empty(ctx: BuildContext) -> Gtk.Widget:
+    window = StreaksWindow(application=ctx.app)
+    ctx.window = window
+    return window
+
+
+def _build_sidebar(ctx: BuildContext) -> Gtk.Widget:
+    window = StreaksWindow(application=ctx.app)
+    ctx.window = window
+    return window
+
+
 SCREENS: dict[str, Screen] = {
     "window": Screen(name="window", width=1160, height=760, build=_build_window),
+    "empty": Screen(name="empty", width=1160, height=760, build=_build_empty, seed=False),
+    "sidebar": Screen(name="sidebar", width=1160, height=760, build=_build_sidebar),
 }
 
 

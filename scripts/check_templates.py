@@ -42,10 +42,23 @@ for py_file in src_dir.glob("**/*.py"):
     with open(py_file) as f:
         content = f.read()
 
-    # Find __gtype_name__
-    gtype_matches = re.findall(r"__gtype_name__\s*=\s*['\"](\w+)['\"]", content)
-    for match in gtype_matches:
-        py_classes[match] = str(py_file)
+    # Find __gtype_name__, but only for classes bound to a Blueprint template (immediately
+    # preceded by @Gtk.Template(...)): plain custom-drawn Gtk.Widget subclasses (e.g.
+    # src/streaks/widgets/*.py) have a GType name without ever having a matching .blp template,
+    # by design (see docs/phases/02-shell-sidebar-empty.md).
+    class_starts = list(re.finditer(r"(?m)^class\s+\w+\(", content))
+    for i, class_match in enumerate(class_starts):
+        start = class_match.start()
+        end = class_starts[i + 1].start() if i + 1 < len(class_starts) else len(content)
+        gtype_match = re.search(r"__gtype_name__\s*=\s*['\"](\w+)['\"]", content[start:end])
+        if not gtype_match:
+            continue
+        preceding_lines = content[:start].rstrip("\n").splitlines()
+        is_templated = bool(preceding_lines) and preceding_lines[-1].strip().startswith(
+            "@Gtk.Template("
+        )
+        if is_templated:
+            py_classes[gtype_match.group(1)] = str(py_file)
 
     # Find Gtk.Template.Child definitions
     child_pattern = r"(\w+)\s*=\s*Gtk\.Template\.Child\(\)"

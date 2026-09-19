@@ -1,0 +1,57 @@
+using Gtk 4.0;
+
+template $StreaksSidebarRow : Gtk.ListBoxRow {
+  child: Gtk.Box {
+    orientation: horizontal;
+    spacing: 10;
+    margin-start: 10;
+    margin-end: 10;
+    margin-top: 4;
+    margin-bottom: 4;
+
+    Gtk.Box dot {
+      width-request: 8;
+      height-request: 8;
+      valign: center;
+      halign: center;
+
+      styles ["colour-dot"]
+    }
+
+    Gtk.Box {
+      orientation: vertical;
+      hexpand: true;
+      valign: center;
+      spacing: 1;
+
+      Gtk.Label name_label {
+        label: _("Streak");
+        halign: start;
+        ellipsize: end;
+        xalign: 0;
+      }
+
+      Gtk.Label meta_label {
+        halign: start;
+        ellipsize: end;
+        xalign: 0;
+
+        styles ["caption", "dim-label"]
+      }
+    }
+
+    Gtk.Label count_label {
+      halign: end;
+      valign: center;
+
+      styles ["heading"]
+    }
+
+    Gtk.Label badge_label {
+      halign: end;
+      valign: center;
+
+      styles ["badge"]
+    }
+  };
+}

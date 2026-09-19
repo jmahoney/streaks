@@ -13,6 +13,36 @@
  * - goal-bar.low (amber)
  * - chart-legend-swatch
  * - sidebar-footer
+ * - sidebar-empty
  * - card (built-in libadwaita)
  * - caption-heading dim-label (section headings)
  */
+
+.colour-dot {
+  border-radius: 9999px;
+  min-width: 8px;
+  min-height: 8px;
+}
+
+.colour-dot.today-dot {
+  border-radius: 2px;
+}
+
+.badge {
+  background-color: @accent_bg_color;
+  color: @accent_fg_color;
+  font-weight: bold;
+  font-size: 11px;
+  min-width: 20px;
+  min-height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+}
+
+.sidebar-footer {
+  padding-bottom: 6px;
+}
+
+.sidebar-empty {
+  padding: 14px 10px;
+}

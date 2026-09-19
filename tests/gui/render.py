@@ -45,6 +45,16 @@ def configure_for_rendering() -> None:
 
     Adw.StyleManager.get_default().set_color_scheme(Adw.ColorScheme.FORCE_LIGHT)
 
+    # Pin the accent to GNOME's default blue regardless of the host session's accent colour
+    # (libadwaita reads it from the portal or GSettings; the design assumes blue).
+    accent = Gtk.CssProvider()
+    accent.load_from_string(
+        ":root { --accent-bg-color: #3584e4; --accent-fg-color: #ffffff; --accent-color: #1c71d8; }"
+    )
+    Gtk.StyleContext.add_provider_for_display(
+        Gdk.Display.get_default(), accent, Gtk.STYLE_PROVIDER_PRIORITY_USER
+    )
+
     settings = Gtk.Settings.get_default()
     settings.set_property("gtk-font-name", "Cantarell 11")
     settings.set_property("gtk-enable-animations", False)

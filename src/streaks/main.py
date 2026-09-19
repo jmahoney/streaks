@@ -33,6 +33,12 @@ class StreaksApplication(Adw.Application):
         action.connect("activate", self._on_about)
         self.add_action(action)
 
+        # Present-but-no-op for now; a later phase wires up the preferences dialog.
+        action = Gio.SimpleAction.new("preferences", None)
+        action.connect("activate", self._on_preferences)
+        self.add_action(action)
+        self.set_accels_for_action("app.preferences", ["<Ctrl>comma"])
+
     def do_activate(self):
         """Activate the application."""
         if not self.window:
@@ -40,6 +46,9 @@ class StreaksApplication(Adw.Application):
 
             self.window = StreaksWindow(application=self)
         self.window.present()
+
+    def _on_preferences(self, *args):
+        """Show the preferences dialog (not yet implemented)."""
 
     def _on_about(self, *args):
         """Show the about dialog."""

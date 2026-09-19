@@ -2,6 +2,8 @@
 <gresources>
   <gresource prefix="/com/cheerschopper/Streaks">
     <file>streaks/ui/window.ui</file>
+    <file>streaks/ui/empty_view.ui</file>
+    <file>streaks/ui/sidebar_row.ui</file>
     <file alias="style.css">../data/style.css</file>
   </gresource>
 </gresources>

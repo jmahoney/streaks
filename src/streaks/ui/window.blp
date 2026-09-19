@@ -6,13 +6,130 @@ template $StreaksWindow : Adw.ApplicationWindow {
   default-width: 1160;
   default-height: 760;
 
-  content: Adw.ToolbarView {
-    [top]
-    Adw.HeaderBar {}
+  content: Adw.NavigationSplitView split_view {
+    min-sidebar-width: 280;
+    max-sidebar-width: 280;
+    sidebar-width-fraction: 0.25;
 
-    content: Gtk.Label content_label {
-      label: _("Streaks");
-      styles ["title-1"]
+    sidebar: Adw.NavigationPage {
+      title: _("Streaks");
+      tag: "sidebar";
+
+      child: Adw.ToolbarView {
+        [top]
+        Adw.HeaderBar {
+          title-widget: Adw.WindowTitle {
+            title: _("Streaks");
+          };
+
+          [end]
+          Gtk.Button new_button {
+            icon-name: "list-add-symbolic";
+            tooltip-text: _("New Streak");
+            action-name: "win.new-streak";
+          }
+        }
+
+        content: Gtk.Box {
+          orientation: vertical;
+          margin-start: 8;
+          margin-end: 8;
+          margin-top: 8;
+          margin-bottom: 8;
+          spacing: 2;
+
+          Gtk.ListBox sidebar_list {
+            selection-mode: single;
+
+            styles ["navigation-sidebar"]
+          }
+
+          Gtk.Label sidebar_empty_label {
+            label: _("No streaks yet");
+            halign: start;
+            visible: false;
+
+            styles ["caption", "dim-label", "sidebar-empty"]
+          }
+
+          Gtk.Box {
+            vexpand: true;
+          }
+
+          Gtk.Label footer_label {
+            label: _("Everything stays on this machine.");
+            halign: start;
+            margin-start: 10;
+
+            styles ["caption", "dim-label", "sidebar-footer"]
+          }
+        };
+      };
+    };
+
+    content: Adw.NavigationPage {
+      title: _("Streaks");
+      tag: "content";
+
+      child: Adw.ToolbarView {
+        [top]
+        Adw.HeaderBar {
+          title-widget: Adw.WindowTitle content_title {
+            title: _("Today");
+          };
+
+          [end]
+          Gtk.MenuButton menu_button {
+            icon-name: "open-menu-symbolic";
+            menu-model: primary_menu;
+          }
+
+          [end]
+          Gtk.ToggleButton search_button {
+            icon-name: "edit-find-symbolic";
+          }
+        }
+
+        content: Gtk.Stack content_stack {
+          Gtk.StackPage {
+            name: "empty";
+            child: $StreaksEmptyView {};
+          }
+
+          Gtk.StackPage {
+            name: "today";
+            child: Adw.StatusPage {
+              title: _("Today");
+            };
+          }
+
+          Gtk.StackPage {
+            name: "streak";
+            child: Adw.StatusPage streak_status_page {
+              title: _("Streak");
+            };
+          }
+        };
+      };
     };
   };
+}
+
+menu primary_menu {
+  section {
+    item {
+      label: _("Preferences");
+      action: "app.preferences";
+    }
+
+    item {
+      label: _("Keyboard Shortcuts");
+      action: "win.show-help-overlay";
+    }
+
+    item {
+      label: _("About Streaks");
+      action: "app.about";
+    }
+  }
 }

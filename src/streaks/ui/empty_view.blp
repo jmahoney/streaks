@@ -1,0 +1,44 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $StreaksEmptyView : Adw.Bin {
+  child: Gtk.Box {
+    orientation: vertical;
+    halign: center;
+    valign: center;
+    spacing: 16;
+    margin-start: 80;
+    margin-end: 80;
+
+    $EmptyGridWidget grid {
+      halign: center;
+    }
+
+    Gtk.Label title_label {
+      label: _("No streaks yet");
+      halign: center;
+      margin-top: 8;
+
+      styles ["title-2"]
+    }
+
+    Gtk.Label body_label {
+      label: _("Pick something you want to do regularly, choose how often, and add as many goals as that thing needs.");
+      halign: center;
+      justify: center;
+      wrap: true;
+      max-width-chars: 46;
+
+      styles ["body", "dim-label"]
+    }
+
+    Gtk.Button create_button {
+      label: _("Create a streak");
+      halign: center;
+      margin-top: 4;
+      action-name: "win.new-streak";
+
+      styles ["suggested-action", "pill"]
+    }
+  };
+}
