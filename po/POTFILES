@@ -1,7 +1,12 @@
 data/com.cheerschopper.Streaks.desktop.in
 data/com.cheerschopper.Streaks.metainfo.xml.in
 data/com.cheerschopper.Streaks.gschema.xml
+src/streaks/clock.py
+src/streaks/engine.py
+src/streaks/export.py
 src/streaks/main.py
+src/streaks/models.py
 src/streaks/resources.py
 src/streaks/window.py
+src/streaks/words.py
 src/streaks/ui/window.blp

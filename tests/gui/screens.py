@@ -1,7 +1,6 @@
 """Registry of GUI "screens" that can be rendered offscreen for screenshots and golden snapshots.
 
-Only the Phase 0 bare window exists as a screen for now; later phases register more entries
-(dialogs, the shell, catch-up, ...).
+Later phases register more entries (dialogs, the shell, catch-up, ...).
 
 This module is imported both by pytest (as a bare top-level module, since `tests/gui` has no
 `__init__.py` and pytest inserts that directory onto `sys.path`) and by `scripts/render_screens.py`
@@ -105,87 +104,26 @@ def _settle() -> None:
     _process_events()
 
 
-def _load_seed_fn() -> Callable[..., object] | None:
-    """Best-effort import of `seed()` from tests/fixtures/seed.py.
-
-    That file is owned by another phase; its exact package shape (whether tests/fixtures has an
-    `__init__.py`) isn't guaranteed, so try a couple of reasonable import strategies rather than
-    assuming one.
-    """
-    tests_dir = _THIS_DIR.parent
-    fixtures_dir = tests_dir / "fixtures"
-    seed_path = fixtures_dir / "seed.py"
-    if not seed_path.exists():
-        return None
-
-    if str(tests_dir) not in sys.path:
-        sys.path.insert(0, str(tests_dir))
-    try:
-        from fixtures.seed import seed  # type: ignore[import-not-found]
-
-        return seed
-    except ImportError:
-        pass
-
-    if str(fixtures_dir) not in sys.path:
-        sys.path.insert(0, str(fixtures_dir))
-    try:
-        from seed import seed  # type: ignore[import-not-found]
-
-        return seed
-    except ImportError:
-        return None
-
-
 def _bind_and_seed(should_seed: bool, today: date) -> None:
-    """Bind a fresh in-memory Peewee DB to `streaks.models` and optionally seed it.
+    """Initialise `streaks.models.db` as a fresh in-memory database and optionally seed it with
+    the design fixture. Mirrors `tests/unit/conftest.py` so every screen renders the same data."""
+    from streaks.models import MODELS, db
 
-    Degrades gracefully: if `streaks.models` doesn't exist yet (this phase lands before Phase 1),
-    or seeding fails for any reason, the step is skipped with a printed note instead of raising —
-    the "window" screen (the only one registered so far) doesn't need a database at all.
-    """
-    try:
-        from streaks import models
-    except ImportError:
-        print("screens: streaks.models not available yet — skipping DB seeding")
-        return
-
-    try:
-        from peewee import SqliteDatabase
-    except ImportError:
-        print("screens: peewee not available — skipping DB seeding")
-        return
-
-    all_models = getattr(models, "ALL_MODELS", None)
-    if not all_models:
-        base_model = getattr(models, "BaseModel", None)
-        all_models = base_model.__subclasses__() if base_model is not None else []
-
-    if not all_models:
-        print("screens: streaks.models has no models to bind — skipping DB seeding")
-        return
-
-    try:
-        test_db = SqliteDatabase(":memory:")
-        test_db.bind(all_models)
-        test_db.connect(reuse_if_open=True)
-        test_db.create_tables(all_models)
-    except Exception as exc:  # noqa: BLE001 - degrade gracefully, this is best-effort scaffolding
-        print(f"screens: failed to bind in-memory DB — skipping DB seeding ({exc})")
-        return
+    if not db.is_closed():
+        db.close()
+    db.init(":memory:", pragmas={"foreign_keys": 1})
+    db.connect()
+    db.create_tables(MODELS)
 
     if not should_seed:
         return
 
-    seed_fn = _load_seed_fn()
-    if seed_fn is None:
-        print("screens: tests/fixtures/seed.py not available yet — skipping DB seeding")
-        return
+    tests_dir = _THIS_DIR.parent
+    if str(tests_dir) not in sys.path:
+        sys.path.insert(0, str(tests_dir))
+    from fixtures.seed import seed
 
-    try:
-        seed_fn(today)
-    except Exception as exc:  # noqa: BLE001 - degrade gracefully, this is best-effort scaffolding
-        print(f"screens: seed() failed — skipping DB seeding ({exc})")
+    seed(today)
 
 
 def build_screen(name: str, app: Adw.Application) -> tuple[Gtk.Widget, Screen]:

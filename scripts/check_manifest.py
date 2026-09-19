@@ -27,8 +27,12 @@ manifest_modules = set()
 for module in manifest.get("modules", []):
     name = module.get("name", "")
     manifest_modules.add(name)
-    # Add python3- prefixed version
-    if not name.startswith("python3-"):
+    # Also register the name with/without its "python3-" prefix, since Python imports are
+    # unprefixed (e.g. `import peewee`) but flatpak module names conventionally carry it
+    # (e.g. "python3-peewee") — either spelling in the manifest should satisfy either import.
+    if name.startswith("python3-"):
+        manifest_modules.add(name[len("python3-") :])
+    else:
         manifest_modules.add(f"python3-{name}")
 
 # Collect imports from Python files

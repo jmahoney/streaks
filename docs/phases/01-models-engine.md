@@ -123,18 +123,18 @@ backfill_days=2, count_through_unconfirmed=True, show_ended=True`):
   Goal bars: this calendar month, denominator = confirmed due days in the month up to today inclusive
   (unconfirmed days excluded), `low` when ratio < 0.75. Lifetime chart = last `weeks_shown` ISO weeks ending this week.
 - `catch_up(streak, today, settings) -> CatchUp` with `subtitle` ("75 Hard · 4 days"), `days: list[(date,
-  label "Tuesday 9 September")]` (unconfirmed days of the current run, oldest first) and
+  label "Wednesday 9 September")]` (unconfirmed days of the current run, oldest first) and
   `catch_up_preview(streak, today, settings, answers: dict[date, tuple[Answer, tuple[int,...]]]) -> Preview` with
   `row_state: dict[date, str]` ("Unanswered" / "All five goals" / "Missed — which goals?" / "Untick the goals you
   missed"), `row_warning: dict[date, str]` ("Saving this ends the 48-day run on 11 September and starts run 4 on the
   12th."), `strip: list[Cell]` (last 24 due days with the pending answers applied), `summary` ("Run 3 ends at 48 days —
-  your best run so far. Run 4 is on 2 days. Wednesday stays hollow — unanswered, and it doesn't break anything." /
-  "Run 3 stays at 51 days. Wednesday stays hollow — …" / "All four days confirmed. Run 3 stays at 51 days.").
+  your best run so far. Run 4 is on 2 days. Thursday stays hollow — unanswered, and it doesn't break anything." /
+  "Run 3 stays at 51 days. Thursday stays hollow — …" / "All four days confirmed. Run 3 stays at 51 days.").
   Also `mark_missed_preview(streak, today, settings) -> str` ("This ends run 3 at 50 days." — today excluded).
 
 ## `words.py`
 `number_word(n) -> str` ("one"…"twelve", else digits), `Number_word` capitalised, `ordinal_day(d) -> "12th"`,
-`fmt_day(d) -> "9 September"`, `fmt_day_short(d) -> "4 Mar"`, `fmt_weekday_day(d) -> "Tuesday 9 September"`,
+`fmt_day(d) -> "9 September"`, `fmt_day_short(d) -> "4 Mar"`, `fmt_weekday_day(d) -> "Wednesday 9 September"`,
 `fmt_range(a, b) -> "14 May – 16 Jun"` (en dash, spaces), `weekday_names_short`, `time_hm(dt) -> "07:12"`.
 Strings that reach the user go through `gettext` (`_`, `ngettext`); import `gettext` and use `gettext.gettext as _`
 at module level so the modules work without the launcher's `gettext.install`.
@@ -165,9 +165,9 @@ Expected values (tests assert these literally — they were computed independent
   in run 3: 28 Jul, 30 Jul, 4 Aug, 10, 11, 18, 21, 25 Aug, 1 Sep, 8 Sep (+ today); hit % 94; tiles ["51","4","47","94%"];
   goal bars this month [9/9, 9/9, 6/9 (low), 8/9, 9/9]; earlier runs metas "14 May – 16 Jun · 34 days",
   "2 Feb – 1 Mar · 28 days"; card meta "3 of 5 · day 51"; sidebar meta "Daily · 5 goals", count 51; banner title
-  "Four days without a check-in — 9 to 12 September"; catch-up days Tue 9…Fri 12; preview with {Tue: kept, Thu: missed
-  goal 2, Fri: kept} → warning "Saving this ends the 48-day run on 11 September and starts run 4 on the 12th.",
-  summary "Run 3 ends at 48 days — your best run so far. Run 4 is on 2 days. Wednesday stays hollow — unanswered, and
+  "Four days without a check-in — 9 to 12 September"; catch-up days Wed 9…Sat 12; preview with {Wed 9: kept, Fri 11: missed
+  goal 2, Sat 12: kept} → warning "Saving this ends the 48-day run on 11 September and starts run 4 on the 12th.",
+  summary "Run 3 ends at 48 days — your best run so far. Run 4 is on 2 days. Thursday stays hollow — unanswered, and
   it doesn't break anything."; mark-missed preview "This ends run 3 at 50 days."
 - No snoozing: count 12, meta "Mon–Fri · 1 goal", card kind not_due, meta "Not today", body "Weekdays only. Next
   check-in Monday 14 September."

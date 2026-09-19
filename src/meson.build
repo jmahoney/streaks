@@ -23,9 +23,14 @@ configure_file(input: 'com.cheerschopper.Streaks.in', output: 'com.cheerschopper
 streaks_sources = files(
   'streaks/__init__.py',
   'streaks/__main__.py',
+  'streaks/clock.py',
+  'streaks/engine.py',
+  'streaks/export.py',
   'streaks/main.py',
+  'streaks/models.py',
   'streaks/resources.py',
-  'streaks/window.py'
+  'streaks/window.py',
+  'streaks/words.py'
 )
 install_data(streaks_sources, install_dir: moduledir)
 install_data(files('../data/style.css'), install_dir: pkgdatadir)

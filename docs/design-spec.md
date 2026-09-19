@@ -195,7 +195,7 @@ periods elapsed in the run, excluding today) rounded.
 - content: box, padding 18, gap 14.
   1. Caption 12.5 at 58 %: "For each day: kept it, missed something, or leave it unanswered. Only “missed” ends the run."
   2. `card` list, one `CatchUpRow` per unconfirmed day (oldest first), padding 12 16, bottom border:
-     left: bold 13.5 date "Tuesday 9 September" (`%A %-d %B`), caption 11.5 state text: "Unanswered" (default),
+     left: bold 13.5 date "Wednesday 9 September" (`%A %-d %B`), caption 11.5 state text: "Unanswered" (default),
      "All five goals" (after Kept; "All {n} goals"/"Done" for 1 goal), "Missed — which goals?" (after Missed);
      right: two linked `Gtk.ToggleButton`s "Kept" / "Missed" (padding 7 13, radius 8). Kept selected → accent bg white
      bold; Missed selected → `#c01c28` bg white bold.
@@ -208,12 +208,12 @@ periods elapsed in the run, excluding today) rounded.
        12th." (engine sentence).
   3. **Result card** (padding 14 16): bold 13 "Result of these answers"; `StripWidget` 9×20 gap 3 of the last 24 due
      days reflecting the pending answers; caption 12 at 60 %: "Run 3 ends at 47 days — your best run so far. Run 4 is on
-     2 days. Wednesday stays hollow — unanswered, and it doesn't break anything." (engine: first sentence when a miss is
+     2 days. Thursday stays hollow — unanswered, and it doesn't break anything." (engine: first sentence when a miss is
      pending, "— your best run so far" only when true; second when a new run starts; third lists unanswered weekday
      names; when nothing is missed: "Run 3 stays at 51 days. {Weekday} stays hollow …" / "All four days confirmed.").
 
-Fixture state for the `catch-up-missed` snapshot: Tue 9 Kept, Wed 10 unanswered, Thu 11 Missed (second workout
-unticked), Fri 12 Kept. Default snapshot: all unanswered.
+Fixture state for the `catch-up-missed` snapshot: Wed 9 Kept, Thu 10 unanswered, Fri 11 Missed (second workout
+unticked), Sat 12 Kept. Default snapshot: all unanswered.
 
 Save: writes one `DayAnswer` per answered day in one transaction, closes, refreshes Today + history.
 
