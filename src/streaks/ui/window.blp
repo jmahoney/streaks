@@ -91,6 +91,8 @@ template $StreaksWindow : Adw.ApplicationWindow {
         }
 
         content: Gtk.Stack content_stack {
+          hhomogeneous: false;
+
           Gtk.StackPage {
             name: "empty";
             child: $StreaksEmptyView {};
@@ -98,9 +100,7 @@ template $StreaksWindow : Adw.ApplicationWindow {
 
           Gtk.StackPage {
             name: "today";
-            child: Adw.StatusPage {
-              title: _("Today");
-            };
+            child: $StreaksTodayView today_view {};
           }
 
           Gtk.StackPage {

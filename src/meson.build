@@ -8,6 +8,10 @@ blueprints = custom_target('blueprints',
     'streaks/ui/window.blp',
     'streaks/ui/sidebar_row.blp',
     'streaks/ui/empty_view.blp',
+    'streaks/ui/today_view.blp',
+    'streaks/ui/catchup_banner.blp',
+    'streaks/ui/checkin_card.blp',
+    'streaks/ui/goal_row.blp',
   ),
   output: '.',
   command: [find_program('blueprint-compiler'), 'batch-compile', '@OUTPUT@', '@CURRENT_SOURCE_DIR@', '@INPUT@'],
@@ -38,6 +42,10 @@ streaks_sources = files(
   'streaks/sidebar_row.py',
   'streaks/state.py',
   'streaks/window.py',
+  'streaks/today_view.py',
+  'streaks/catchup_banner.py',
+  'streaks/checkin_card.py',
+  'streaks/goal_row.py',
   'streaks/words.py'
 )
 install_data(streaks_sources, install_dir: moduledir)

@@ -3,9 +3,9 @@
 from streaks.window import StreaksWindow
 
 
-def test_window_defaults(app, process_events):
+def test_window_defaults(fresh_state, app, process_events):
     """Split view geometry, page titles/tags, and the content stack's pages."""
-    window = StreaksWindow(application=app)
+    window = StreaksWindow(application=app, state=fresh_state)
     window.present()
     process_events()
 

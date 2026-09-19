@@ -16,6 +16,7 @@ from streaks import clock, engine
 from streaks.empty_view import StreaksEmptyView  # noqa: F401  registers $StreaksEmptyView
 from streaks.sidebar_row import StreaksSidebarRow
 from streaks.state import AppState
+from streaks.today_view import StreaksTodayView  # noqa: F401  registers $StreaksTodayView
 
 _ = gettext.gettext
 _logger = logging.getLogger(__name__)
@@ -33,6 +34,7 @@ class StreaksWindow(Adw.ApplicationWindow):
     footer_label = Gtk.Template.Child()
     content_stack = Gtk.Template.Child()
     content_title = Gtk.Template.Child()
+    today_view = Gtk.Template.Child()
     streak_status_page = Gtk.Template.Child()
     search_button = Gtk.Template.Child()
     menu_button = Gtk.Template.Child()
@@ -52,6 +54,7 @@ class StreaksWindow(Adw.ApplicationWindow):
         self.sidebar_list.set_header_func(self._header_func)
         self.sidebar_list.connect("row-selected", self._on_row_selected)
 
+        self.today_view.set_state(self.state)
         self._rebuild_sidebar()
 
     # -- window actions -----------------------------------------------------------
@@ -173,6 +176,7 @@ class StreaksWindow(Adw.ApplicationWindow):
             self.content_title.set_title(_("Today"))
             self.content_title.set_subtitle(self._today_view.title if self._today_view else "")
             self.content_stack.set_visible_child_name("today")
+            self.today_view.show_day(None)
             return
 
         streak = next((s for s in self.state.streaks if s.id == streak_id), None)

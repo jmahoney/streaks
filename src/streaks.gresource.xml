@@ -4,6 +4,10 @@
     <file>streaks/ui/window.ui</file>
     <file>streaks/ui/empty_view.ui</file>
     <file>streaks/ui/sidebar_row.ui</file>
+    <file>streaks/ui/today_view.ui</file>
+    <file>streaks/ui/catchup_banner.ui</file>
+    <file>streaks/ui/checkin_card.ui</file>
+    <file>streaks/ui/goal_row.ui</file>
     <file alias="style.css">../data/style.css</file>
   </gresource>
 </gresources>

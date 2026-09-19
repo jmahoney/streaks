@@ -1,0 +1,98 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $StreaksTodayView : Adw.Bin {
+  child: Gtk.ScrolledWindow scrolled {
+    hscrollbar-policy: never;
+    vexpand: true;
+
+    child: Gtk.Box {
+      orientation: vertical;
+      margin-top: 24;
+      margin-bottom: 24;
+      margin-start: 28;
+      margin-end: 28;
+      spacing: 18;
+
+      Gtk.Box {
+        orientation: horizontal;
+        spacing: 14;
+
+        Gtk.Box {
+          orientation: vertical;
+          hexpand: true;
+          valign: end;
+          spacing: 4;
+
+          Gtk.Label title_label {
+            halign: start;
+            xalign: 0;
+
+            styles ["title-2"]
+          }
+
+          Gtk.Label subtitle_label {
+            halign: start;
+            xalign: 0;
+
+            styles ["dim-label"]
+          }
+        }
+
+        Gtk.Button back_to_today_button {
+          label: _("Back to today");
+          valign: end;
+          visible: false;
+        }
+
+        Gtk.MenuButton another_day_button {
+          label: _("Check in for another day");
+          valign: end;
+
+          popover: Gtk.Popover calendar_popover {
+            child: Gtk.Box {
+              orientation: vertical;
+              spacing: 8;
+              margin-start: 12;
+              margin-end: 12;
+              margin-top: 12;
+              margin-bottom: 12;
+
+              Gtk.Calendar day_calendar {}
+
+              Gtk.Label calendar_hint_label {
+                wrap: true;
+                max-width-chars: 28;
+
+                styles ["caption", "dim-label"]
+              }
+            };
+          };
+        }
+      }
+
+      Gtk.Box banners_box {
+        orientation: vertical;
+        spacing: 18;
+      }
+
+      Gtk.Box columns_box {
+        orientation: horizontal;
+        spacing: 18;
+        homogeneous: true;
+
+        Gtk.Box column_left {
+          orientation: vertical;
+          spacing: 18;
+          valign: start;
+        }
+
+        Gtk.Box column_right {
+          orientation: vertical;
+          spacing: 18;
+          valign: start;
+        }
+      }
+    };
+  };
+}

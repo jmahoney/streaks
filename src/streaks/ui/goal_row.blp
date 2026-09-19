@@ -1,0 +1,32 @@
+using Gtk 4.0;
+
+template $StreaksGoalRow : Gtk.ListBoxRow {
+  styles ["goal-row"]
+
+  child: Gtk.Box {
+    orientation: horizontal;
+    spacing: 12;
+    margin-start: 16;
+    margin-end: 16;
+
+    Gtk.CheckButton check {
+      valign: center;
+
+      styles ["selection-mode"]
+    }
+
+    Gtk.Label name_label {
+      hexpand: true;
+      halign: start;
+      xalign: 0;
+      ellipsize: end;
+    }
+
+    Gtk.Label time_label {
+      halign: end;
+      valign: center;
+
+      styles ["caption", "dim-label"]
+    }
+  };
+}

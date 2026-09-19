@@ -14,6 +14,9 @@
  * - chart-legend-swatch
  * - sidebar-footer
  * - sidebar-empty
+ * - catchup-banner (+ .title)
+ * - checkin-card (+ .footer)
+ * - goal-row
  * - card (built-in libadwaita)
  * - caption-heading dim-label (section headings)
  */
@@ -45,4 +48,28 @@
 
 .sidebar-empty {
   padding: 14px 10px;
+}
+
+.catchup-banner {
+  background-color: #f4f8fe;
+  border: 1px solid #bcd4f2;
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+
+.catchup-banner .title {
+  color: #1a5fb4;
+}
+
+.strike {
+  text-decoration: line-through;
+}
+
+.checkin-card .footer {
+  background-color: #fcfcfc;
+  padding: 11px 16px;
+}
+
+.goal-row {
+  min-height: 46px;
 }

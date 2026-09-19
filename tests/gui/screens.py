@@ -80,10 +80,39 @@ def _build_sidebar(ctx: BuildContext) -> Gtk.Widget:
     return window
 
 
+def _select_today(window) -> None:
+    today_row = window.sidebar_list.get_row_at_index(0)
+    if today_row is not None:
+        window.sidebar_list.select_row(today_row)
+
+
+def _build_today(ctx: BuildContext) -> Gtk.Widget:
+    window = StreaksWindow(application=ctx.app)
+    ctx.window = window
+    _select_today(window)
+    return window
+
+
+def _build_today_quiet(ctx: BuildContext) -> Gtk.Widget:
+    from streaks.engine import Answer
+    from streaks.models import Streak, answer_day
+
+    streak = Streak.get(Streak.name == "75 Hard")
+    for day in (date(2026, 9, 9), date(2026, 9, 10), date(2026, 9, 11), date(2026, 9, 12)):
+        answer_day(streak, day, Answer.KEPT)
+
+    window = StreaksWindow(application=ctx.app)
+    ctx.window = window
+    _select_today(window)
+    return window
+
+
 SCREENS: dict[str, Screen] = {
     "window": Screen(name="window", width=1160, height=760, build=_build_window),
     "empty": Screen(name="empty", width=1160, height=760, build=_build_empty, seed=False),
     "sidebar": Screen(name="sidebar", width=1160, height=760, build=_build_sidebar),
+    "today": Screen(name="today", width=1160, height=760, build=_build_today),
+    "today-quiet": Screen(name="today-quiet", width=1160, height=760, build=_build_today_quiet),
 }
 
 

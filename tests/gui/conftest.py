@@ -27,13 +27,19 @@ if str(_TESTS_DIR) not in sys.path:
 SEEDED_TODAY = date(2026, 9, 13)
 
 # GSettings keys `seeded_state`/`fresh_state` reset before each test, since the `memory` backend
-# keeps its values for the whole test process rather than per-test.
+# keeps its values for the whole test process rather than per-test. `window-width`/`window-height`
+# are bidirectionally bound to the live window (`AppSettings.bind_window_state`), so a real window
+# manager nudging one test's window a few pixels wider than its default would otherwise leak that
+# size into every window built afterwards for the rest of the process.
 _RESET_KEYS = (
     "sidebar-selection",
     "show-ended",
     "day-start-minutes",
     "backfill-days",
     "count-through-unconfirmed",
+    "window-width",
+    "window-height",
+    "window-maximized",
 )
 
 

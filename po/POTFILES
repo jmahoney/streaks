@@ -13,7 +13,15 @@ src/streaks/sidebar_row.py
 src/streaks/state.py
 src/streaks/widgets/grid_widgets.py
 src/streaks/window.py
+src/streaks/today_view.py
+src/streaks/catchup_banner.py
+src/streaks/checkin_card.py
+src/streaks/goal_row.py
 src/streaks/words.py
 src/streaks/ui/window.blp
 src/streaks/ui/sidebar_row.blp
 src/streaks/ui/empty_view.blp
+src/streaks/ui/today_view.blp
+src/streaks/ui/catchup_banner.blp
+src/streaks/ui/checkin_card.blp
+src/streaks/ui/goal_row.blp

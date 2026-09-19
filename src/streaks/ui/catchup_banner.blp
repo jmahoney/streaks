@@ -1,0 +1,44 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $StreaksCatchupBanner : Gtk.Box {
+  orientation: horizontal;
+  spacing: 16;
+  valign: start;
+
+  styles ["catchup-banner"]
+
+  Gtk.Box {
+    orientation: vertical;
+    hexpand: true;
+    valign: center;
+    spacing: 4;
+
+    Gtk.Label title_label {
+      halign: start;
+      xalign: 0;
+      wrap: true;
+
+      styles ["title", "heading"]
+    }
+
+    Gtk.Label body_label {
+      halign: start;
+      xalign: 0;
+      wrap: true;
+
+      styles ["caption", "dim-label"]
+    }
+  }
+
+  $StripWidget strip {
+    valign: center;
+  }
+
+  Gtk.Button catch_up_button {
+    label: _("Catch up");
+    valign: center;
+
+    styles ["suggested-action"]
+  }
+}
