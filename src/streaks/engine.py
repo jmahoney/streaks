@@ -847,6 +847,16 @@ def _tile_caption(period_kind: PeriodKind) -> str:
     return _("days running")
 
 
+def _tile_caption_ended(period_kind: PeriodKind) -> str:
+    """The first stat tile's caption for an ended streak (design-spec §4): it reports the
+    streak's best run rather than a still-running count."""
+    if period_kind == PeriodKind.N_PER_WEEK:
+        return _("weeks, best run")
+    if period_kind == PeriodKind.MONTHLY:
+        return _("months, best run")
+    return _("days, best run")
+
+
 def _goals_hit_percent(run: Run, today: date) -> int:
     eligible = [
         pr
@@ -962,17 +972,29 @@ def history(
         selected = next((r for r in all_runs if r.end is None), all_runs[-1])
 
     n_goals = sum(1 for g in streak.goals if g.removed_on is None)
-    running_len = selected.length if selected else 0
-    header_subtitle = _("%(meta)s · run %(idx)d") % {
-        "meta": sidebar_meta(streak),
-        "idx": selected.index if selected else 0,
-    }
+    is_ended = streak.ended_on is not None
+
+    if is_ended:
+        best = best_run(streak, today, settings)
+        running_len = best.length if best else 0
+        tile0_caption = _tile_caption_ended(streak.period_kind)
+        header_subtitle = _("%(meta)s · ended %(date)s") % {
+            "meta": sidebar_meta(streak),
+            "date": words.fmt_day_short(streak.ended_on),
+        }
+    else:
+        running_len = selected.length if selected else 0
+        tile0_caption = _tile_caption(streak.period_kind)
+        header_subtitle = _("%(meta)s · run %(idx)d") % {
+            "meta": sidebar_meta(streak),
+            "idx": selected.index if selected else 0,
+        }
 
     unconfirmed = selected.unconfirmed if selected else 0
     confirmed = selected.confirmed if selected else 0
     hit_pct = _goals_hit_percent(selected, today) if selected else 0
     tiles: list[tuple[str, str, str]] = [
-        (str(running_len), _tile_caption(streak.period_kind), "accent"),
+        (str(running_len), tile0_caption, "accent"),
         (str(unconfirmed), _("unconfirmed"), "dim"),
         (str(confirmed), _("confirmed kept"), "strong"),
         (f"{hit_pct}%", _("goals hit"), "strong"),

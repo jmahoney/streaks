@@ -718,6 +718,22 @@ def test_fixture_couch_to_5k(seeded, today, settings):
     assert sidebar_ended_meta(streak, best.length) == "Ended 4 Mar · best 31"
 
 
+def test_fixture_couch_to_5k_history_ended_streak(seeded, today, settings):
+    """Phase 5: for an ended streak, the first stat tile reports the best run (not "still
+    running"), and the header subtitle says when it ended rather than which run is showing."""
+    streak = _streaks(today)["Couch to 5K"]
+    h = history(streak, today, settings)
+    assert h.tiles == [
+        ("31", "days, best run", "accent"),
+        ("0", "unconfirmed", "dim"),
+        ("31", "confirmed kept", "strong"),
+        ("100%", "goals hit", "strong"),
+    ]
+    assert h.header_subtitle == "Daily · 1 goal · ended 4 Mar"
+    assert h.chart_title == "Run 1 · 2 Feb – 4 Mar"
+    assert h.catch_up_link is None
+
+
 def test_fixture_today_view(seeded, today, settings):
     tv = today_view(list(load_all(today)), today, None, settings)
     assert tv.title == "Sunday 13 September"

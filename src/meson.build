@@ -14,6 +14,10 @@ blueprints = custom_target('blueprints',
     'streaks/ui/goal_row.blp',
     'streaks/ui/streak_dialog.blp',
     'streaks/ui/goal_edit_row.blp',
+    'streaks/ui/stat_tile.blp',
+    'streaks/ui/streak_view.blp',
+    'streaks/ui/goal_bar_row.blp',
+    'streaks/ui/run_row.blp',
   ),
   output: '.',
   command: [find_program('blueprint-compiler'), 'batch-compile', '@OUTPUT@', '@CURRENT_SOURCE_DIR@', '@INPUT@'],
@@ -50,7 +54,11 @@ streaks_sources = files(
   'streaks/catchup_banner.py',
   'streaks/checkin_card.py',
   'streaks/goal_row.py',
-  'streaks/words.py'
+  'streaks/words.py',
+  'streaks/stat_tile.py',
+  'streaks/streak_view.py',
+  'streaks/goal_bar_row.py',
+  'streaks/run_row.py',
 )
 install_data(streaks_sources, install_dir: moduledir)
 

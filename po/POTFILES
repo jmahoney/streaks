@@ -29,3 +29,11 @@ src/streaks/ui/streak_dialog.blp
 src/streaks/streak_dialog.py
 src/streaks/ui/goal_edit_row.blp
 src/streaks/goal_edit_row.py
+src/streaks/ui/stat_tile.blp
+src/streaks/stat_tile.py
+src/streaks/ui/streak_view.blp
+src/streaks/streak_view.py
+src/streaks/ui/goal_bar_row.blp
+src/streaks/goal_bar_row.py
+src/streaks/ui/run_row.blp
+src/streaks/run_row.py

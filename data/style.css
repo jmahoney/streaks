@@ -19,6 +19,12 @@
  * - goal-row
  * - card (built-in libadwaita)
  * - caption-heading dim-label (section headings)
+ *
+ * Phase 5 (streak history, design-spec §4):
+ * - stat-accent (already listed above; used on a stat tile's value_label)
+ * - goal-bar.low / progressbar.low > trough > progress (amber progress fill)
+ * - chart-legend-swatch (11×11 rounded swatch in the chart legend)
+ * - chart-day-label (10px, 40% opacity day-of-week letters beside the heatmap)
  */
 
 .colour-dot {
@@ -101,4 +107,23 @@
   box-shadow:
     0 0 0 2px @window_bg_color,
     0 0 0 3.5px currentColor;
+}
+
+.stat-accent {
+  color: #1a68c7;
+}
+
+progressbar.low > trough > progress {
+  background-color: #e5a50a;
+}
+
+.chart-legend-swatch {
+  min-width: 11px;
+  min-height: 11px;
+  border-radius: 3px;
+}
+
+.chart-day-label {
+  font-size: 10px;
+  opacity: 0.4;
 }

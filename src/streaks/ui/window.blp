@@ -85,6 +85,20 @@ template $StreaksWindow : Adw.ApplicationWindow {
           }
 
           [end]
+          Gtk.MenuButton more_button {
+            icon-name: "view-more-symbolic";
+            visible: false;
+          }
+
+          [end]
+          Gtk.Button checkin_button {
+            label: _("Check in");
+            visible: false;
+
+            styles ["suggested-action"]
+          }
+
+          [end]
           Gtk.ToggleButton search_button {
             icon-name: "edit-find-symbolic";
           }
@@ -105,9 +119,7 @@ template $StreaksWindow : Adw.ApplicationWindow {
 
           Gtk.StackPage {
             name: "streak";
-            child: Adw.StatusPage streak_status_page {
-              title: _("Streak");
-            };
+            child: $StreaksStreakView streak_view {};
           }
         };
       };

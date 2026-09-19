@@ -62,18 +62,27 @@ else:
 
 # Update meson.build
 meson_file = repo_root / "src" / "meson.build"
-meson_content = meson_file.read_text()
 
-blp_line = f"  input: files('streaks/ui/{name}.blp'),"
-if blp_line not in meson_content:
-    # Find the blueprints input line and add the new file
-    if "input: files('streaks/ui/window.blp')," in meson_content:
-        meson_content = meson_content.replace(
-            "  input: files('streaks/ui/window.blp'),",
-            f"  input: files('streaks/ui/window.blp',\n{blp_line}",
-        )
-        meson_file.write_text(meson_content)
-        print(f"Updated {meson_file}")
+
+def add_to_files_list(content: str, anchor: str, entry: str) -> str:
+    """Insert `entry` as a new line before the closing `)` of the `files(` list that contains
+    `anchor`, keeping the two-space indent and one trailing comma per line. Idempotent."""
+    if entry in content:
+        return content
+    anchor_pos = content.index(anchor)
+    close = content.index("\n)", anchor_pos)
+    before = content[:close].rstrip()
+    if not before.endswith(","):
+        before += ","
+    return f"{before}\n  {entry},\n)" + content[close + 2 :]
+
+
+meson_content = meson_file.read_text()
+updated = add_to_files_list(meson_content, "'streaks/ui/window.blp'", f"'streaks/ui/{name}.blp'")
+updated = add_to_files_list(updated, "'streaks/window.py'", f"'streaks/{name}.py'")
+if updated != meson_content:
+    meson_file.write_text(updated)
+    print(f"Updated {meson_file}")
 
 # Update gresource.xml
 gresource_file = repo_root / "src" / "streaks.gresource.xml"
@@ -87,17 +96,6 @@ if ui_line not in gresource_content:
     )
     gresource_file.write_text(gresource_content)
     print(f"Updated {gresource_file}")
-
-# Update streaks_sources in meson.build
-py_file_line = f"  'streaks/{name}.py',"
-if py_file_line not in meson_content:
-    if "  'streaks/window.py'" in meson_content:
-        meson_content = meson_content.replace(
-            "  'streaks/window.py'",
-            f"  'streaks/window.py',\n{py_file_line}",
-        )
-        meson_file.write_text(meson_content)
-        print(f"Updated {meson_file} with streaks_sources")
 
 # Update po/POTFILES
 potfiles = repo_root / "po" / "POTFILES"

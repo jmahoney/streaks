@@ -131,6 +131,37 @@ def _build_new_streak(ctx: BuildContext) -> Gtk.Widget:
     return child
 
 
+def _select_streak(window, name: str) -> None:
+    from streaks.sidebar_row import StreaksSidebarRow
+
+    child = window.sidebar_list.get_first_child()
+    while child is not None:
+        if isinstance(child, StreaksSidebarRow) and child.name_label.get_label() == name:
+            window.sidebar_list.select_row(child)
+            return
+        child = child.get_next_sibling()
+
+
+def _build_streak(ctx: BuildContext) -> Gtk.Widget:
+    window = StreaksWindow(application=ctx.app)
+    ctx.window = window
+    _select_streak(window, "75 Hard")
+    return window
+
+
+def _build_streak_lifetime(ctx: BuildContext) -> Gtk.Widget:
+    # `Adw.ToggleGroup` only keeps a programmatic `set_active_name()` once it has been realized
+    # (an unrealized group's active toggle reverts to the first one on its first map/layout
+    # pass), so this screen must present the window before switching to "lifetime".
+    window = StreaksWindow(application=ctx.app)
+    ctx.window = window
+    _select_streak(window, "75 Hard")
+    window.present()
+    _process_events()
+    window.streak_view.range_toggle.set_active_name("lifetime")
+    return window
+
+
 def _build_today_quiet(ctx: BuildContext) -> Gtk.Widget:
     from streaks.engine import Answer
     from streaks.models import Streak, answer_day
@@ -152,6 +183,10 @@ SCREENS: dict[str, Screen] = {
     "today": Screen(name="today", width=1160, height=760, build=_build_today),
     "today-quiet": Screen(name="today-quiet", width=1160, height=760, build=_build_today_quiet),
     "new-streak": Screen(name="new-streak", width=560, height=900, build=_build_new_streak),
+    "streak": Screen(name="streak", width=1160, height=760, build=_build_streak),
+    "streak-lifetime": Screen(
+        name="streak-lifetime", width=1160, height=760, build=_build_streak_lifetime
+    ),
 }
 
 

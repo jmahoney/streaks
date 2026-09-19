@@ -1,0 +1,39 @@
+using Gtk 4.0;
+
+template $StreaksGoalBarRow : Gtk.ListBoxRow {
+  activatable: false;
+  selectable: false;
+
+  child: Gtk.Box {
+    orientation: horizontal;
+    spacing: 12;
+    margin-start: 16;
+    margin-end: 16;
+    margin-top: 10;
+    margin-bottom: 10;
+
+    Gtk.Label name_label {
+      hexpand: true;
+      halign: start;
+      xalign: 0;
+      ellipsize: end;
+    }
+
+    Gtk.ProgressBar bar {
+      valign: center;
+      width-request: 140;
+
+      styles ["goal-bar"]
+    }
+
+    Gtk.Label ratio_label {
+      halign: end;
+      valign: center;
+      width-chars: 5;
+      xalign: 1;
+      use-markup: true;
+
+      styles ["caption"]
+    }
+  };
+}

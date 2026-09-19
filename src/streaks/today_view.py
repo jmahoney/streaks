@@ -81,6 +81,21 @@ class StreaksTodayView(Adw.Bin):
         self._shown_day = day
         self._rebuild()
 
+    def scroll_to_streak(self, streak_id: int) -> None:
+        """Focus the check-in card for ``streak_id``, if it is currently shown.
+
+        GTK scrolls a `Gtk.ScrolledWindow` to keep a newly-focused descendant in view, so
+        grabbing focus on the card is enough to bring it on screen — no manual adjustment math
+        needed.
+        """
+        for column in (self.column_left, self.column_right):
+            child = column.get_first_child()
+            while child is not None:
+                if getattr(child, "streak_id", None) == streak_id:
+                    child.grab_focus()
+                    return
+                child = child.get_next_sibling()
+
     # -- rebuilding ---------------------------------------------------------------
 
     @staticmethod

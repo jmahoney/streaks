@@ -1,0 +1,238 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $StreaksStreakView : Adw.Bin {
+  child: Gtk.ScrolledWindow {
+    hscrollbar-policy: never;
+    vexpand: true;
+
+    child: Gtk.Box {
+      orientation: vertical;
+      margin-top: 24;
+      margin-bottom: 24;
+      margin-start: 28;
+      margin-end: 28;
+      spacing: 18;
+
+      Gtk.Box tiles_box {
+        orientation: horizontal;
+        spacing: 14;
+        homogeneous: true;
+
+        $StreaksStatTile tile_running {}
+        $StreaksStatTile tile_unconfirmed {}
+        $StreaksStatTile tile_confirmed {}
+        $StreaksStatTile tile_hit {}
+      }
+
+      Gtk.Box {
+        orientation: vertical;
+        margin-start: 18;
+        margin-end: 18;
+        margin-top: 16;
+        margin-bottom: 16;
+        spacing: 0;
+        vexpand: false;
+
+        styles ["card"]
+
+        Gtk.Box {
+          orientation: horizontal;
+          spacing: 12;
+          valign: end;
+
+          Gtk.Label chart_title_label {
+            halign: start;
+            xalign: 0;
+
+            styles ["heading"]
+          }
+
+          Gtk.Label best_label {
+            label: _("BEST");
+            halign: start;
+            valign: center;
+            visible: false;
+
+            styles ["caption-heading", "accent"]
+          }
+
+          Gtk.Label chart_caption_label {
+            label: _("Darker means more of that day's goals were done. Outlined days are ones you never answered for.");
+            hexpand: true;
+            wrap: true;
+            xalign: 0;
+
+            styles ["caption", "dim-label"]
+          }
+
+          Adw.ToggleGroup range_toggle {
+            valign: center;
+
+            Adw.Toggle {
+              name: "run";
+              label: _("This run");
+            }
+
+            Adw.Toggle {
+              name: "lifetime";
+              label: _("Lifetime");
+            }
+          }
+        }
+
+        Gtk.Box {
+          orientation: horizontal;
+          spacing: 6;
+          margin-top: 14;
+          valign: start;
+          vexpand: false;
+
+          Gtk.Box day_labels_box {
+            orientation: vertical;
+            spacing: 4;
+            width-request: 18;
+            valign: start;
+            vexpand: false;
+
+            Gtk.Label {
+              label: "M";
+              xalign: 0;
+              height-request: 13;
+              valign: center;
+              styles ["chart-day-label"]
+            }
+
+            Gtk.Label {
+              label: "";
+              xalign: 0;
+              height-request: 13;
+              valign: center;
+              styles ["chart-day-label"]
+            }
+
+            Gtk.Label {
+              label: "W";
+              xalign: 0;
+              height-request: 13;
+              valign: center;
+              styles ["chart-day-label"]
+            }
+
+            Gtk.Label {
+              label: "";
+              xalign: 0;
+              height-request: 13;
+              valign: center;
+              styles ["chart-day-label"]
+            }
+
+            Gtk.Label {
+              label: "F";
+              xalign: 0;
+              height-request: 13;
+              valign: center;
+              styles ["chart-day-label"]
+            }
+
+            Gtk.Label {
+              label: "";
+              xalign: 0;
+              height-request: 13;
+              valign: center;
+              styles ["chart-day-label"]
+            }
+
+            Gtk.Label {
+              label: "";
+              xalign: 0;
+              height-request: 13;
+              valign: center;
+              styles ["chart-day-label"]
+            }
+          }
+
+          $HeatmapWidget heatmap {
+            halign: start;
+            valign: start;
+            vexpand: false;
+          }
+        }
+
+        Gtk.Box legend_box {
+          orientation: horizontal;
+          spacing: 16;
+          margin-top: 14;
+
+          Gtk.Box legend_entries_box {
+            orientation: horizontal;
+            spacing: 16;
+          }
+
+          Gtk.Box {
+            hexpand: true;
+          }
+
+          Gtk.Button catch_up_link {
+            visible: false;
+
+            styles ["flat", "accent"]
+          }
+        }
+      }
+
+      Gtk.Box lower_grid {
+        orientation: horizontal;
+        spacing: 18;
+        homogeneous: true;
+
+        Gtk.Box goals_card {
+          orientation: vertical;
+          spacing: 0;
+
+          styles ["card"]
+
+          Gtk.Label {
+            label: _("Per goal, this month");
+            halign: start;
+            xalign: 0;
+            margin-start: 16;
+            margin-end: 16;
+            margin-top: 12;
+            margin-bottom: 12;
+
+            styles ["heading"]
+          }
+
+          Gtk.ListBox goal_bars_list {
+            selection-mode: none;
+          }
+        }
+
+        Gtk.Box runs_card {
+          orientation: vertical;
+          spacing: 0;
+
+          styles ["card"]
+
+          Gtk.Label {
+            label: _("Earlier runs");
+            halign: start;
+            xalign: 0;
+            margin-start: 16;
+            margin-end: 16;
+            margin-top: 12;
+            margin-bottom: 12;
+
+            styles ["heading"]
+          }
+
+          Gtk.ListBox runs_list {
+            selection-mode: none;
+            activate-on-single-click: true;
+          }
+        }
+      }
+    };
+  };
+}

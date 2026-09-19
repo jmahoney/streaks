@@ -12,11 +12,13 @@ gi.require_version("Adw", "1")
 
 from gi.repository import Adw, Gio, GLib, Gtk
 
-from streaks import clock, engine
+from streaks import clock, engine, models
 from streaks.empty_view import StreaksEmptyView  # noqa: F401  registers $StreaksEmptyView
+from streaks.models import Streak
 from streaks.sidebar_row import StreaksSidebarRow
 from streaks.state import AppState
 from streaks.streak_dialog import StreaksStreakDialog
+from streaks.streak_view import StreaksStreakView  # noqa: F401  registers $StreaksStreakView
 from streaks.today_view import StreaksTodayView  # noqa: F401  registers $StreaksTodayView
 
 _ = gettext.gettext
@@ -36,9 +38,11 @@ class StreaksWindow(Adw.ApplicationWindow):
     content_stack = Gtk.Template.Child()
     content_title = Gtk.Template.Child()
     today_view = Gtk.Template.Child()
-    streak_status_page = Gtk.Template.Child()
+    streak_view = Gtk.Template.Child()
     search_button = Gtk.Template.Child()
     menu_button = Gtk.Template.Child()
+    more_button = Gtk.Template.Child()
+    checkin_button = Gtk.Template.Child()
     new_button = Gtk.Template.Child()
 
     def __init__(self, state: AppState | None = None, **kwargs):
@@ -50,12 +54,18 @@ class StreaksWindow(Adw.ApplicationWindow):
         self.state.settings.connect("changed", self._on_settings_changed)
 
         self._today_view: engine.TodayView | None = None
+        self._current_streak_id = 0
+        self.end_streak_dialog: Adw.AlertDialog | None = None
+        self.delete_streak_dialog: Adw.AlertDialog | None = None
 
         self._install_actions()
         self.sidebar_list.set_header_func(self._header_func)
         self.sidebar_list.connect("row-selected", self._on_row_selected)
+        self.checkin_button.connect("clicked", self._on_checkin_clicked)
+        self.streak_view.connect("catch-up", self._on_streak_catch_up)
 
         self.today_view.set_state(self.state)
+        self.streak_view.set_state(self.state)
         self._rebuild_sidebar()
 
     # -- window actions -----------------------------------------------------------
@@ -68,6 +78,14 @@ class StreaksWindow(Adw.ApplicationWindow):
         edit_streak = Gio.SimpleAction.new("edit-streak", GLib.VariantType.new("i"))
         edit_streak.connect("activate", self._on_edit_streak)
         self.add_action(edit_streak)
+
+        end_streak = Gio.SimpleAction.new("end-streak", GLib.VariantType.new("i"))
+        end_streak.connect("activate", self._on_end_streak)
+        self.add_action(end_streak)
+
+        delete_streak = Gio.SimpleAction.new("delete-streak", GLib.VariantType.new("i"))
+        delete_streak.connect("activate", self._on_delete_streak)
+        self.add_action(delete_streak)
 
         select_today = Gio.SimpleAction.new("select-today", None)
         select_today.connect("activate", self._on_select_today)
@@ -92,10 +110,96 @@ class StreaksWindow(Adw.ApplicationWindow):
         dialog.set_state(self.state)
         dialog.present(self)
 
+    def _on_end_streak(self, _action: Gio.SimpleAction, param: GLib.Variant) -> None:
+        streak_id = param.get_int32()
+        streak = next((s for s in self.state.streaks if s.id == streak_id), None)
+        if streak is None:
+            return
+        dialog = Adw.AlertDialog(
+            heading=_("End this streak?"),
+            body=_("It moves to Ended in the sidebar. Its history stays readable."),
+        )
+        dialog.add_response("cancel", _("Cancel"))
+        dialog.add_response("end", _("End streak"))
+        dialog.set_response_appearance("end", Adw.ResponseAppearance.DESTRUCTIVE)
+        dialog.set_default_response("cancel")
+        dialog.set_close_response("cancel")
+        dialog.connect("response", self._on_end_streak_response, streak_id)
+        self.end_streak_dialog = dialog
+        dialog.present(self)
+
+    def _on_end_streak_response(
+        self, _dialog: Adw.AlertDialog, response: str, streak_id: int
+    ) -> None:
+        if response != "end":
+            return
+        streak = Streak.get_by_id(streak_id)
+        models.end_streak(streak, self.state.today())
+        self.state.reload()
+
+    def _on_delete_streak(self, _action: Gio.SimpleAction, param: GLib.Variant) -> None:
+        streak_id = param.get_int32()
+        streak = next((s for s in self.state.streaks if s.id == streak_id), None)
+        if streak is None:
+            return
+        dialog = Adw.AlertDialog(
+            heading=_("Delete %(name)s?") % {"name": streak.name},
+            body=_("Every check-in for this streak will be removed. This cannot be undone."),
+        )
+        dialog.add_response("cancel", _("Cancel"))
+        dialog.add_response("delete", _("Delete"))
+        dialog.set_response_appearance("delete", Adw.ResponseAppearance.DESTRUCTIVE)
+        dialog.set_default_response("cancel")
+        dialog.set_close_response("cancel")
+        dialog.connect("response", self._on_delete_streak_response, streak_id)
+        self.delete_streak_dialog = dialog
+        dialog.present(self)
+
+    def _on_delete_streak_response(
+        self, _dialog: Adw.AlertDialog, response: str, streak_id: int
+    ) -> None:
+        if response != "delete":
+            return
+        streak = Streak.get_by_id(streak_id)
+        models.delete_streak(streak)
+        self.state.set_selection(0)
+        self.state.reload()
+
     def _on_select_today(self, *_args) -> None:
         today_row = self.sidebar_list.get_row_at_index(0)
         if today_row is not None:
             self.sidebar_list.select_row(today_row)
+
+    def _on_checkin_clicked(self, _button: Gtk.Button) -> None:
+        streak_id = self._current_streak_id
+        self._on_select_today()
+        if streak_id:
+            self.today_view.scroll_to_streak(streak_id)
+
+    def _on_streak_catch_up(self, _view: StreaksStreakView, streak_id: int) -> None:
+        _logger.info("catch-up requested for streak %s (not yet implemented)", streak_id)
+
+    # -- header ---------------------------------------------------------------------
+
+    def _set_header_for_page(self, page: str) -> None:
+        """Show only the end-of-header controls that belong to ``page`` (design-spec §1)."""
+        is_streak = page == "streak"
+        self.search_button.set_visible(page == "today")
+        self.menu_button.set_visible(not is_streak)
+        self.checkin_button.set_visible(is_streak)
+        self.more_button.set_visible(is_streak)
+
+    def _build_more_menu(self, streak_id: int) -> Gio.Menu:
+        menu = Gio.Menu()
+        for label, action_name in (
+            (_("Edit…"), "win.edit-streak"),
+            (_("End streak"), "win.end-streak"),
+            (_("Delete…"), "win.delete-streak"),
+        ):
+            item = Gio.MenuItem.new(label, None)
+            item.set_action_and_target_value(action_name, GLib.Variant("i", streak_id))
+            menu.append_item(item)
+        return menu
 
     # -- sidebar building -----------------------------------------------------------
 
@@ -129,7 +233,7 @@ class StreaksWindow(Adw.ApplicationWindow):
             self.sidebar_list.set_visible(False)
             self.footer_label.set_visible(False)
             self.sidebar_empty_label.set_visible(True)
-            self.search_button.set_visible(False)
+            self._set_header_for_page("empty")
             self.content_title.set_title(_("Streaks"))
             self.content_title.set_subtitle("")
             self.content_stack.set_visible_child_name("empty")
@@ -138,7 +242,6 @@ class StreaksWindow(Adw.ApplicationWindow):
         self.sidebar_list.set_visible(True)
         self.footer_label.set_visible(True)
         self.sidebar_empty_label.set_visible(False)
-        self.search_button.set_visible(True)
 
         today = self.state.today()
         now = clock.now()
@@ -188,6 +291,8 @@ class StreaksWindow(Adw.ApplicationWindow):
         self.state.set_selection(streak_id)
 
         if streak_id == 0:
+            self._current_streak_id = 0
+            self._set_header_for_page("today")
             self.content_title.set_title(_("Today"))
             self.content_title.set_subtitle(self._today_view.title if self._today_view else "")
             self.content_stack.set_visible_child_name("today")
@@ -199,9 +304,12 @@ class StreaksWindow(Adw.ApplicationWindow):
             return
         settings = self.state.settings.to_engine()
         hist = engine.history(streak, self.state.today(), settings)
+        self._current_streak_id = streak_id
+        self._set_header_for_page("streak")
+        self.more_button.set_menu_model(self._build_more_menu(streak_id))
         self.content_title.set_title(streak.name)
         self.content_title.set_subtitle(hist.header_subtitle)
-        self.streak_status_page.set_title(streak.name)
+        self.streak_view.configure(streak)
         self.content_stack.set_visible_child_name("streak")
 
     def _on_state_changed(self, _state: AppState) -> None:
