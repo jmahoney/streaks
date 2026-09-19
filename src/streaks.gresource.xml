@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+  <gresource prefix="/com/cheerschopper/Streaks">
+    <file>streaks/ui/window.ui</file>
+    <file alias="style.css">../data/style.css</file>
+  </gresource>
+</gresources>

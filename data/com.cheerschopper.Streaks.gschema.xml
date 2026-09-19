@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist gettext-domain="streaks">
+  <schema id="com.cheerschopper.Streaks" path="/com/cheerschopper/Streaks/">
+    <key type="i" name="window-width">
+      <default>1160</default>
+      <summary>Window width</summary>
+      <description>The width of the application window</description>
+    </key>
+    <key type="i" name="window-height">
+      <default>760</default>
+      <summary>Window height</summary>
+      <description>The height of the application window</description>
+    </key>
+    <key type="b" name="window-maximized">
+      <default>false</default>
+      <summary>Window maximized</summary>
+      <description>Whether the application window is maximized</description>
+    </key>
+    <key type="i" name="sidebar-selection">
+      <default>0</default>
+      <summary>Sidebar selection</summary>
+      <description>The last selected streak ID or 0 for Today</description>
+    </key>
+    <key type="b" name="reminders">
+      <default>true</default>
+      <summary>Reminders enabled</summary>
+      <description>Whether check-in reminders are enabled</description>
+    </key>
+    <key type="i" name="day-start-minutes">
+      <default>240</default>
+      <summary>Day start time</summary>
+      <description>The time in minutes from midnight when a new day starts (0–1439)</description>
+      <range min="0" max="1439"/>
+    </key>
+    <key type="i" name="backfill-days">
+      <default>2</default>
+      <summary>Backfill window</summary>
+      <description>How many days back a check-in can be recorded (0–14)</description>
+      <range min="0" max="14"/>
+    </key>
+    <key type="b" name="count-through-unconfirmed">
+      <default>true</default>
+      <summary>Count through unconfirmed days</summary>
+      <description>Whether runs continue through unconfirmed days or end at the backfill limit</description>
+    </key>
+    <key type="b" name="show-ended">
+      <default>true</default>
+      <summary>Show ended runs</summary>
+      <description>Whether to show ended runs in the sidebar</description>
+    </key>
+  </schema>
+</schemalist>

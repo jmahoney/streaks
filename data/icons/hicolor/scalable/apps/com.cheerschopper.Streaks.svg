@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+  <!-- 7x4 grid of rounded squares, one highlighted -->
+  <rect x="8" y="8" width="16" height="16" rx="4" ry="4" fill="#3584e4"/>
+  <rect x="28" y="8" width="16" height="16" rx="4" ry="4" fill="#e9e9e7"/>
+  <rect x="48" y="8" width="16" height="16" rx="4" ry="4" fill="#e9e9e7"/>
+  <rect x="68" y="8" width="16" height="16" rx="4" ry="4" fill="#e9e9e7"/>
+  <rect x="88" y="8" width="16" height="16" rx="4" ry="4" fill="#e9e9e7"/>
+  <rect x="108" y="8" width="16" height="16" rx="4" ry="4" fill="#e9e9e7"/>
+
+  <rect x="8" y="28" width="16" height="16" rx="4" ry="4" fill="#e9e9e7"/>
+  <rect x="28" y="28" width="16" height="16" rx="4" ry="4" fill="#e9e9e7"/>
+  <rect x="48" y="28" width="16" height="16" rx="4" ry="4" fill="#e9e9e7"/>
+  <rect x="68" y="28" width="16" height="16" rx="4" ry="4" fill="#e9e9e7"/>
+  <rect x="88" y="28" width="16" height="16" rx="4" ry="4" fill="#e9e9e7"/>
+  <rect x="108" y="28" width="16" height="16" rx="4" ry="4" fill="#e9e9e7"/>
+
+  <rect x="8" y="48" width="16" height="16" rx="4" ry="4" fill="#e9e9e7"/>
+  <rect x="28" y="48" width="16" height="16" rx="4" ry="4" fill="#e9e9e7"/>
+  <rect x="48" y="48" width="16" height="16" rx="4" ry="4" fill="#e9e9e7"/>
+  <rect x="68" y="48" width="16" height="16" rx="4" ry="4" fill="#e9e9e7"/>
+  <rect x="88" y="48" width="16" height="16" rx="4" ry="4" fill="#e9e9e7"/>
+  <rect x="108" y="48" width="16" height="16" rx="4" ry="4" fill="#e9e9e7"/>
+
+  <rect x="8" y="68" width="16" height="16" rx="4" ry="4" fill="#e9e9e7"/>
+  <rect x="28" y="68" width="16" height="16" rx="4" ry="4" fill="#e9e9e7"/>
+  <rect x="48" y="68" width="16" height="16" rx="4" ry="4" fill="#e9e9e7"/>
+  <rect x="68" y="68" width="16" height="16" rx="4" ry="4" fill="#e9e9e7"/>
+  <rect x="88" y="68" width="16" height="16" rx="4" ry="4" fill="#e9e9e7"/>
+  <rect x="108" y="68" width="16" height="16" rx="4" ry="4" fill="#cfe2f8"/>
+</svg>

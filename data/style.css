@@ -1,0 +1,18 @@
+/* Streaks custom styles
+ *
+ * Allowed custom CSS classes:
+ * - colour-dot (8×8 circle)
+ * - today-dot (square)
+ * - badge (pill count)
+ * - catchup-banner
+ * - catchup-row.missed
+ * - catchup-goal-list
+ * - colour-swatch + :checked
+ * - stat-accent (#1a68c7 number)
+ * - strike (strike-through label)
+ * - goal-bar.low (amber)
+ * - chart-legend-swatch
+ * - sidebar-footer
+ * - card (built-in libadwaita)
+ * - caption-heading dim-label (section headings)
+ */

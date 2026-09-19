@@ -1,0 +1,18 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $StreaksWindow : Adw.ApplicationWindow {
+  title: _("Streaks");
+  default-width: 1160;
+  default-height: 760;
+
+  content: Adw.ToolbarView {
+    [top]
+    Adw.HeaderBar {}
+
+    content: Gtk.Label content_label {
+      label: _("Streaks");
+      styles ["title-1"]
+    };
+  };
+}

@@ -1,0 +1,10 @@
+pytest = find_program('pytest', 'pytest-3', required: false)
+if pytest.found()
+  test_env = environment()
+  test_env.set('STREAKS_GRESOURCE', meson.project_build_root() / 'src' / 'streaks.gresource')
+  test_env.set('GSETTINGS_SCHEMA_DIR', meson.project_build_root() / 'data')
+  test_env.set('GSETTINGS_BACKEND', 'memory')
+  test_env.set('PYTHONPATH', meson.project_source_root() / 'src')
+  test('unit', pytest, args: ['-q', meson.project_source_root() / 'tests' / 'unit'], env: test_env, timeout: 300)
+  test('gui', pytest, args: ['-q', meson.project_source_root() / 'tests' / 'gui'], env: test_env, timeout: 600)
+endif

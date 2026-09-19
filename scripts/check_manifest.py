@@ -1,0 +1,74 @@
+#!/usr/bin/env python3
+"""Check manifest for missing dependencies."""
+
+import ast
+import json
+import sys
+from pathlib import Path
+
+repo_root = Path(__file__).parent.parent
+src_dir = repo_root / "src" / "streaks"
+manifest_file = repo_root / "com.cheerschopper.Streaks.json"
+
+errors = []
+
+# Load manifest
+with open(manifest_file) as f:
+    manifest = json.load(f)
+
+# Check runtime version
+if manifest.get("runtime-version") != "50":
+    errors.append(
+        f"FAIL manifest: runtime-version should be '50', got '{manifest.get('runtime-version')}'"
+    )
+
+# Collect module names from manifest
+manifest_modules = set()
+for module in manifest.get("modules", []):
+    name = module.get("name", "")
+    manifest_modules.add(name)
+    # Add python3- prefixed version
+    if not name.startswith("python3-"):
+        manifest_modules.add(f"python3-{name}")
+
+# Collect imports from Python files
+imports = set()
+for py_file in src_dir.glob("**/*.py"):
+    if "__pycache__" in str(py_file):
+        continue
+
+    try:
+        with open(py_file) as f:
+            tree = ast.parse(f.read())
+
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                for alias in node.names:
+                    module_name = alias.name.split(".")[0]
+                    imports.add(module_name)
+            elif isinstance(node, ast.ImportFrom):
+                if node.module:
+                    module_name = node.module.split(".")[0]
+                    imports.add(module_name)
+    except Exception:
+        pass
+
+# Filter out stdlib and gi
+stdlib_modules = sys.stdlib_module_names
+imports = {m for m in imports if m not in stdlib_modules and m != "gi"}
+
+# Check each import
+for module in sorted(imports):
+    if module not in manifest_modules:
+        errors.append(
+            f"FAIL manifest: import '{module}' not found in com.cheerschopper.Streaks.json"
+        )
+
+# Print results
+if errors:
+    for error in errors:
+        print(error)
+    sys.exit(1)
+else:
+    print("PASS manifest")
+    sys.exit(0)

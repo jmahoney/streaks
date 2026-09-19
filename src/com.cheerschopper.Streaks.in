@@ -1,0 +1,24 @@
+#!@PYTHON@
+# -*- coding: utf-8 -*-
+import os
+import sys
+import signal
+import locale
+import gettext
+
+VERSION = '@VERSION@'
+pkgdatadir = '@pkgdatadir@'
+localedir = '@localedir@'
+
+sys.path.insert(1, pkgdatadir)
+signal.signal(signal.SIGINT, signal.SIG_DFL)
+
+locale.bindtextdomain('streaks', localedir)
+locale.textdomain('streaks')
+gettext.install('streaks', localedir)
+
+os.environ.setdefault('STREAKS_GRESOURCE', os.path.join(pkgdatadir, 'streaks.gresource'))
+
+if __name__ == '__main__':
+    from streaks import main
+    sys.exit(main.main(VERSION))

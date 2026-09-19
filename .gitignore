@@ -1,0 +1,59 @@
+# ==========================================
+# Python Basics
+# ==========================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.htmlcov/
+.coverage
+
+# ==========================================
+# GNOME & Meson Build Directories
+# ==========================================
+# Meson defaults to a directory named 'build' or 'builddir'
+build/
+builddir/
+subprojects/
+
+# Compiled GSettings schemas (generated locally during tests/runs)
+*.gschema.valid
+gschemas.compiled
+
+# Compiled GLib resources (if generated in-tree)
+*.gresource
+
+# Local localization / translation binaries (compiled from .po files)
+*.mo
+
+# ==========================================
+# Flatpak Development (GNOME Builder / CLI)
+# ==========================================
+# Flatpak-builder cache and output directories
+.flatpak-builder/
+/app/
+/_flatpak/
+
+# ==========================================
+# Python Environments & Tools
+# ==========================================
+.venv/
+venv/
+ENV/
+.env
+.mypy_cache/
+.ruff_cache/
+
+# ==========================================
+# IDEs & System Files
+# ==========================================
+# GNOME Builder configuration
+.builder/
+
+# Common Editors
+.vscode/
+.idea/
+*.swp
+*~
+.DS_Store

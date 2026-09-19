@@ -1,0 +1,7 @@
+data/com.cheerschopper.Streaks.desktop.in
+data/com.cheerschopper.Streaks.metainfo.xml.in
+data/com.cheerschopper.Streaks.gschema.xml
+src/streaks/main.py
+src/streaks/resources.py
+src/streaks/window.py
+src/streaks/ui/window.blp
