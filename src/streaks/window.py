@@ -10,12 +10,13 @@ import gi
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 
-from gi.repository import Adw, Gio, Gtk
+from gi.repository import Adw, Gio, GLib, Gtk
 
 from streaks import clock, engine
 from streaks.empty_view import StreaksEmptyView  # noqa: F401  registers $StreaksEmptyView
 from streaks.sidebar_row import StreaksSidebarRow
 from streaks.state import AppState
+from streaks.streak_dialog import StreaksStreakDialog
 from streaks.today_view import StreaksTodayView  # noqa: F401  registers $StreaksTodayView
 
 _ = gettext.gettext
@@ -64,6 +65,10 @@ class StreaksWindow(Adw.ApplicationWindow):
         new_streak.connect("activate", self._on_new_streak)
         self.add_action(new_streak)
 
+        edit_streak = Gio.SimpleAction.new("edit-streak", GLib.VariantType.new("i"))
+        edit_streak.connect("activate", self._on_edit_streak)
+        self.add_action(edit_streak)
+
         select_today = Gio.SimpleAction.new("select-today", None)
         select_today.connect("activate", self._on_select_today)
         self.add_action(select_today)
@@ -74,8 +79,18 @@ class StreaksWindow(Adw.ApplicationWindow):
         self.add_action(show_help_overlay)
 
     def _on_new_streak(self, *_args) -> None:
-        # Phase 4 wires this up to the new-streak dialog; for now it's a logged no-op.
-        _logger.info("win.new-streak activated (not yet implemented)")
+        dialog = StreaksStreakDialog.for_new()
+        dialog.set_state(self.state)
+        dialog.present(self)
+
+    def _on_edit_streak(self, _action: Gio.SimpleAction, param: GLib.Variant) -> None:
+        streak_id = param.get_int32()
+        streak = next((s for s in self.state.streaks if s.id == streak_id), None)
+        if streak is None:
+            return
+        dialog = StreaksStreakDialog.for_edit(streak)
+        dialog.set_state(self.state)
+        dialog.present(self)
 
     def _on_select_today(self, *_args) -> None:
         today_row = self.sidebar_list.get_row_at_index(0)

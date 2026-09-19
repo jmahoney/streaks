@@ -1,0 +1,36 @@
+using Gtk 4.0;
+
+template $StreaksGoalEditRow : Gtk.ListBoxRow {
+  styles ["goal-edit-row"]
+
+  child: Gtk.Box {
+    orientation: horizontal;
+    spacing: 12;
+    margin-start: 16;
+    margin-end: 16;
+    margin-top: 8;
+    margin-bottom: 8;
+
+    Gtk.Image handle {
+      icon-name: "list-drag-handle-symbolic";
+      valign: center;
+
+      styles ["dim-label"]
+    }
+
+    Gtk.Entry entry {
+      hexpand: true;
+      valign: center;
+      placeholder-text: _("Goal");
+
+      styles ["flat"]
+    }
+
+    Gtk.Button remove_button {
+      icon-name: "window-close-symbolic";
+      valign: center;
+
+      styles ["flat"]
+    }
+  };
+}

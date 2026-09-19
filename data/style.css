@@ -73,3 +73,32 @@
 .goal-row {
   min-height: 46px;
 }
+
+.goal-edit-row {
+  min-height: 44px;
+}
+
+.colour-swatch {
+  min-width: 20px;
+  min-height: 20px;
+  padding: 0;
+  border-radius: 9999px;
+}
+
+.colour-swatch check,
+.colour-swatch radio {
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  background: none;
+  background-image: none;
+  border: none;
+  box-shadow: none;
+  -gtk-icon-source: none;
+}
+
+.colour-swatch:checked {
+  box-shadow:
+    0 0 0 2px @window_bg_color,
+    0 0 0 3.5px currentColor;
+}

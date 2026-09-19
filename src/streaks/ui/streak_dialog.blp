@@ -1,0 +1,291 @@
+using Gtk 4.0;
+using Adw 1;
+
+Gtk.Popover reminder_popover {
+  child: Gtk.Box {
+    orientation: vertical;
+    spacing: 10;
+    margin-start: 12;
+    margin-end: 12;
+    margin-top: 12;
+    margin-bottom: 12;
+
+    Gtk.Box {
+      orientation: horizontal;
+      spacing: 12;
+
+      Gtk.Label {
+        label: _("Remind me");
+        hexpand: true;
+        halign: start;
+      }
+
+      Gtk.Switch reminder_switch {
+        valign: center;
+      }
+    }
+
+    Gtk.Box {
+      orientation: horizontal;
+      spacing: 6;
+      halign: center;
+
+      Gtk.SpinButton hour_spin {
+        numeric: true;
+        wrap: true;
+        valign: center;
+
+        adjustment: Gtk.Adjustment {
+          lower: 0;
+          upper: 23;
+          step-increment: 1;
+          value: 20;
+        };
+      }
+
+      Gtk.Label {
+        label: ":";
+        valign: center;
+      }
+
+      Gtk.SpinButton minute_spin {
+        numeric: true;
+        wrap: true;
+        valign: center;
+
+        adjustment: Gtk.Adjustment {
+          lower: 0;
+          upper: 59;
+          step-increment: 1;
+          value: 0;
+        };
+      }
+    }
+  };
+}
+
+template $StreaksStreakDialog : Adw.Dialog {
+  content-width: 560;
+
+  child: Adw.ToolbarView {
+    [top]
+    Adw.HeaderBar {
+      show-start-title-buttons: false;
+      show-end-title-buttons: false;
+
+      title-widget: Adw.WindowTitle {
+        title: bind template.title;
+      };
+
+      [start]
+      Gtk.Button cancel_button {
+        label: _("Cancel");
+      }
+
+      [end]
+      Gtk.Button save_button {
+        label: _("Create");
+        sensitive: false;
+
+        styles ["suggested-action"]
+      }
+    }
+
+    content: Adw.PreferencesPage {
+      Adw.PreferencesGroup {
+        Adw.EntryRow name_row {
+          title: _("Name");
+        }
+
+        Adw.ActionRow colour_row {
+          title: _("Colour");
+
+          [suffix]
+          Gtk.Box {
+            orientation: horizontal;
+            spacing: 10;
+            valign: center;
+
+            Gtk.CheckButton swatch_0 {
+              active: true;
+              valign: center;
+
+              styles ["colour-swatch"]
+            }
+
+            Gtk.CheckButton swatch_1 {
+              group: swatch_0;
+              valign: center;
+
+              styles ["colour-swatch"]
+            }
+
+            Gtk.CheckButton swatch_2 {
+              group: swatch_0;
+              valign: center;
+
+              styles ["colour-swatch"]
+            }
+
+            Gtk.CheckButton swatch_3 {
+              group: swatch_0;
+              valign: center;
+
+              styles ["colour-swatch"]
+            }
+
+            Gtk.CheckButton swatch_4 {
+              group: swatch_0;
+              valign: center;
+
+              styles ["colour-swatch"]
+            }
+          }
+        }
+      }
+
+      Adw.PreferencesGroup period_group {
+        title: _("Period");
+        description: _("Every goal in a streak shares this period.");
+
+        Adw.ActionRow {
+          child: Adw.ToggleGroup period_toggle {
+            homogeneous: true;
+
+            Adw.Toggle {
+              name: "daily";
+              label: _("Daily");
+            }
+
+            Adw.Toggle {
+              name: "weekdays";
+              label: _("Weekdays");
+            }
+
+            Adw.Toggle {
+              name: "n_per_week";
+              label: _("N a week");
+            }
+
+            Adw.Toggle {
+              name: "monthly";
+              label: _("Monthly");
+            }
+          };
+        }
+
+        Adw.ActionRow {
+          child: Gtk.Box weekday_box {
+            orientation: horizontal;
+            halign: center;
+            spacing: 8;
+            margin-top: 4;
+            margin-bottom: 4;
+
+            Gtk.ToggleButton weekday_0 {
+              label: "M";
+              width-request: 30;
+              height-request: 30;
+
+              styles ["circular"]
+            }
+
+            Gtk.ToggleButton weekday_1 {
+              label: "T";
+              width-request: 30;
+              height-request: 30;
+
+              styles ["circular"]
+            }
+
+            Gtk.ToggleButton weekday_2 {
+              label: "W";
+              width-request: 30;
+              height-request: 30;
+
+              styles ["circular"]
+            }
+
+            Gtk.ToggleButton weekday_3 {
+              label: "T";
+              width-request: 30;
+              height-request: 30;
+
+              styles ["circular"]
+            }
+
+            Gtk.ToggleButton weekday_4 {
+              label: "F";
+              width-request: 30;
+              height-request: 30;
+
+              styles ["circular"]
+            }
+
+            Gtk.ToggleButton weekday_5 {
+              label: "S";
+              width-request: 30;
+              height-request: 30;
+
+              styles ["circular"]
+            }
+
+            Gtk.ToggleButton weekday_6 {
+              label: "S";
+              width-request: 30;
+              height-request: 30;
+
+              styles ["circular"]
+            }
+          };
+        }
+
+        Adw.SpinRow times_row {
+          title: _("Times a week");
+          visible: false;
+
+          adjustment: Gtk.Adjustment {
+            lower: 1;
+            upper: 7;
+            step-increment: 1;
+            value: 3;
+          };
+        }
+
+        Adw.ActionRow reminder_row {
+          title: _("Reminder");
+          subtitle: _("A check-in notification each period");
+          activatable: true;
+
+          [suffix]
+          Gtk.Label reminder_label {
+            label: _("Off ›");
+            valign: center;
+
+            styles ["dim-label"]
+          }
+        }
+
+        Adw.SwitchRow skip_row {
+          title: _("Allow one skip a week");
+          subtitle: _("A skipped period won't break the run");
+        }
+      }
+
+      Adw.PreferencesGroup goals_group {
+        title: _("Goals — 1");
+
+        Gtk.ListBox goals_list {
+          selection-mode: none;
+
+          styles ["boxed-list"]
+
+          Adw.ButtonRow add_goal_row {
+            title: _("Add a goal");
+            start-icon-name: "list-add-symbolic";
+          }
+        }
+      }
+    };
+  };
+}

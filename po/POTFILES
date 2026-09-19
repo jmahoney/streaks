@@ -25,3 +25,7 @@ src/streaks/ui/today_view.blp
 src/streaks/ui/catchup_banner.blp
 src/streaks/ui/checkin_card.blp
 src/streaks/ui/goal_row.blp
+src/streaks/ui/streak_dialog.blp
+src/streaks/streak_dialog.py
+src/streaks/ui/goal_edit_row.blp
+src/streaks/goal_edit_row.py

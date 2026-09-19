@@ -93,6 +93,44 @@ def _build_today(ctx: BuildContext) -> Gtk.Widget:
     return window
 
 
+def _build_new_streak(ctx: BuildContext) -> Gtk.Widget:
+    from streaks.streak_dialog import StreaksStreakDialog
+
+    window = StreaksWindow(application=ctx.app)
+    ctx.window = window
+    window.present()
+    _process_events()
+
+    dialog = StreaksStreakDialog.for_new()
+    dialog.set_state(window.state)
+
+    # The design fixture's five goals (design-spec §6), replacing the default empty row.
+    goal_texts = [
+        "Take a progress photo",
+        "45 min workout — outside",
+        "45 min second workout",
+        "Read 10 pages",
+        "Stick to the diet",
+    ]
+    dialog.name_row.set_text("75 Hard")
+    dialog._goal_rows[0].entry.set_text(goal_texts[0])
+    for text in goal_texts[1:]:
+        row = dialog._add_goal_row_widget()
+        row.entry.set_text(text)
+
+    dialog.present(window)
+    _process_events()
+
+    # Detach the content from the dialog: under a headless/no-WM display, `AdwDialog`'s floating
+    # sheet never reaches GTK's "mapped" state (no window manager ever focuses the surface), so
+    # anything still parented inside it snapshots as blank. Rendering the (already laid-out,
+    # correctly-sized-to-560) content on its own, ordinary, `present()`-ed window sidesteps that
+    # — this is exactly the "non-window widget" path `build_screen` already handles below.
+    child = dialog.get_child()
+    dialog.set_child(None)
+    return child
+
+
 def _build_today_quiet(ctx: BuildContext) -> Gtk.Widget:
     from streaks.engine import Answer
     from streaks.models import Streak, answer_day
@@ -113,6 +151,7 @@ SCREENS: dict[str, Screen] = {
     "sidebar": Screen(name="sidebar", width=1160, height=760, build=_build_sidebar),
     "today": Screen(name="today", width=1160, height=760, build=_build_today),
     "today-quiet": Screen(name="today-quiet", width=1160, height=760, build=_build_today_quiet),
+    "new-streak": Screen(name="new-streak", width=560, height=900, build=_build_new_streak),
 }
 
 
