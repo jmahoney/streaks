@@ -2,6 +2,7 @@
 <gresources>
   <gresource prefix="/com/cheerschopper/Streaks">
     <file>streaks/ui/window.ui</file>
+    <file>streaks/ui/preferences_dialog.ui</file>
     <file>streaks/ui/catchup_row.ui</file>
     <file>streaks/ui/catchup_dialog.ui</file>
     <file>streaks/ui/run_row.ui</file>
@@ -16,6 +17,7 @@
     <file>streaks/ui/catchup_banner.ui</file>
     <file>streaks/ui/checkin_card.ui</file>
     <file>streaks/ui/goal_row.ui</file>
+    <file alias="gtk/help-overlay.ui">streaks/ui/shortcuts.ui</file>
     <file alias="style.css">../data/style.css</file>
   </gresource>
 </gresources>

@@ -33,6 +33,8 @@ class StreaksWindow(Adw.ApplicationWindow):
     __gtype_name__ = "StreaksWindow"
 
     split_view = Gtk.Template.Child()
+    search_bar = Gtk.Template.Child()
+    search_entry = Gtk.Template.Child()
     sidebar_list = Gtk.Template.Child()
     sidebar_empty_label = Gtk.Template.Child()
     footer_label = Gtk.Template.Child()
@@ -52,7 +54,9 @@ class StreaksWindow(Adw.ApplicationWindow):
         self.state = state or AppState()
         self.state.settings.bind_window_state(self)
         self.state.connect("changed", self._on_state_changed)
-        self.state.settings.connect("changed", self._on_settings_changed)
+        # Break `AppState`'s GSettings subscription once this window is done with it — see
+        # `AppState.close()`.
+        self.connect("destroy", self._on_destroy)
 
         self._today_view: engine.TodayView | None = None
         self._current_streak_id = 0
@@ -62,9 +66,18 @@ class StreaksWindow(Adw.ApplicationWindow):
 
         self._install_actions()
         self.sidebar_list.set_header_func(self._header_func)
+        self.sidebar_list.set_filter_func(self._filter_sidebar_row)
         self.sidebar_list.connect("row-selected", self._on_row_selected)
         self.checkin_button.connect("clicked", self._on_checkin_clicked)
         self.streak_view.connect("catch-up", self._on_streak_catch_up)
+
+        self.search_bar.connect_entry(self.search_entry)
+        self.search_bar.set_key_capture_widget(self)
+        self.search_bar.set_visible(False)
+        self.search_bar.connect("notify::search-mode-enabled", self._on_search_mode_changed)
+        # `Gtk.Editable::changed` (not `GtkSearchEntry::search-changed`, which is debounced by a
+        # short idle timeout) so filtering is synchronous and deterministic for tests.
+        self.search_entry.connect("changed", self._on_search_changed)
 
         self.today_view.set_state(self.state)
         self.streak_view.set_state(self.state)
@@ -93,10 +106,14 @@ class StreaksWindow(Adw.ApplicationWindow):
         select_today.connect("activate", self._on_select_today)
         self.add_action(select_today)
 
-        # Present-but-no-op for now; a later phase wires up the shortcuts window.
-        show_help_overlay = Gio.SimpleAction.new("show-help-overlay", None)
-        show_help_overlay.connect("activate", lambda *_args: None)
-        self.add_action(show_help_overlay)
+        toggle_search = Gio.SimpleAction.new("toggle-search", None)
+        toggle_search.connect("activate", self._on_toggle_search)
+        self.add_action(toggle_search)
+
+        # No "show-help-overlay" action here: `GtkApplicationWindow` wires one up on its own,
+        # building it from the `gtk/help-overlay.ui` resource under the application's
+        # `resource-base-path` (see `src/streaks/ui/shortcuts.blp`), as long as no action of
+        # that name already exists on the window.
 
     def _on_new_streak(self, *_args) -> None:
         dialog = StreaksStreakDialog.for_new()
@@ -183,6 +200,38 @@ class StreaksWindow(Adw.ApplicationWindow):
         self.catchup_dialog = dialog
         dialog.present(self)
 
+    def _on_toggle_search(self, *_args) -> None:
+        if not self.search_button.get_visible():
+            return
+        self.search_bar.set_search_mode(True)
+        self.search_entry.grab_focus()
+
+    # -- search -----------------------------------------------------------------------
+
+    def _on_search_changed(self, _entry: Gtk.SearchEntry) -> None:
+        self.sidebar_list.invalidate_filter()
+        self.sidebar_list.invalidate_headers()
+
+    def _on_search_mode_changed(self, *_args) -> None:
+        active = self.search_bar.get_search_mode()
+        # Keep the collapsed search bar out of the sidebar box's layout entirely (not just
+        # visually collapsed via its internal revealer): a `visible` widget still claims its
+        # share of the box's inter-child spacing even at zero height, which would nudge the
+        # streak list down a couple of pixels whether or not anyone ever opens search.
+        self.search_bar.set_visible(active)
+        if not active:
+            self.search_entry.set_text("")
+        self.sidebar_list.invalidate_filter()
+        self.sidebar_list.invalidate_headers()
+
+    def _filter_sidebar_row(self, row: Gtk.ListBoxRow) -> bool:
+        if not isinstance(row, StreaksSidebarRow) or row.streak_id == 0:
+            return True
+        query = self.search_entry.get_text().strip().lower()
+        if not query:
+            return True
+        return query in row.name_label.get_label().lower()
+
     # -- header ---------------------------------------------------------------------
 
     def _set_header_for_page(self, page: str) -> None:
@@ -207,10 +256,24 @@ class StreaksWindow(Adw.ApplicationWindow):
 
     # -- sidebar building -----------------------------------------------------------
 
-    def _header_func(self, row: Gtk.ListBoxRow, before: Gtk.ListBoxRow | None) -> None:
+    def _header_func(self, row: Gtk.ListBoxRow, _before: Gtk.ListBoxRow | None) -> None:
         section = getattr(row, "section", None)
-        prev_section = getattr(before, "section", None) if before is not None else None
-        if section is None or section == prev_section:
+        if section is None or not row.get_child_visible():
+            row.set_header(None)
+            return
+
+        # Don't trust `_before`: it is the previous row regardless of whether the search filter
+        # has hidden it, so a filtered-out first row of a section would otherwise leave the next
+        # visible row of that same section wrongly believing it isn't the section's first.
+        prev_section = None
+        sibling = row.get_prev_sibling()
+        while sibling is not None:
+            if isinstance(sibling, StreaksSidebarRow) and sibling.get_child_visible():
+                prev_section = getattr(sibling, "section", None)
+                break
+            sibling = sibling.get_prev_sibling()
+
+        if section == prev_section:
             row.set_header(None)
             return
         label = Gtk.Label(label=_("RUNNING") if section == "running" else _("ENDED"))
@@ -319,6 +382,5 @@ class StreaksWindow(Adw.ApplicationWindow):
     def _on_state_changed(self, _state: AppState) -> None:
         self._rebuild_sidebar()
 
-    def _on_settings_changed(self, _settings, key: str) -> None:
-        if key == "show-ended":
-            self._rebuild_sidebar()
+    def _on_destroy(self, *_args) -> None:
+        self.state.close()

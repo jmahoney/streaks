@@ -33,11 +33,14 @@ class StreaksApplication(Adw.Application):
         action.connect("activate", self._on_about)
         self.add_action(action)
 
-        # Present-but-no-op for now; a later phase wires up the preferences dialog.
         action = Gio.SimpleAction.new("preferences", None)
         action.connect("activate", self._on_preferences)
         self.add_action(action)
         self.set_accels_for_action("app.preferences", ["<Ctrl>comma"])
+
+        self.set_accels_for_action("win.new-streak", ["<Ctrl>n"])
+        self.set_accels_for_action("win.toggle-search", ["<Ctrl>f"])
+        self.set_accels_for_action("win.show-help-overlay", ["<Ctrl>question"])
 
     def do_activate(self):
         """Activate the application."""
@@ -48,7 +51,14 @@ class StreaksApplication(Adw.Application):
         self.window.present()
 
     def _on_preferences(self, *args):
-        """Show the preferences dialog (not yet implemented)."""
+        """Present the Preferences dialog over the active window."""
+        window = self.get_active_window() or self.window
+        if window is None:
+            return
+        from streaks.preferences_dialog import StreaksPreferencesDialog
+
+        dialog = StreaksPreferencesDialog(window.state)
+        dialog.present(window)
 
     def _on_about(self, *args):
         """Show the about dialog."""

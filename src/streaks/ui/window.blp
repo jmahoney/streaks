@@ -38,6 +38,12 @@ template $StreaksWindow : Adw.ApplicationWindow {
           margin-bottom: 8;
           spacing: 2;
 
+          Gtk.SearchBar search_bar {
+            search-mode-enabled: bind search_button.active bidirectional;
+
+            child: Gtk.SearchEntry search_entry {};
+          }
+
           Gtk.ListBox sidebar_list {
             selection-mode: single;
 

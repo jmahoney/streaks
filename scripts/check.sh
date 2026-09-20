@@ -8,11 +8,23 @@ export STREAKS_GRESOURCE="${STREAKS_GRESOURCE:-_build/src/streaks.gresource}"
 export GSETTINGS_SCHEMA_DIR="${GSETTINGS_SCHEMA_DIR:-_build/data}"
 export GSETTINGS_BACKEND="${GSETTINGS_BACKEND:-memory}"
 
-# Check if we need xvfb for headless testing
+# GUI tests run under xvfb by default so test windows never appear on (or hang) the user's
+# desktop. STREAKS_HEADLESS=0 opts into the live display; with no display at all xvfb is required.
 need_xvfb=0
-if [[ "${STREAKS_HEADLESS:-0}" == "1" ]] || ([[ -z "${DISPLAY:-}" ]] && [[ -z "${WAYLAND_DISPLAY:-}" ]]); then
+if [[ "${STREAKS_HEADLESS:-1}" == "1" ]] || ([[ -z "${DISPLAY:-}" ]] && [[ -z "${WAYLAND_DISPLAY:-}" ]]); then
   need_xvfb=1
 fi
+if [[ $need_xvfb -eq 1 ]] && ! command -v xvfb-run >/dev/null; then
+  echo "FAIL setup: xvfb-run not found (sudo apt install xvfb), or run with STREAKS_HEADLESS=0"; exit 1
+fi
+# Under xvfb GTK must be pinned to the X11 backend: with WAYLAND_DISPLAY still set, GTK4 prefers
+# Wayland and the "headless" windows would open on the user's real desktop.
+if [[ $need_xvfb -eq 1 ]]; then
+  export GDK_BACKEND=x11
+  unset WAYLAND_DISPLAY
+fi
+# Every pytest run is bounded so a hung GUI test fails instead of spinning forever.
+PYTEST_TIMEOUT="${PYTEST_TIMEOUT:-600}"
 
 declare -A results
 stages=()
@@ -56,7 +68,7 @@ run_stage() {
 if [[ $unit_only -eq 1 ]]; then
   run_stage "ruff format" "ruff format --check src tests scripts"
   run_stage "ruff check" "ruff check src tests scripts"
-  run_stage "unit" "python3 -m pytest -q tests/unit"
+  run_stage "unit" "timeout $PYTEST_TIMEOUT python3 -m pytest -q tests/unit"
 else
   # Full check or GUI check
   run_stage "ruff format" "ruff format --check src tests scripts"
@@ -76,15 +88,15 @@ else
   run_stage "schema" "glib-compile-schemas --strict --dry-run data"
 
   if [[ $gui_only -ne 1 ]]; then
-    run_stage "unit" "python3 -m pytest -q tests/unit"
+    run_stage "unit" "timeout $PYTEST_TIMEOUT python3 -m pytest -q tests/unit"
   fi
 
   # GUI tests
   if true; then
     if [[ $need_xvfb -eq 1 ]]; then
-      run_stage "gui" "xvfb-run -a -s '-screen 0 1600x1000x24 -dpi 96' python3 -m pytest -q tests/gui --ignore=tests/gui/test_snapshots.py"
+      run_stage "gui" "timeout $PYTEST_TIMEOUT xvfb-run -a -s '-screen 0 1600x1000x24 -dpi 96' python3 -m pytest -q tests/gui --ignore=tests/gui/test_snapshots.py"
     else
-      run_stage "gui" "python3 -m pytest -q tests/gui --ignore=tests/gui/test_snapshots.py"
+      run_stage "gui" "timeout $PYTEST_TIMEOUT python3 -m pytest -q tests/gui --ignore=tests/gui/test_snapshots.py"
     fi
   fi
 
@@ -92,9 +104,9 @@ else
   if [[ $fast -eq 0 ]] && [[ $no_snapshots -eq 0 ]]; then
     if [[ -d tests/snapshots ]] && [[ $(find tests/snapshots -name '*.png' 2>/dev/null | wc -l) -gt 0 ]]; then
       if [[ $need_xvfb -eq 1 ]]; then
-        run_stage "snapshots" "xvfb-run -a -s '-screen 0 1600x1000x24 -dpi 96' python3 -m pytest -q tests/gui/test_snapshots.py"
+        run_stage "snapshots" "timeout $PYTEST_TIMEOUT xvfb-run -a -s '-screen 0 1600x1000x24 -dpi 96' python3 -m pytest -q tests/gui/test_snapshots.py"
       else
-        run_stage "snapshots" "python3 -m pytest -q tests/gui/test_snapshots.py"
+        run_stage "snapshots" "timeout $PYTEST_TIMEOUT python3 -m pytest -q tests/gui/test_snapshots.py"
       fi
     else
       echo "SKIP snapshots: no tests/snapshots yet"

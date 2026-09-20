@@ -20,6 +20,8 @@ blueprints = custom_target('blueprints',
     'streaks/ui/run_row.blp',
     'streaks/ui/catchup_dialog.blp',
     'streaks/ui/catchup_row.blp',
+    'streaks/ui/preferences_dialog.blp',
+    'streaks/ui/shortcuts.blp',
   ),
   output: '.',
   command: [find_program('blueprint-compiler'), 'batch-compile', '@OUTPUT@', '@CURRENT_SOURCE_DIR@', '@INPUT@'],
@@ -63,6 +65,7 @@ streaks_sources = files(
   'streaks/run_row.py',
   'streaks/catchup_dialog.py',
   'streaks/catchup_row.py',
+  'streaks/preferences_dialog.py',
 )
 install_data(streaks_sources, install_dir: moduledir)
 

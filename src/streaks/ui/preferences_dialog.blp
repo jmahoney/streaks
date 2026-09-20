@@ -1,0 +1,147 @@
+using Gtk 4.0;
+using Adw 1;
+
+Gtk.Popover day_start_popover {
+  child: Gtk.Box {
+    orientation: vertical;
+    spacing: 10;
+    margin-start: 12;
+    margin-end: 12;
+    margin-top: 12;
+    margin-bottom: 12;
+
+    Gtk.Label {
+      label: _("Day starts at");
+      halign: start;
+
+      styles ["heading"]
+    }
+
+    Gtk.Box {
+      orientation: horizontal;
+      spacing: 6;
+      halign: center;
+
+      Gtk.SpinButton day_start_hour_spin {
+        numeric: true;
+        wrap: true;
+        valign: center;
+
+        adjustment: Gtk.Adjustment {
+          lower: 0;
+          upper: 23;
+          step-increment: 1;
+        };
+      }
+
+      Gtk.Label {
+        label: ":";
+        valign: center;
+      }
+
+      Gtk.SpinButton day_start_minute_spin {
+        numeric: true;
+        wrap: true;
+        valign: center;
+
+        adjustment: Gtk.Adjustment {
+          lower: 0;
+          upper: 59;
+          step-increment: 1;
+        };
+      }
+    }
+  };
+}
+
+template $StreaksPreferencesDialog : Adw.PreferencesDialog {
+  content-width: 660;
+
+  Adw.PreferencesPage {
+    Adw.PreferencesGroup {
+      title: _("Check-ins");
+
+      Adw.SwitchRow reminders_row {
+        title: _("Reminders");
+        subtitle: _("Per streak, at the time you set");
+      }
+
+      Adw.ActionRow day_start_row {
+        title: _("Day starts at");
+        subtitle: _("Late-night check-ins count for the day before");
+        activatable: true;
+
+        [suffix]
+        Gtk.Label day_start_label {
+          label: "04:00";
+          valign: center;
+
+          styles ["dim-label"]
+        }
+
+        [suffix]
+        Gtk.Image {
+          icon-name: "go-next-symbolic";
+          valign: center;
+        }
+      }
+
+      Adw.SpinRow backfill_row {
+        title: _("Backfill window");
+        subtitle: _("How far back a day can be answered for");
+        numeric: true;
+
+        adjustment: Gtk.Adjustment {
+          lower: 0;
+          upper: 14;
+          step-increment: 1;
+          value: 2;
+        };
+
+        [suffix]
+        Gtk.Label backfill_label {
+          valign: center;
+
+          styles ["dim-label"]
+        }
+      }
+    }
+
+    Adw.PreferencesGroup {
+      title: _("Runs");
+
+      Adw.SwitchRow count_through_row {
+        title: _("Keep counting through unconfirmed days");
+        subtitle: _("A run ends only when you mark a goal missed");
+      }
+
+      Adw.SwitchRow show_ended_row {
+        title: _("Show ended runs in the sidebar");
+        subtitle: _("Old runs stay readable either way");
+      }
+    }
+
+    Adw.PreferencesGroup {
+      title: _("Data");
+      description: _("Everything stays on this machine. There is no account.");
+
+      Adw.ActionRow export_row {
+        title: _("Export everything");
+        activatable: true;
+
+        [suffix]
+        Gtk.Image {
+          icon-name: "go-next-symbolic";
+          valign: center;
+        }
+      }
+
+      Adw.ActionRow delete_row {
+        title: _("Delete all data");
+        activatable: true;
+
+        styles ["error"]
+      }
+    }
+  }
+}

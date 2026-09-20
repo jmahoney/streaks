@@ -41,3 +41,6 @@ src/streaks/ui/catchup_dialog.blp
 src/streaks/catchup_dialog.py
 src/streaks/ui/catchup_row.blp
 src/streaks/catchup_row.py
+src/streaks/ui/preferences_dialog.blp
+src/streaks/preferences_dialog.py
+src/streaks/ui/shortcuts.blp

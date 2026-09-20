@@ -35,6 +35,12 @@ class AppSettings(GObject.Object):
     def _on_gio_changed(self, _gio_settings: Gio.Settings, key: str) -> None:
         self.emit("changed", key)
 
+    @property
+    def gio(self) -> Gio.Settings:
+        """The underlying ``Gio.Settings``, for widgets (e.g. Preferences) that bind rows to
+        keys directly with ``settings.bind()``."""
+        return self._gio
+
     def to_engine(self) -> engine.Settings:
         """The subset of settings the pure engine needs, as an ``engine.Settings``."""
         return engine.Settings(
@@ -50,6 +56,8 @@ class AppSettings(GObject.Object):
 
     @show_ended.setter
     def show_ended(self, value: bool) -> None:
+        if self._gio.get_boolean("show-ended") == value:
+            return
         self._gio.set_boolean("show-ended", value)
 
     @property
@@ -59,6 +67,13 @@ class AppSettings(GObject.Object):
 
     @sidebar_selection.setter
     def sidebar_selection(self, streak_id: int) -> None:
+        # Guard against a same-value write: GSettings' `memory` backend (used by the test suite)
+        # re-emits `changed` even when the value doesn't actually change, and `sidebar-selection`
+        # is written every time the sidebar picks a row to select — including from inside a
+        # rebuild the settings-changed signal itself can trigger. Skipping the redundant write
+        # here breaks that feedback loop at the source (see `AppState._on_settings_changed`).
+        if self._gio.get_int("sidebar-selection") == streak_id:
+            return
         self._gio.set_int("sidebar-selection", streak_id)
 
     def bind_window_state(self, window: Gtk.Window) -> None:

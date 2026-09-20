@@ -1,0 +1,39 @@
+using Gtk 4.0;
+
+Gtk.ShortcutsWindow help_overlay {
+  modal: true;
+
+  Gtk.ShortcutsSection {
+    section-name: "shortcuts";
+    max-height: 10;
+
+    Gtk.ShortcutsGroup {
+      title: _("General");
+
+      Gtk.ShortcutsShortcut {
+        title: _("New streak");
+        accelerator: "<Control>n";
+      }
+
+      Gtk.ShortcutsShortcut {
+        title: _("Preferences");
+        accelerator: "<Control>comma";
+      }
+
+      Gtk.ShortcutsShortcut {
+        title: _("Search");
+        accelerator: "<Control>f";
+      }
+
+      Gtk.ShortcutsShortcut {
+        title: _("Quit");
+        accelerator: "<Control>q";
+      }
+
+      Gtk.ShortcutsShortcut {
+        title: _("Keyboard shortcuts");
+        accelerator: "<Control>question";
+      }
+    }
+  }
+}

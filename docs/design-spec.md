@@ -178,9 +178,9 @@ Captions: "days running" / "weeks running" / "months running" per period kind.
   (amber), Read 10 pages 11/13, Stick to the diet 12/13. Denominator = due days so far this month (excluding today
   unless something was done today).
 - **Earlier runs** card: header "Earlier runs". One row per finished run, newest first (padding 12 16): bold 13 "Run 2",
-  caption 11.5 "14 May – 3 Jul · 34 days", spacer, "›" 12 at 40 %; below, `StripWidget` (7×18, gap 2) one cell per day
-  of the run using the chart scale. Fixture: Run 2 (14 May – 3 Jul · 34 days), Run 1 (2 Feb – 9 Mar · 28 days).
-  Clicking a row switches the chart to that run (title "Run 2 · 14 May – 3 Jul").
+  caption 11.5 "14 May – 16 Jun · 34 days", spacer, "›" 12 at 40 %; below, `StripWidget` (7×18, gap 2) one cell per day
+  of the run using the chart scale. Fixture: Run 2 (14 May – 16 Jun · 34 days), Run 1 (2 Feb – 1 Mar · 28 days).
+  Clicking a row switches the chart to that run (title "Run 2 · 14 May – 16 Jun").
 
 Stats (engine): running = due periods from run start through today inclusive; unconfirmed = past due periods in the run
 with no checks and no answer; confirmed kept = periods with status kept; goals hit % = checks done ÷ (goals × due

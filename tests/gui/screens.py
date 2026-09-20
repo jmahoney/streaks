@@ -209,6 +209,48 @@ def _build_catch_up_missed(ctx: BuildContext) -> Gtk.Widget:
     return child
 
 
+def _hide_internal_title_buttons(widget: Gtk.Widget) -> None:
+    """Recursively turn off ``show-start/end-title-buttons`` on every ``Adw.HeaderBar`` found.
+
+    Only used by ``_build_preferences`` below. ``Adw.PreferencesDialog`` builds its own header
+    bar internally (there is no template hook for it), and that header bar only decides to draw
+    OS-style min/maximize/close window controls once it is actually mapped into a real,
+    decorated top-level — which is exactly what ``build_screen()`` does to render a detached
+    dialog child standalone (see its docstring). In real use, `Adw.PreferencesDialog` is always
+    presented as a floating sheet over the main window, never as its own decorated top-level, so
+    this never happens there; it is purely a rendering-harness artifact.
+    """
+    if isinstance(widget, Adw.HeaderBar):
+        widget.set_show_start_title_buttons(False)
+        widget.set_show_end_title_buttons(False)
+    child = widget.get_first_child()
+    while child is not None:
+        _hide_internal_title_buttons(child)
+        child = child.get_next_sibling()
+
+
+def _build_preferences(ctx: BuildContext) -> Gtk.Widget:
+    from streaks.preferences_dialog import StreaksPreferencesDialog
+
+    window = StreaksWindow(application=ctx.app)
+    ctx.window = window
+    window.present()
+    _process_events()
+
+    dialog = StreaksPreferencesDialog(window.state)
+    dialog.present(window)
+    _process_events()
+
+    # Same "detach and render standalone" trick as `_build_new_streak`/`_build_catch_up`: under a
+    # headless/no-WM display `AdwDialog`'s floating sheet never maps, so anything still parented
+    # inside it snapshots blank. Unlike a plain `Adw.Dialog`, `Adw.PreferencesDialog.get_child()`
+    # does return a widget (its internal `AdwToastOverlay`), so the same trick applies unchanged.
+    child = dialog.get_child()
+    dialog.set_child(None)
+    _hide_internal_title_buttons(child)
+    return child
+
+
 def _build_today_quiet(ctx: BuildContext) -> Gtk.Widget:
     from streaks.engine import Answer
     from streaks.models import Streak, answer_day
@@ -238,6 +280,7 @@ SCREENS: dict[str, Screen] = {
     "catch-up-missed": Screen(
         name="catch-up-missed", width=560, height=730, build=_build_catch_up_missed
     ),
+    "preferences": Screen(name="preferences", width=660, height=680, build=_build_preferences),
 }
 
 

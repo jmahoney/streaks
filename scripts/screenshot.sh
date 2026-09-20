@@ -18,8 +18,10 @@ export GSETTINGS_BACKEND="memory"
 export PYTHONPATH="src"
 
 # Check if we need xvfb
-if [[ "${STREAKS_HEADLESS:-0}" == "1" ]] || ([[ -z "${DISPLAY:-}" ]] && [[ -z "${WAYLAND_DISPLAY:-}" ]]); then
-  xvfb-run -a -s "-screen 0 1600x1000x24 -dpi 96" python3 scripts/render_screens.py --out _build/screenshots "$@"
+if [[ "${STREAKS_HEADLESS:-1}" == "1" ]] || ([[ -z "${DISPLAY:-}" ]] && [[ -z "${WAYLAND_DISPLAY:-}" ]]); then
+  # Under xvfb GTK must be pinned to the X11 backend: with WAYLAND_DISPLAY still set, GTK4 prefers
+  # Wayland and the "headless" windows would open on the user's real desktop.
+  env -u WAYLAND_DISPLAY GDK_BACKEND=x11 xvfb-run -a -s "-screen 0 1600x1000x24 -dpi 96" timeout "${PYTEST_TIMEOUT:-600}" python3 scripts/render_screens.py --out _build/screenshots "$@"
 else
   python3 scripts/render_screens.py --out _build/screenshots "$@"
 fi
