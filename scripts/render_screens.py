@@ -46,7 +46,12 @@ from streaks.resources import load_resources  # noqa: E402
 # StreaksWindow at module scope.
 load_resources()
 
-from render import render_widget, texture_to_png  # noqa: E402
+from render import (  # noqa: E402
+    configure_for_rendering,
+    render_widget,
+    set_colour_scheme,
+    texture_to_png,
+)
 from screens import SCREENS, build_screen  # noqa: E402
 
 
@@ -54,6 +59,9 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out", required=True, help="output directory for PNGs")
     parser.add_argument("names", nargs="*", help="screen names to render (default: all)")
+    parser.add_argument(
+        "--dark", action="store_true", help="render in the dark colour scheme (design turn 5)"
+    )
     args = parser.parse_args(argv)
 
     names = args.names or sorted(SCREENS)
@@ -78,6 +86,9 @@ def main(argv: list[str] | None = None) -> int:
     app.register()
 
     from gi.repository import Gtk
+
+    configure_for_rendering()
+    set_colour_scheme(dark=args.dark)
 
     for name in names:
         widget = None

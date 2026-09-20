@@ -210,18 +210,19 @@ class Preview:
 
 
 # --------------------------------------------------------------------------------------
-# Chart colours (design-spec "Chart cell colour scale").
+# Chart colour tokens (design-spec "Chart cell colour scale"). The engine is scheme-agnostic:
+# these are names, resolved to light or dark hex by ``streaks.theme`` at draw time.
 # --------------------------------------------------------------------------------------
 
-CHART_ZERO = "#e9e9e7"
-CHART_LOW = "#cfe2f8"
-CHART_MID = "#92bdf0"
-CHART_HIGH = "#4b8fdb"
-CHART_FULL = "#1a68c7"
-CHART_WHITE = "#ffffff"
-CHART_UNCONFIRMED_BORDER = "#a9c9ef"
-CHART_MISSED = "#f3c0c4"
-CHART_UPCOMING = "#f4f4f2"
+CHART_ZERO = "chart-zero"
+CHART_LOW = "chart-low"
+CHART_MID = "chart-mid"
+CHART_HIGH = "chart-high"
+CHART_FULL = "chart-full"
+CHART_HOLLOW = "chart-hollow"
+CHART_UNCONFIRMED_BORDER = "chart-unconfirmed-border"
+CHART_MISSED = "chart-missed"
+CHART_UPCOMING = "chart-upcoming"
 
 
 # --------------------------------------------------------------------------------------
@@ -595,7 +596,7 @@ def _cell_for_result(pr: PeriodResult) -> Cell:
     if pr.status == Status.MISSED:
         return Cell(CHART_MISSED, None, _tooltip_for(pr))
     if pr.status == Status.UNCONFIRMED or (pr.status == Status.OPEN and pr.done == 0):
-        return Cell(CHART_WHITE, CHART_UNCONFIRMED_BORDER, _tooltip_for(pr))
+        return Cell(CHART_HOLLOW, CHART_UNCONFIRMED_BORDER, _tooltip_for(pr))
     ratio = pr.ratio
     if ratio == 0:
         fill = CHART_ZERO
@@ -619,7 +620,7 @@ def _banner_strip(results: tuple[PeriodResult, ...]) -> list[Cell]:
     cells = []
     for pr in last:
         if pr.status == Status.UNCONFIRMED:
-            cells.append(Cell(CHART_WHITE, CHART_UNCONFIRMED_BORDER, _tooltip_for(pr)))
+            cells.append(Cell(CHART_HOLLOW, CHART_UNCONFIRMED_BORDER, _tooltip_for(pr)))
         else:
             cells.append(Cell(CHART_FULL, None, _tooltip_for(pr)))
     return cells
@@ -931,7 +932,7 @@ def _legend(n_goals: int) -> list[tuple[str, str | None, str]]:
     return [
         (CHART_FULL, None, all_label),
         (CHART_MID, None, _("some")),
-        (CHART_WHITE, CHART_UNCONFIRMED_BORDER, _("unconfirmed")),
+        (CHART_HOLLOW, CHART_UNCONFIRMED_BORDER, _("unconfirmed")),
         (CHART_MISSED, None, _("missed")),
     ]
 

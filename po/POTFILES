@@ -11,6 +11,7 @@ src/streaks/resources.py
 src/streaks/settings.py
 src/streaks/sidebar_row.py
 src/streaks/state.py
+src/streaks/theme.py
 src/streaks/widgets/grid_widgets.py
 src/streaks/window.py
 src/streaks/today_view.py

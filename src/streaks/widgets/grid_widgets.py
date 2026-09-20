@@ -3,7 +3,8 @@
 All three (design-spec §10) share one drawing routine: a plain ``Gtk.Widget`` that lays a flat
 list of ``engine.Cell`` values on a fixed grid and paints each cell as a rounded rectangle, with
 an optional 1px border and a per-cell tooltip. No engine/business logic lives here — colours and
-tooltip text are always supplied by the caller as plain strings via ``set_cells()``.
+tooltip text are always supplied by the caller as plain strings via ``set_cells()``; colour
+tokens (``engine.CHART_*``) are resolved for the current light/dark scheme by ``streaks.theme``.
 """
 
 from __future__ import annotations
@@ -15,6 +16,7 @@ gi.require_version("Gsk", "4.0")
 
 from gi.repository import Gdk, Graphene, Gsk, Gtk
 
+from streaks import theme
 from streaks.engine import Cell
 
 
@@ -38,6 +40,7 @@ class _CellGridWidget(Gtk.Widget):
         self.radius = radius
         self._cells: list[Cell] = []
         self.set_has_tooltip(True)
+        theme.watch(self, self.queue_draw)
 
     def _rows_columns(self) -> tuple[int, int]:
         raise NotImplementedError
@@ -95,13 +98,13 @@ class _CellGridWidget(Gtk.Widget):
 
             snapshot.push_rounded_clip(rrect)
             colour = Gdk.RGBA()
-            colour.parse(cell.fill)
+            colour.parse(theme.resolve(cell.fill))
             snapshot.append_color(colour, bounds)
             snapshot.pop()
 
             if cell.border:
                 border_colour = Gdk.RGBA()
-                border_colour.parse(cell.border)
+                border_colour.parse(theme.resolve(cell.border))
                 widths = [1.0, 1.0, 1.0, 1.0]
                 colours = [border_colour, border_colour, border_colour, border_colour]
                 snapshot.append_border(rrect, widths, colours)

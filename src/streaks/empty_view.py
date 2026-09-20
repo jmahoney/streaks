@@ -11,7 +11,8 @@ gi.require_version("Adw", "1")
 
 from gi.repository import Adw, Gtk
 
-from streaks.engine import CHART_LOW, CHART_ZERO, Cell
+from streaks.engine import CHART_ZERO, Cell
+from streaks.theme import CHART_EMPTY_HINT
 from streaks.widgets.grid_widgets import EmptyGridWidget  # noqa: F401  registers $EmptyGridWidget
 
 _ = gettext.gettext
@@ -24,7 +25,7 @@ def _empty_grid_cells() -> list[Cell]:
     """The static decorative grid: every cell empty except the last (bottom-right)."""
     n = _GRID_ROWS * _GRID_COLUMNS
     cells = [Cell(CHART_ZERO, None, "") for _ in range(n - 1)]
-    cells.append(Cell(CHART_LOW, None, ""))
+    cells.append(Cell(CHART_EMPTY_HINT, None, ""))
     return cells
 
 

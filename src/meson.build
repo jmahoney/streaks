@@ -51,6 +51,7 @@ streaks_sources = files(
   'streaks/settings.py',
   'streaks/sidebar_row.py',
   'streaks/state.py',
+  'streaks/theme.py',
   'streaks/window.py',
   'streaks/goal_edit_row.py',
   'streaks/streak_dialog.py',

@@ -363,6 +363,13 @@ def build_screen(name: str, app: Adw.Application) -> tuple[Gtk.Widget, Screen]:
     if isinstance(widget, Gtk.Window):
         toplevel: Gtk.Window = widget
     else:
+        # A detached dialog child paints no background of its own (the sheet it normally sits in
+        # does), which only shows once cards are translucent (dark scheme). Host it in a bin
+        # styled like `Adw.Dialog`'s sheet so renders composite the same way the real thing does.
+        host = Adw.Bin()
+        host.add_css_class("render-dialog-host")
+        host.set_child(widget)
+        widget = host
         toplevel = Gtk.Window(application=app)
         toplevel.set_child(widget)
         if ctx.window is None:
@@ -372,5 +379,11 @@ def build_screen(name: str, app: Adw.Application) -> tuple[Gtk.Widget, Screen]:
     toplevel.present()
 
     _settle()
+
+    # Whether the toplevel ends up X-focused under a bare (no-WM) Xvfb depends on what happened to
+    # the previous screen's window, and a focused entry paints a focus ring plus selected text.
+    # Drop focus so renders don't depend on ordering.
+    toplevel.set_focus(None)
+    _process_events()
 
     return widget, screen

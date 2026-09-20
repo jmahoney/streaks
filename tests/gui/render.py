@@ -31,6 +31,35 @@ from gi.repository import (  # noqa: E402
 _configured = False
 
 
+_accent_pin: Gtk.CssProvider | None = None
+
+
+def set_colour_scheme(dark: bool) -> None:
+    """Force the light or dark scheme (design turns 4 and 5 respectively).
+
+    In light the accent is pinned to GNOME's default blue regardless of the host session's accent
+    colour (libadwaita reads it from the portal or GSettings; the design assumes blue). In dark
+    the pin is dropped so the app's own dark accent (amber, in `data/style.css`) applies.
+    """
+    global _accent_pin
+    style_manager = Adw.StyleManager.get_default()
+    display = Gdk.Display.get_default()
+    if _accent_pin is not None:
+        Gtk.StyleContext.remove_provider_for_display(display, _accent_pin)
+        _accent_pin = None
+    if dark:
+        style_manager.set_color_scheme(Adw.ColorScheme.FORCE_DARK)
+        return
+    style_manager.set_color_scheme(Adw.ColorScheme.FORCE_LIGHT)
+    _accent_pin = Gtk.CssProvider()
+    _accent_pin.load_from_string(
+        ":root { --accent-bg-color: #3584e4; --accent-fg-color: #ffffff; --accent-color: #1c71d8; }"
+    )
+    Gtk.StyleContext.add_provider_for_display(
+        display, _accent_pin, Gtk.STYLE_PROVIDER_PRIORITY_USER
+    )
+
+
 def configure_for_rendering() -> None:
     """Force deterministic, animation-free, light-themed rendering.
 
@@ -43,16 +72,17 @@ def configure_for_rendering() -> None:
     if _configured:
         return
 
-    Adw.StyleManager.get_default().set_color_scheme(Adw.ColorScheme.FORCE_LIGHT)
+    set_colour_scheme(dark=False)
 
-    # Pin the accent to GNOME's default blue regardless of the host session's accent colour
-    # (libadwaita reads it from the portal or GSettings; the design assumes blue).
-    accent = Gtk.CssProvider()
-    accent.load_from_string(
-        ":root { --accent-bg-color: #3584e4; --accent-fg-color: #ffffff; --accent-color: #1c71d8; }"
+    # Background for detached dialog children (see screens.build_screen), matching the colours
+    # `Adw.Dialog` gives its sheet.
+    dialog_host = Gtk.CssProvider()
+    dialog_host.load_from_string(
+        ".render-dialog-host { background-color: var(--dialog-bg-color); "
+        "color: var(--dialog-fg-color); }"
     )
     Gtk.StyleContext.add_provider_for_display(
-        Gdk.Display.get_default(), accent, Gtk.STYLE_PROVIDER_PRIORITY_USER
+        Gdk.Display.get_default(), dialog_host, Gtk.STYLE_PROVIDER_PRIORITY_USER
     )
 
     settings = Gtk.Settings.get_default()

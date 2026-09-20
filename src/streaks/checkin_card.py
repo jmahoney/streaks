@@ -10,6 +10,7 @@ gi.require_version("Gtk", "4.0")
 
 from gi.repository import GObject, Gtk
 
+from streaks import theme
 from streaks.engine import Card
 from streaks.goal_row import StreaksGoalRow  # noqa: F401  registers $StreaksGoalRow
 
@@ -47,10 +48,6 @@ class StreaksCheckinCard(Gtk.Box):
     def __init__(self, **kwargs):
         """Initialize the card."""
         super().__init__(**kwargs)
-        self._dot_provider = Gtk.CssProvider()
-        self.dot.get_style_context().add_provider(
-            self._dot_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
-        )
         self.goals_list.connect("row-activated", self._on_row_activated)
         self.missed_button.connect("clicked", self._on_missed_clicked)
 
@@ -72,7 +69,9 @@ class StreaksCheckinCard(Gtk.Box):
     def configure(self, card: Card) -> None:
         """Populate the card from an ``engine.Card``."""
         self.streak_id = card.streak_id
-        self._dot_provider.load_from_string(f"* {{ background-color: {card.colour}; }}")
+        for css_class in theme.colour_classes():
+            self.dot.remove_css_class(css_class)
+        self.dot.add_css_class(theme.colour_class(card.colour))
         self.name_label.set_label(card.name)
         self.meta_label.set_label(card.meta)
 

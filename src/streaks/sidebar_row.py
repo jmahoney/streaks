@@ -16,10 +16,13 @@ gi.require_version("Adw", "1")
 
 from gi.repository import GObject, Gtk
 
+from streaks import theme
+
 _ = gettext.gettext
 
-TODAY_DOT_COLOUR = "rgba(0, 0, 0, .55)"
-ENDED_DOT_COLOUR = "#c0bfbc"
+# Dot classes for the two non-streak rows; their colours live in data/style.css.
+_TODAY_DOT_CLASS = "today-dot"
+_ENDED_DOT_CLASS = "ended-dot"
 
 
 @Gtk.Template(resource_path="/com/cheerschopper/Streaks/streaks/ui/sidebar_row.ui")
@@ -40,20 +43,18 @@ class StreaksSidebarRow(Gtk.ListBoxRow):
         """Initialize the row."""
         super().__init__(**kwargs)
         self.colour: str | None = None
-        self._dot_provider = Gtk.CssProvider()
-        self.dot.get_style_context().add_provider(
-            self._dot_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
-        )
 
-    def _set_dot_colour(self, colour: str) -> None:
+    def _set_dot_class(self, css_class: str, colour: str | None = None) -> None:
+        """Paint the dot via one CSS class (the stylesheet supplies light and dark hues)."""
         self.colour = colour
-        self._dot_provider.load_from_string(f"* {{ background-color: {colour}; }}")
+        for old in (_TODAY_DOT_CLASS, _ENDED_DOT_CLASS, *theme.colour_classes()):
+            self.dot.remove_css_class(old)
+        self.dot.add_css_class(css_class)
 
     def configure_today(self, open_count: int) -> None:
         """Set up the fixed "Today" row, badged with the number of open check-ins."""
         self.streak_id = 0
-        self.dot.add_css_class("today-dot")
-        self._set_dot_colour(TODAY_DOT_COLOUR)
+        self._set_dot_class(_TODAY_DOT_CLASS)
         self.name_label.set_label(_("Today"))
         self.meta_label.set_visible(False)
         self.count_label.set_visible(False)
@@ -66,8 +67,7 @@ class StreaksSidebarRow(Gtk.ListBoxRow):
     ) -> None:
         """Set up a row for a currently-running streak."""
         self.streak_id = streak_id
-        self.dot.remove_css_class("today-dot")
-        self._set_dot_colour(colour)
+        self._set_dot_class(theme.colour_class(colour), colour)
         self.name_label.set_label(name)
         self.meta_label.set_label(meta)
         self.meta_label.set_visible(True)
@@ -79,8 +79,7 @@ class StreaksSidebarRow(Gtk.ListBoxRow):
     def configure_ended(self, streak_id: int, name: str, meta: str) -> None:
         """Set up a row for an ended streak (dimmed, no count)."""
         self.streak_id = streak_id
-        self.dot.remove_css_class("today-dot")
-        self._set_dot_colour(ENDED_DOT_COLOUR)
+        self._set_dot_class(_ENDED_DOT_CLASS)
         self.name_label.set_label(name)
         self.meta_label.set_label(meta)
         self.meta_label.set_visible(True)

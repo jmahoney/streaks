@@ -9,6 +9,8 @@
  * - catchup-goal-list
  * - colour-swatch + :checked
  * - stat-accent (#1a68c7 number)
+ * - streak-blue/green/yellow/red/purple (a streak's colour on dots and swatches)
+ * - ended-dot
  * - strike (strike-through label)
  * - goal-bar.low (amber)
  * - chart-legend-swatch
@@ -29,7 +31,37 @@
  * Phase 6 (catch-up dialog, design-spec §5):
  * - catchup-row.missed (already listed above; bg #fdf2f2, border #f0d7d9) + .date (#a51d2d)
  * - catchup-goal-list (already listed above; radius 9, border 1px #f0d7d9)
+ *
+ * Dark scheme (design turn 5, "Dark variant — amber accent"): every colour below is a CSS
+ * variable declared on :root and overridden in the prefers-color-scheme block at the end, so no
+ * widget needs to know which scheme is active. Streak colours are the streak-* classes (stored
+ * hex -> class via streaks.theme.colour_class); the chart palette the drawing widgets use lives
+ * in streaks.theme, since GSK can't read CSS.
  */
+
+:root {
+  --streak-blue: #3584e4;
+  --streak-green: #2ec27e;
+  --streak-yellow: #e5a50a;
+  --streak-red: #e01b24;
+  --streak-purple: #9141ac;
+
+  --today-dot-color: rgba(0, 0, 0, .55);
+  --ended-dot-color: #c0bfbc;
+
+  --catchup-banner-bg-color: #f4f8fe;
+  --catchup-banner-border-color: #bcd4f2;
+  --catchup-banner-title-color: #1a5fb4;
+
+  --checkin-footer-bg-color: #fcfcfc;
+
+  --stat-accent-color: #1a68c7;
+  --goal-bar-low-color: #e5a50a;
+
+  --catchup-missed-bg-color: #fdf2f2;
+  --catchup-missed-border-color: #f0d7d9;
+  --catchup-missed-fg-color: #a51d2d;
+}
 
 .colour-dot {
   border-radius: 9999px;
@@ -39,11 +71,23 @@
 
 .colour-dot.today-dot {
   border-radius: 2px;
+  background-color: var(--today-dot-color);
 }
 
+.colour-dot.ended-dot {
+  background-color: var(--ended-dot-color);
+}
+
+/* Streak colours: `color` too, so the colour-swatch:checked ring picks it up via currentColor. */
+.streak-blue { background-color: var(--streak-blue); color: var(--streak-blue); }
+.streak-green { background-color: var(--streak-green); color: var(--streak-green); }
+.streak-yellow { background-color: var(--streak-yellow); color: var(--streak-yellow); }
+.streak-red { background-color: var(--streak-red); color: var(--streak-red); }
+.streak-purple { background-color: var(--streak-purple); color: var(--streak-purple); }
+
 .badge {
-  background-color: @accent_bg_color;
-  color: @accent_fg_color;
+  background-color: var(--accent-bg-color);
+  color: var(--accent-fg-color);
   font-weight: bold;
   font-size: 11px;
   min-width: 20px;
@@ -61,14 +105,14 @@
 }
 
 .catchup-banner {
-  background-color: #f4f8fe;
-  border: 1px solid #bcd4f2;
+  background-color: var(--catchup-banner-bg-color);
+  border: 1px solid var(--catchup-banner-border-color);
   border-radius: 12px;
   padding: 14px 16px;
 }
 
 .catchup-banner .title {
-  color: #1a5fb4;
+  color: var(--catchup-banner-title-color);
 }
 
 .strike {
@@ -76,7 +120,7 @@
 }
 
 .checkin-card .footer {
-  background-color: #fcfcfc;
+  background-color: var(--checkin-footer-bg-color);
   padding: 11px 16px;
 }
 
@@ -109,16 +153,16 @@
 
 .colour-swatch:checked {
   box-shadow:
-    0 0 0 2px @window_bg_color,
+    0 0 0 2px var(--window-bg-color),
     0 0 0 3.5px currentColor;
 }
 
 .stat-accent {
-  color: #1a68c7;
+  color: var(--stat-accent-color);
 }
 
 progressbar.low > trough > progress {
-  background-color: #e5a50a;
+  background-color: var(--goal-bar-low-color);
 }
 
 .chart-legend-swatch {
@@ -133,15 +177,48 @@ progressbar.low > trough > progress {
 }
 
 .catchup-row.missed {
-  background-color: #fdf2f2;
-  border-color: #f0d7d9;
+  background-color: var(--catchup-missed-bg-color);
+  border-color: var(--catchup-missed-border-color);
 }
 
 .catchup-row.missed .date {
-  color: #a51d2d;
+  color: var(--catchup-missed-fg-color);
 }
 
 .catchup-goal-list {
   border-radius: 9px;
-  border: 1px solid #f0d7d9;
+  border: 1px solid var(--catchup-missed-border-color);
+}
+
+/* Dark scheme. Blue at small sizes goes muddy on the #1e1e20 ground, so dark runs on amber:
+ * #ffa348 fills with dark ink, #ffbe6f for accent-coloured text. Streak dots move to the dark
+ * Adwaita hues. Only colours change between schemes — layout never does. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --accent-bg-color: #ffa348;
+    --accent-fg-color: #2a1c09;
+    --accent-color: #ffbe6f;
+
+    --streak-blue: #ffa348;
+    --streak-green: #8ff0a4;
+    --streak-yellow: #f9f06b;
+    --streak-red: #e01b24;
+    --streak-purple: #dc8add;
+
+    --today-dot-color: rgba(255, 255, 255, .61);
+    --ended-dot-color: #5c5c63;
+
+    --catchup-banner-bg-color: #332a1c;
+    --catchup-banner-border-color: #5e4a2b;
+    --catchup-banner-title-color: #ffbe6f;
+
+    --checkin-footer-bg-color: #35353a;
+
+    --stat-accent-color: #ffa348;
+    --goal-bar-low-color: #c9822c;
+
+    --catchup-missed-bg-color: #3a2224;
+    --catchup-missed-border-color: #5a2f33;
+    --catchup-missed-fg-color: #ff938a;
+  }
 }

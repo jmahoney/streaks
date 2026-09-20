@@ -1,5 +1,6 @@
 """Tests for the streak history content pane (design-spec §4)."""
 
+from streaks import engine
 from streaks.sidebar_row import StreaksSidebarRow
 from streaks.window import StreaksWindow
 
@@ -100,10 +101,10 @@ def test_75_hard_chart(seeded_state, app, process_events):
     def cell_for(day):
         return cells[(day - week_start).days]
 
-    assert cell_for(date(2026, 9, 10)).border == "#a9c9ef"
-    assert cell_for(date(2026, 9, 8)).fill == "#4b8fdb"
-    assert cell_for(date(2026, 9, 7)).fill == "#1a68c7"
-    assert cell_for(date(2026, 9, 13)).fill == "#4b8fdb"  # today, 3 of 5 = 0.6
+    assert cell_for(date(2026, 9, 10)).border == engine.CHART_UNCONFIRMED_BORDER
+    assert cell_for(date(2026, 9, 8)).fill == engine.CHART_HIGH
+    assert cell_for(date(2026, 9, 7)).fill == engine.CHART_FULL
+    assert cell_for(date(2026, 9, 13)).fill == engine.CHART_HIGH  # today, 3 of 5 = 0.6
 
     assert _legend_entries(view) == ["all five", "some", "unconfirmed", "missed"]
     assert view.catch_up_link.get_visible()
@@ -132,7 +133,7 @@ def test_lifetime_toggle(seeded_state, app, process_events):
     this_week_start = today - timedelta(days=today.weekday())
     grid_start = this_week_start - timedelta(days=7 * 29)
     index = (date(2026, 3, 15) - grid_start).days
-    assert cells[index].fill == "#f3c0c4"
+    assert cells[index].fill == engine.CHART_MISSED
 
     window.destroy()
 

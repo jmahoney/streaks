@@ -1,6 +1,7 @@
 # Streaks — design specification (source of truth for coding agents)
 
-Extracted from `claude-design/streak-tracking-gnome-app/project/Streaks for GNOME.dc.html` (turn 4, options 4a–4f).
+Extracted from `claude-design/streak-tracking-gnome-app/project/Streaks for GNOME.dc.html` (turn 4, options 4a–4f;
+dark colours from turn 5, options 5a–5f).
 Coding agents work from **this file**; open the HTML only if something here is unclear. Every quoted string below is
 exact and must be wrapped in `_()` in code. The fixture date is **Sunday 13 September 2026**.
 
@@ -40,6 +41,44 @@ Chart cell colour scale (from the design's script), by fraction of goals done th
 
 Cells: 13×13, radius `max(2, round(13/4))` = 3, gap 4. Strips (banner, earlier runs, catch-up result): 8×22 gap 3
 (banner), 7×18 gap 2 (earlier runs), 9×20 gap 3 (catch-up result), radius 2.
+
+### Dark scheme (turn 5, "Dark variant — amber accent")
+
+Same six views in Adwaita dark; **only colours change, never layout**. Blue at 13px on a `#1e1e20` ground goes muddy
+and the chart scale collapses, so dark runs on **amber**: `#ffa348` for fills, buttons and the top of the chart scale,
+with dark ink (`#2a1c09`) on the fills rather than white, and `#ffbe6f` for accent-coloured text (flat `accent`
+buttons, banner title, catch-up link). Implemented as an accent override in `data/style.css` under
+`@media (prefers-color-scheme: dark)` (`--accent-bg-color` / `--accent-fg-color` / `--accent-color`), so every
+libadwaita `accent`/`suggested-action`/check/switch picks it up.
+
+| Token | Light | Dark |
+|---|---|---|
+| Streak colours (stored hex stays the light value) | `#3584e4` `#2ec27e` `#e5a50a` `#e01b24` `#9141ac` | `#ffa348` `#8ff0a4` `#f9f06b` `#e01b24` `#dc8add` |
+| Today dot / ended dot | `rgba(0,0,0,.55)` / `#c0bfbc` | `rgba(255,255,255,.61)` / `#5c5c63` |
+| Catch-up banner bg / border / title | `#f4f8fe` / `#bcd4f2` / `#1a5fb4` | `#332a1c` / `#5e4a2b` / `#ffbe6f` |
+| Check-in card footer | `#fcfcfc` | `#35353a` |
+| Stat tile accent number | `#1a68c7` | `#ffa348` |
+| Goal bar "low" fill | `#e5a50a` | `#c9822c` |
+| Catch-up missed row bg / border / date | `#fdf2f2` / `#f0d7d9` / `#a51d2d` | `#3a2224` / `#5a2f33` / `#ff938a` |
+
+Chart cell scale in dark (`streaks.theme.DARK_PALETTE`; ratio thresholds unchanged):
+
+| Status / ratio | Light | Dark |
+|---|---|---|
+| ratio 0 | `#e9e9e7` | `#2c2c30` |
+| < 0.3 | `#cfe2f8` | `#4a3a22` |
+| < 0.6 | `#92bdf0` | `#8a5f22` |
+| < 0.99 | `#4b8fdb` | `#c9822c` |
+| 1.0 | `#1a68c7` | `#ffa348` |
+| unconfirmed | `#ffffff` + `#a9c9ef` border | hollow (transparent) + `#6b5230` border |
+| missed | `#f3c0c4` | `#8e4a50` |
+| upcoming | `#f4f4f2` | `#232326` |
+| empty-state hint cell (§8) | `#cfe2f8` | `#7a4d18` |
+
+The engine never sees hex: it emits the tokens `engine.CHART_*` (plus `theme.CHART_EMPTY_HINT`) and
+`streaks.theme.resolve()` picks the palette for the active scheme when a grid widget or legend swatch paints. Grid
+widgets and the streak view repaint on `Adw.StyleManager:dark` (`theme.watch()`), so a live scheme switch needs no
+data reload. Dialog backgrounds and everything else not listed here are libadwaita's own dark colours.
 
 ---
 
@@ -277,7 +316,7 @@ for Today).
 
 Sidebar: caption "No streaks yet" (see §2). Content: centred vertical box (gap 16, horizontal padding 80):
 - `EmptyGridWidget`: 7 columns × 4 rows of 14×14 cells, radius 4, gap 5, all `#e9e9e7` except the last (bottom-right)
-  `#cfe2f8`.
+  `#cfe2f8` (`#2c2c30` / `#7a4d18` in dark).
 - Title bold 19 "No streaks yet" (margin-top 8) → `title-2`.
 - Body 13.5/1.6 at 55 %, max width 420, centred: "Pick something you want to do regularly, choose how often, and add as
   many goals as that thing needs."
@@ -288,16 +327,20 @@ Header shows "Today" only, with the primary menu button.
 ## 9. Custom CSS allowed (`data/style.css`)
 
 Only these classes; everything else must be a libadwaita style class:
-`colour-dot` (8×8 circle, colour from inline provider per streak), `today-dot` (square), `badge` (pill count),
-`catchup-banner`, `catchup-row.missed`, `catchup-goal-list`, `colour-swatch` (+ `:checked` ring), `stat-accent`
-(`#1a68c7` number), `strike` (strike-through label), `goal-bar.low` (amber), `chart-legend-swatch`,
-`sidebar-footer`. Cards use `card`; section headings use `caption-heading dim-label`.
+`colour-dot` (8×8 circle), `today-dot` (square) / `ended-dot`, `streak-blue|green|yellow|red|purple` (a streak's
+colour on dots and swatches — `theme.colour_class(stored_hex)`; never an inline provider, so the dark hues apply),
+`badge` (pill count), `catchup-banner`, `catchup-row.missed`, `catchup-goal-list`, `colour-swatch` (+ `:checked`
+ring), `stat-accent` (`#1a68c7` number), `strike` (strike-through label), `goal-bar.low` (amber),
+`chart-legend-swatch`, `sidebar-footer`. Cards use `card`; section headings use `caption-heading dim-label`.
+Every colour in the stylesheet is a `:root` CSS variable with its dark value in the
+`@media (prefers-color-scheme: dark)` block at the end — add new colours the same way.
 
 ## 10. Custom widgets (`src/streaks/widgets/`)
 
 All three subclass `Gtk.Widget`, take a list of cell specs (`fill`, `border`, `tooltip`) and draw with `do_snapshot`
 (`Gsk.RoundedRect` + `Gtk.Snapshot.append_color`/`append_border`), implementing `do_measure` from cell size/gap and
-`query-tooltip` for per-cell tooltips. Colours are passed in as hex strings from the engine so the widget has no logic.
+`query-tooltip` for per-cell tooltips. Colours arrive as `engine.CHART_*` tokens (or plain hex) and are resolved for
+the active scheme through `streaks.theme.resolve()` at paint time; the widget has no other logic.
 - `HeatmapWidget` — 7 rows × N columns (column-major weeks), cell 13, gap 4, radius 3.
 - `StripWidget` — 1 row, configurable `cell_width`, `cell_height`, `gap`, radius 2.
 - `EmptyGridWidget` — 7 × 4 fixed grid, cell 14, gap 5, radius 4.

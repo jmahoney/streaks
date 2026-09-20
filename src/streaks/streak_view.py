@@ -16,7 +16,7 @@ gi.require_version("Adw", "1")
 
 from gi.repository import Adw, GObject, Gtk
 
-from streaks import engine
+from streaks import engine, theme
 from streaks.engine import StreakData
 from streaks.goal_bar_row import StreaksGoalBarRow  # noqa: F401  registers $StreaksGoalBarRow
 from streaks.run_row import StreaksRunRow  # noqa: F401  registers $StreaksRunRow
@@ -63,7 +63,10 @@ class StreaksStreakView(Adw.Bin):
         self.state: AppState | None = None
         self._streak: StreakData | None = None
         self._run_index: int | None = None
+        self._legend: list[tuple[str, str | None, str]] = []
 
+        # The legend swatches carry resolved colours, so repaint them when the scheme flips.
+        theme.watch(self, lambda: self._rebuild_legend(self._legend))
         self.range_toggle.connect("notify::active-name", self._on_range_changed)
         self.runs_list.connect("row-activated", self._on_run_activated)
         self.catch_up_link.connect("clicked", self._on_catch_up_clicked)
@@ -135,6 +138,7 @@ class StreaksStreakView(Adw.Bin):
         self._rebuild_earlier_runs(hist.earlier_runs)
 
     def _rebuild_legend(self, legend: list[tuple[str, str | None, str]]) -> None:
+        self._legend = legend
         self._clear_box(self.legend_entries_box)
         for fill, border, label in legend:
             entry = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
@@ -145,8 +149,12 @@ class StreaksStreakView(Adw.Bin):
             swatch.set_valign(Gtk.Align.CENTER)
             swatch.add_css_class("chart-legend-swatch")
             provider = Gtk.CssProvider()
-            border_css = f"border: 1px solid {border};" if border else "border: none;"
-            provider.load_from_string(f"* {{ background-color: {fill}; {border_css} }}")
+            border_css = (
+                f"border: 1px solid {theme.resolve(border)};" if border else "border: none;"
+            )
+            provider.load_from_string(
+                f"* {{ background-color: {theme.resolve(fill)}; {border_css} }}"
+            )
             swatch.get_style_context().add_provider(
                 provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
             )

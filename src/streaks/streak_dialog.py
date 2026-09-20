@@ -18,6 +18,7 @@ gi.require_version("Adw", "1")
 
 from gi.repository import Adw, Gdk, GObject, Gtk
 
+from streaks import theme
 from streaks.engine import PeriodKind, StreakData
 from streaks.goal_edit_row import StreaksGoalEditRow  # noqa: F401  registers $StreaksGoalEditRow
 from streaks.models import COLOURS, Streak, create_streak, update_streak
@@ -93,11 +94,7 @@ class StreaksStreakDialog(Adw.Dialog):
         )
 
         for colour, swatch in zip(COLOURS, self._swatches, strict=True):
-            provider = Gtk.CssProvider()
-            provider.load_from_string(f"* {{ background-color: {colour}; color: {colour}; }}")
-            swatch.get_style_context().add_provider(
-                provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
-            )
+            swatch.add_css_class(theme.colour_class(colour))
 
         for i, button in enumerate(self._weekday_buttons):
             button.set_active(i < 5)  # Mon-Fri default, kept across period-kind switches.

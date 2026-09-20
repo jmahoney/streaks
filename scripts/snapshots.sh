@@ -30,6 +30,7 @@ case "$action" in
       exit 1
     fi
     "${runner[@]}" timeout "${PYTEST_TIMEOUT:-600}" python3 scripts/render_screens.py --out tests/snapshots
+    "${runner[@]}" timeout "${PYTEST_TIMEOUT:-600}" python3 scripts/render_screens.py --dark --out tests/snapshots/dark
     ;;
   check)
     "${runner[@]}" timeout "${PYTEST_TIMEOUT:-600}" python3 -m pytest -q tests/gui/test_snapshots.py

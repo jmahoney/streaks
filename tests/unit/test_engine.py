@@ -19,12 +19,12 @@ from streaks import clock, words
 from streaks.engine import (
     CHART_FULL,
     CHART_HIGH,
+    CHART_HOLLOW,
     CHART_LOW,
     CHART_MID,
     CHART_MISSED,
     CHART_UNCONFIRMED_BORDER,
     CHART_UPCOMING,
-    CHART_WHITE,
     CHART_ZERO,
     Answer,
     AnswerData,
@@ -412,13 +412,13 @@ def test_cell_for_result_fill_by_ratio(status, done, total, expected_fill):
 def test_cell_for_result_unconfirmed_and_open_zero():
     unconfirmed = PeriodResult(Period(date(2026, 1, 1), date(2026, 1, 1)), Status.UNCONFIRMED, 0, 5)
     cell = _cell_for_result(unconfirmed)
-    assert cell.fill == CHART_WHITE
+    assert cell.fill == CHART_HOLLOW
     assert cell.border == CHART_UNCONFIRMED_BORDER
     assert "unconfirmed" in cell.tooltip
 
     open_zero = PeriodResult(Period(date(2026, 1, 1), date(2026, 1, 1)), Status.OPEN, 0, 5)
     cell = _cell_for_result(open_zero)
-    assert cell.fill == CHART_WHITE
+    assert cell.fill == CHART_HOLLOW
     assert cell.border == CHART_UNCONFIRMED_BORDER
 
 

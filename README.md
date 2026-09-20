@@ -14,6 +14,7 @@ Everything stays on the machine — there is no account, no network access, and 
 | ![Today](docs/screenshots/today.png) Today — check-in cards, quiet-days banner | ![Sidebar](docs/screenshots/sidebar.png) Sidebar — running/ended streaks |
 | ![Streak history](docs/screenshots/streak.png) Streak history — stats, heatmap, per-goal bars | ![New streak](docs/screenshots/new-streak.png) New/Edit streak dialog |
 | ![Catch up](docs/screenshots/catch-up.png) Catch-up dialog | ![Preferences](docs/screenshots/preferences.png) Preferences |
+| ![Today, dark](docs/screenshots/dark/today.png) Dark scheme — amber accent | ![Streak history, dark](docs/screenshots/dark/streak.png) Dark scheme — amber chart scale |
 
 More: [`docs/screenshots/`](docs/screenshots/) (copied from the approved golden snapshots in
 `tests/snapshots/` — see `scripts/snapshots.sh`).
@@ -65,10 +66,11 @@ deliberately want to watch them run on your own display.
 Other scripts:
 
 - `scripts/screenshot.sh [screen]` — render one (or all) screens to `_build/screenshots/`
-  (gitignored) for a quick look, headless by default.
-- `scripts/snapshots.sh check` — compare the current UI against `tests/snapshots/*.png`.
-- `scripts/snapshots.sh update` — re-render and overwrite the goldens (only after a deliberate,
-  reviewed visual change).
+  (gitignored) for a quick look, headless by default; add `--dark` for the dark scheme.
+- `scripts/snapshots.sh check` — compare the current UI against `tests/snapshots/*.png` (light)
+  and `tests/snapshots/dark/*.png`.
+- `scripts/snapshots.sh update` — re-render and overwrite the goldens, both schemes (only after a
+  deliberate, reviewed visual change).
 - `scripts/add_ui.py <name>` — scaffold a new `.blp`/`.py` component pair and wire it into
   `meson.build`, `streaks.gresource.xml` and `po/POTFILES`.
 
@@ -120,10 +122,9 @@ can't accidentally connect to a real desktop's compositor, and the app quits its
 - **Narrow-window layout.** The design (and this implementation) only covers the desktop-width
   layout in `docs/design-spec.md`; there's no adaptive/narrow breakpoint for the sidebar or the
   Today two-column card grid.
-- **Dark variant.** The design spec only specifies the light theme's colours; libadwaita's
-  automatic dark-mode palette applies, but the design was never separately reviewed against it
-  (custom colours in `data/style.css` and the chart's hex fills are the light-theme values from
-  the spec).
+- **Dark variant** follows the design's turn 5 (amber accent, amber chart scale, dark streak
+  hues) via `@media (prefers-color-scheme: dark)` in `data/style.css` and `streaks.theme`; it
+  follows the system setting, and there is no in-app light/dark toggle.
 
 ## License
 
