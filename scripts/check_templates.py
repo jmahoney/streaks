@@ -1,9 +1,17 @@
 #!/usr/bin/env python3
-"""Check template consistency between .blp and .py files."""
+"""Check template consistency between .blp and .py files, and a basic i18n-completeness pass.
+
+The i18n checks (Phase 8 deliverable 4) are deliberately conservative: a bare literal is only
+flagged when it contains a letter, so punctuation/placeholder-only strings (``":"``, ``""``,
+``"04:00"``) that aren't meaningfully translatable don't need an explicit exemption list.
+"""
 
 import re
 import sys
 from pathlib import Path
+
+_TRANSLATABLE_PROPS = ("label", "title", "subtitle", "tooltip-text", "placeholder-text")
+_HAS_LETTER = re.compile(r"[A-Za-z]")
 
 repo_root = Path(__file__).parent.parent
 src_dir = repo_root / "src" / "streaks"
@@ -132,6 +140,59 @@ for py_file in src_dir.glob("*.py"):
     expected = f"'streaks/{py_name}'"
     if expected not in meson_content:
         errors.append(f"FAIL templates: {meson_build}: missing streaks/{py_name}")
+
+# Check .blp files: every `label:`/`title:`/`subtitle:`/`tooltip-text:`/`placeholder-text:` with
+# a bare (non-`_(...)`) string literal must not contain a letter — i.e. real translatable text
+# must go through `_()` (Phase 8 deliverable 4).
+_blp_prop_pattern = re.compile(
+    r"\b(?:" + "|".join(re.escape(p) for p in _TRANSLATABLE_PROPS) + r")\s*:\s*"
+    r'(?P<value>_\(\s*"(?:[^"\\]|\\.)*"\s*\)|"(?:[^"\\]|\\.)*")'
+)
+
+for blp_file in src_dir.glob("**/*.blp"):
+    with open(blp_file) as f:
+        content = f.read()
+    for match in _blp_prop_pattern.finditer(content):
+        value = match.group("value")
+        if value.startswith("_("):
+            continue  # already translatable
+        literal = value[1:-1]  # strip the surrounding quotes
+        if _HAS_LETTER.search(literal):
+            line_no = content.count("\n", 0, match.start()) + 1
+            errors.append(
+                f"FAIL i18n: {blp_file}:{line_no}: untranslated literal {value} (wrap it in _(...))"
+            )
+
+# Check .py files: a widget built with a translatable-looking keyword (`label=`/`title=`/etc.)
+# must not be given a bare string literal containing a letter — it must be `_(...)`/`ngettext(...)`
+# instead (Phase 8 deliverable 4). Dynamic values (`label=goal.name`, `label=some_var`) have no
+# quote right after `=` and are never matched.
+_py_kwarg_pattern = re.compile(
+    r"\b(?:" + "|".join(p.replace("-", "_") for p in _TRANSLATABLE_PROPS) + r")\s*=\s*"
+    r'(?P<value>f?\'(?:[^\'\\]|\\.)*\'|f?"(?:[^"\\]|\\.)*")'
+)
+
+for py_file in src_dir.glob("**/*.py"):
+    if "__pycache__" in str(py_file):
+        continue
+    with open(py_file) as f:
+        content = f.read()
+    for match in _py_kwarg_pattern.finditer(content):
+        value = match.group("value")
+        # A preceding `_(`/`ngettext(` (any whitespace in between) means this literal is one of
+        # gettext's own arguments, not a bare, untranslated widget keyword value.
+        before = content[: match.start()]
+        if re.search(r"(?:_|ngettext)\(\s*$", before):
+            continue
+        literal = value[1:-1] if not value.startswith("f") else value[2:-1]
+        if "{" in literal:
+            continue  # f-string with interpolation: not a plain literal
+        if _HAS_LETTER.search(literal):
+            line_no = content.count("\n", 0, match.start()) + 1
+            errors.append(
+                f"FAIL i18n: {py_file}:{line_no}: untranslated literal {value} "
+                f"(wrap it in _(...)/ngettext(...))"
+            )
 
 # Print errors
 if errors:

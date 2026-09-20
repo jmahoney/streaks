@@ -25,6 +25,13 @@ install_data(
   install_dir: get_option('datadir') / 'glib-2.0' / 'schemas'
 )
 
+# The desktop file is `DBusActivatable=true`; without this service file, `flatpak build-finish`
+# refuses to export the app (see `docs/phases/08-polish-packaging.md`, deliverable 7).
+install_data(
+  'com.cheerschopper.Streaks.service',
+  install_dir: get_option('datadir') / 'dbus-1' / 'services'
+)
+
 gnome.compile_schemas(
   build_by_default: true,
   depend_files: 'com.cheerschopper.Streaks.gschema.xml'

@@ -1030,8 +1030,12 @@ def history(
 
     legend = _legend(n_goals)
 
+    # An ended streak has no open run to catch up on (`engine.catch_up()` needs `current_run()`,
+    # which is always `None` once a streak has ended) — never offer the link for one, even if its
+    # last (now-closed) run happens to still have unconfirmed periods in it (Phase 8 deliverable
+    # 5: an ended streak's history is read-only).
     catch_up_link = None
-    if selected is not None and selected.unconfirmed > 0:
+    if not is_ended and selected is not None and selected.unconfirmed > 0:
         catch_up_link = ngettext(
             "%(n)d day unconfirmed — catch up",
             "%(n)d days unconfirmed — catch up",
@@ -1056,7 +1060,7 @@ def history(
         chart_title=chart_title,
         is_best=is_best,
         weeks=weeks,
-        day_labels=["M", "", "W", "", "F", "", ""],
+        day_labels=[_("M"), "", _("W"), "", _("F"), "", ""],
         legend=legend,
         catch_up_link=catch_up_link,
         goal_bars=goal_bars,

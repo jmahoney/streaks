@@ -16,7 +16,7 @@ import gi
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 
-from gi.repository import Adw, Gtk
+from gi.repository import Adw, Gdk, GObject, Gtk
 
 from streaks.engine import PeriodKind, StreakData
 from streaks.goal_edit_row import StreaksGoalEditRow  # noqa: F401  registers $StreaksGoalEditRow
@@ -103,6 +103,13 @@ class StreaksStreakDialog(Adw.Dialog):
             button.set_active(i < 5)  # Mon-Fri default, kept across period-kind switches.
 
         self.reminder_popover.set_parent(self.reminder_row)
+
+        # Goal drag-reorder (design-spec §6/Phase 8 deliverable 1): one `Gtk.DropTarget` on the
+        # whole list (rather than one per row) is enough, since dropping anywhere in the list
+        # only ever needs to know which row is being dragged and which row it landed on.
+        self._drop_target = Gtk.DropTarget.new(GObject.TYPE_PYOBJECT, Gdk.DragAction.MOVE)
+        self._drop_target.connect("drop", self._on_goal_row_dropped)
+        self.goals_list.add_controller(self._drop_target)
 
         self.name_row.connect("notify::text", self._on_field_changed)
         self.period_toggle.connect("notify::active-name", self._on_period_changed)
@@ -232,10 +239,69 @@ class StreaksStreakDialog(Adw.Dialog):
         row.entry.connect("changed", self._on_field_changed)
         row.entry.connect("activate", self._on_goal_entry_activate, row)
         row.remove_button.connect("clicked", self._on_remove_goal_clicked, row)
+        row.connect("move-requested", self._on_goal_row_move_requested)
+        self._setup_goal_drag_source(row)
         self._goal_rows.append(row)
         self.goals_list.insert(row, len(self._goal_rows) - 1)
         self._update_goals()
         return row
+
+    # -- goal reordering (drag-and-drop + keyboard fallback) -----------------------------
+
+    def _setup_goal_drag_source(self, row: StreaksGoalEditRow) -> None:
+        drag_source = Gtk.DragSource()
+        drag_source.set_actions(Gdk.DragAction.MOVE)
+        drag_source.connect("prepare", self._on_goal_drag_prepare, row)
+        row.handle.add_controller(drag_source)
+
+    def _on_goal_drag_prepare(
+        self, _source: Gtk.DragSource, _x: float, _y: float, row: StreaksGoalEditRow
+    ) -> Gdk.ContentProvider:
+        value = GObject.Value()
+        value.init(GObject.TYPE_PYOBJECT)
+        value.set_boxed(row)
+        return Gdk.ContentProvider.new_for_value(value)
+
+    def _on_goal_row_dropped(
+        self, _target: Gtk.DropTarget, source_row: StreaksGoalEditRow, _x: float, y: float
+    ) -> bool:
+        target_row = self.goals_list.get_row_at_y(int(y))
+        if target_row is None or target_row is self.add_goal_row:
+            target_index = len(self._goal_rows) - 1
+        elif target_row not in self._goal_rows:
+            return False
+        else:
+            target_index = self._goal_rows.index(target_row)
+        return self._reorder_goal_row(source_row, target_index)
+
+    def _on_goal_row_move_requested(self, row: StreaksGoalEditRow, direction: int) -> None:
+        if row not in self._goal_rows:
+            return
+        target_index = self._goal_rows.index(row) + direction
+        if self._reorder_goal_row(row, target_index):
+            row.entry.grab_focus()
+
+    def _reorder_goal_row(self, source_row: StreaksGoalEditRow, target_index: int) -> bool:
+        """Move ``source_row`` to ``target_index`` in both the model list and ``goals_list``.
+
+        This is the single place goal order actually changes — both the real drag-and-drop
+        ``drop`` handler and the keyboard fallback (``row.move-up``/``row.move-down``) funnel
+        through it, and tests call it directly with a row and an index rather than driving actual
+        GTK drag/keyboard input. Returns ``False`` (no-op) if ``source_row`` isn't one of this
+        dialog's goal rows or ``target_index`` is already where it is/out of range.
+        """
+        if source_row not in self._goal_rows:
+            return False
+        target_index = max(0, min(target_index, len(self._goal_rows) - 1))
+        current_index = self._goal_rows.index(source_row)
+        if current_index == target_index:
+            return False
+        self._goal_rows.pop(current_index)
+        self._goal_rows.insert(target_index, source_row)
+        self.goals_list.remove(source_row)
+        self.goals_list.insert(source_row, target_index)
+        self._update_save_sensitive()
+        return True
 
     def _on_add_goal_activated(self, *_args) -> None:
         row = self._add_goal_row_widget()

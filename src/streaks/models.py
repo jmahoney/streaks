@@ -21,6 +21,7 @@ from peewee import (
     ForeignKeyField,
     IntegerField,
     Model,
+    PeeweeException,
     SqliteDatabase,
     TextField,
     TimeField,
@@ -48,6 +49,7 @@ __all__ = [
     "DayAnswer",
     "database_path",
     "init_db",
+    "DatabaseInitError",
     "create_streak",
     "update_streak",
     "toggle_goal_check",
@@ -113,24 +115,58 @@ class DayAnswer(BaseModel):
 MODELS = (Streak, Goal, GoalCheck, DayAnswer)
 
 
-def database_path() -> str:
-    """Resolve the sandboxed on-disk database path, creating its directory."""
+class DatabaseInitError(RuntimeError):
+    """Raised by ``init_db()`` when the on-disk database can't be created or opened.
+
+    Carries the path that was attempted (even if resolving/creating the data directory itself is
+    what failed) so the caller (``main.py``) can show it to the user before quitting, instead of
+    letting a raw traceback reach them.
+    """
+
+    def __init__(self, path: str, reason: str):
+        super().__init__(f"can't open the database at {path}: {reason}")
+        self.path = path
+        self.reason = reason
+
+
+def _default_data_dir() -> str:
     data_dir = os.environ.get("STREAKS_DATA_DIR")
     if not data_dir:
         data_dir = os.path.join(GLib.get_user_data_dir(), "streaks")
-    os.makedirs(data_dir, exist_ok=True)
+    return data_dir
+
+
+def database_path() -> str:
+    """Resolve the sandboxed on-disk database path, creating its directory.
+
+    Raises ``DatabaseInitError`` if the data directory can't be created (e.g. a file already
+    sits where the directory should be).
+    """
+    data_dir = _default_data_dir()
+    try:
+        os.makedirs(data_dir, exist_ok=True)
+    except OSError as exc:
+        raise DatabaseInitError(data_dir, str(exc)) from exc
     return os.path.join(data_dir, "streaks.db")
 
 
 def init_db(path: str | None = None) -> SqliteDatabase:
-    """Initialise the module-level production database and create tables if needed."""
+    """Initialise the module-level production database and create tables if needed.
+
+    Raises ``DatabaseInitError`` (never a raw ``OSError``/``peewee`` exception) if the path can't
+    be resolved, opened, or written to — e.g. a corrupt file or one sitting where the data
+    directory should be.
+    """
     if path is None:
         path = database_path()
-    db.init(path, pragmas={"foreign_keys": 1, "journal_mode": "wal"})
-    db.connect(reuse_if_open=True)
-    db.create_tables(MODELS)
-    if db.pragma("user_version") == 0:
-        db.pragma("user_version", 1)
+    try:
+        db.init(path, pragmas={"foreign_keys": 1, "journal_mode": "wal"})
+        db.connect(reuse_if_open=True)
+        db.create_tables(MODELS)
+        if db.pragma("user_version") == 0:
+            db.pragma("user_version", 1)
+    except (OSError, PeeweeException) as exc:
+        raise DatabaseInitError(path, str(exc)) from exc
     return db
 
 

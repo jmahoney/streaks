@@ -60,6 +60,7 @@ class StreaksWindow(Adw.ApplicationWindow):
 
         self._today_view: engine.TodayView | None = None
         self._current_streak_id = 0
+        self._current_streak_ended = False
         self.end_streak_dialog: Adw.AlertDialog | None = None
         self.delete_streak_dialog: Adw.AlertDialog | None = None
         self.catchup_dialog: StreaksCatchupDialog | None = None
@@ -235,20 +236,30 @@ class StreaksWindow(Adw.ApplicationWindow):
     # -- header ---------------------------------------------------------------------
 
     def _set_header_for_page(self, page: str) -> None:
-        """Show only the end-of-header controls that belong to ``page`` (design-spec §1)."""
+        """Show only the end-of-header controls that belong to ``page`` (design-spec §1).
+
+        An ended streak's page is read-only (design-spec §4/Phase 8 deliverable 5): no "Check
+        in" button, and the ⋯ menu offers only Delete… (see ``_build_more_menu``).
+        """
         is_streak = page == "streak"
+        is_ended = is_streak and self._current_streak_ended
         self.search_button.set_visible(page == "today")
         self.menu_button.set_visible(not is_streak)
-        self.checkin_button.set_visible(is_streak)
+        self.checkin_button.set_visible(is_streak and not is_ended)
         self.more_button.set_visible(is_streak)
 
-    def _build_more_menu(self, streak_id: int) -> Gio.Menu:
+    def _build_more_menu(self, streak_id: int, ended: bool) -> Gio.Menu:
         menu = Gio.Menu()
-        for label, action_name in (
-            (_("Edit…"), "win.edit-streak"),
-            (_("End streak"), "win.end-streak"),
-            (_("Delete…"), "win.delete-streak"),
-        ):
+        items = (
+            [(_("Delete…"), "win.delete-streak")]
+            if ended
+            else [
+                (_("Edit…"), "win.edit-streak"),
+                (_("End streak"), "win.end-streak"),
+                (_("Delete…"), "win.delete-streak"),
+            ]
+        )
+        for label, action_name in items:
             item = Gio.MenuItem.new(label, None)
             item.set_action_and_target_value(action_name, GLib.Variant("i", streak_id))
             menu.append_item(item)
@@ -372,8 +383,11 @@ class StreaksWindow(Adw.ApplicationWindow):
         settings = self.state.settings.to_engine()
         hist = engine.history(streak, self.state.today(), settings)
         self._current_streak_id = streak_id
+        self._current_streak_ended = streak.ended_on is not None
         self._set_header_for_page("streak")
-        self.more_button.set_menu_model(self._build_more_menu(streak_id))
+        self.more_button.set_menu_model(
+            self._build_more_menu(streak_id, self._current_streak_ended)
+        )
         self.content_title.set_title(streak.name)
         self.content_title.set_subtitle(hist.header_subtitle)
         self.streak_view.configure(streak)

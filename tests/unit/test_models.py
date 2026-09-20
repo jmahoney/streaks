@@ -14,6 +14,7 @@ from peewee import IntegrityError
 from streaks.engine import Answer, PeriodKind
 from streaks.models import (
     COLOURS,
+    DatabaseInitError,
     DayAnswer,
     Goal,
     GoalCheck,
@@ -24,6 +25,7 @@ from streaks.models import (
     delete_all,
     delete_streak,
     end_streak,
+    init_db,
     load_all,
     load_streak_data,
     reorder_streaks,
@@ -289,3 +291,80 @@ def test_reminder_time_round_trips():
         reminder_time=time(20, 0),
     )
     assert Streak.get_by_id(streak.id).reminder_time == time(20, 0)
+
+
+def test_reminder_time_round_trips_through_update_streak():
+    """Phase 8 deliverable 3: editing a streak (not just creating one) round-trips
+    ``reminder_time`` too — nothing schedules a notification from it yet (see README's "Not yet
+    implemented"), but the value itself must survive an edit."""
+    streak = create_streak("A", COLOURS[0], PeriodKind.DAILY, ["g1"], created_on=date(2026, 1, 1))
+    goal = Goal.get(Goal.streak == streak)
+
+    update_streak(
+        streak,
+        name="A",
+        colour=COLOURS[0],
+        period_kind=PeriodKind.DAILY,
+        weekdays_mask=0b0011111,
+        times_per_week=3,
+        reminder_time=time(7, 30),
+        allow_skip=False,
+        goals=[(goal.id, "g1")],
+        today=date(2026, 1, 2),
+    )
+    assert Streak.get_by_id(streak.id).reminder_time == time(7, 30)
+
+    # Turning it back off round-trips to `None` too.
+    update_streak(
+        streak,
+        name="A",
+        colour=COLOURS[0],
+        period_kind=PeriodKind.DAILY,
+        weekdays_mask=0b0011111,
+        times_per_week=3,
+        reminder_time=None,
+        allow_skip=False,
+        goals=[(goal.id, "g1")],
+        today=date(2026, 1, 2),
+    )
+    assert Streak.get_by_id(streak.id).reminder_time is None
+
+
+def test_init_db_raises_database_init_error_for_unwritable_data_dir(tmp_path, monkeypatch):
+    """Phase 8 deliverable 6: a path where ``STREAKS_DATA_DIR`` should be a directory but is
+    actually a file raises ``DatabaseInitError`` (with the attempted path and a reason), never a
+    raw ``OSError``/traceback — ``main.py`` shows this in an ``Adw.AlertDialog`` and quits."""
+    blocked = tmp_path / "not-a-directory"
+    blocked.write_text("this is a file, not a directory")
+    monkeypatch.setenv("STREAKS_DATA_DIR", str(blocked))
+
+    with pytest.raises(DatabaseInitError) as exc_info:
+        init_db()
+
+    assert exc_info.value.path == str(blocked)
+    assert exc_info.value.reason
+
+
+def test_init_db_raises_database_init_error_for_corrupt_database_file(tmp_path):
+    """A path that exists but isn't a valid SQLite database also raises ``DatabaseInitError``
+    rather than letting Peewee's raw exception (or a traceback) reach the caller."""
+    from streaks.models import MODELS, db
+
+    corrupt = tmp_path / "corrupt.db"
+    corrupt.write_bytes(b"not a sqlite database" * 10)
+
+    try:
+        with pytest.raises(DatabaseInitError) as exc_info:
+            init_db(str(corrupt))
+
+        assert exc_info.value.path == str(corrupt)
+        assert exc_info.value.reason
+    finally:
+        # `init_db()` rebinds the module-level `db` to `corrupt` before it fails on
+        # `create_tables()` — restore the in-memory database the autouse `in_memory_db` fixture
+        # set up, so this test doesn't leak a broken connection into whichever test runs next.
+        if not db.is_closed():
+            db.close()
+        db.init(":memory:", pragmas={"foreign_keys": 1})
+        db.connect()
+        db.create_tables(MODELS)

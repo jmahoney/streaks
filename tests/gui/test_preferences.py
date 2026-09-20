@@ -4,7 +4,9 @@
 from __future__ import annotations
 
 import json
+import re
 from datetime import date
+from pathlib import Path
 
 import gi
 
@@ -429,6 +431,46 @@ def test_window_state_saved_and_restored(seeded_state, app, process_events):
 
 
 # -- keyboard shortcuts window ---------------------------------------------------------------------
+
+# Every shortcut `shortcuts.blp` lists, mapped to the action `main.py`/`window.py` registers it
+# to with `set_accels_for_action` (Phase 8 deliverable 2). Titles are the exact strings from
+# `Gtk.ShortcutsShortcut.title` in `src/streaks/ui/shortcuts.blp`.
+_SHORTCUT_TITLE_TO_ACTION = {
+    "New streak": "win.new-streak",
+    "Preferences": "app.preferences",
+    "Search": "win.toggle-search",
+    "Quit": "app.quit",
+    "Keyboard shortcuts": "win.show-help-overlay",
+}
+
+
+def _shortcuts_blp_accelerators() -> dict[str, str]:
+    """Parse (title -> accelerator) straight out of the ``.blp`` source, so this test breaks the
+    moment the two drift apart, whichever side changes."""
+    blp_path = Path(__file__).resolve().parents[2] / "src" / "streaks" / "ui" / "shortcuts.blp"
+    content = blp_path.read_text()
+    pairs = re.findall(
+        r'Gtk\.ShortcutsShortcut\s*\{\s*title:\s*_\("([^"]+)"\);\s*accelerator:\s*"([^"]+)";',
+        content,
+    )
+    assert pairs, "no Gtk.ShortcutsShortcut entries found in shortcuts.blp"
+    return dict(pairs)
+
+
+def test_shortcuts_blp_accelerators_match_registered_actions(app):
+    """Every accelerator `shortcuts.blp` displays must be the one actually wired up via
+    `app.set_accels_for_action`/`win.set_accels_for_action` — a shortcuts window that lies about
+    what a key combo does is worse than no shortcuts window at all."""
+    blp_accelerators = _shortcuts_blp_accelerators()
+    assert set(blp_accelerators) == set(_SHORTCUT_TITLE_TO_ACTION)
+
+    for title, accelerator in blp_accelerators.items():
+        action_name = _SHORTCUT_TITLE_TO_ACTION[title]
+        registered = app.get_accels_for_action(action_name)
+        assert registered == [accelerator], (
+            f"{title!r} ({action_name}): shortcuts.blp says {accelerator!r}, "
+            f"but the app has {registered!r} registered"
+        )
 
 
 def test_show_help_overlay_action_is_wired_and_lists_new_streak(seeded_state, app, process_events):

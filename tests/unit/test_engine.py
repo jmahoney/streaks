@@ -745,6 +745,24 @@ def test_fixture_today_view(seeded, today, settings):
         "No snoozing the alarm",
         "Clip fingernails",
     ]
+    # Phase 8 deliverable 5: Today never shows a card for an ended streak — "Couch to 5K" (ended
+    # 4 Mar) has no card above, confirmed explicitly here too.
+    assert "Couch to 5K" not in [c.name for c in tv.cards]
+
+
+def test_ended_streak_has_no_catch_up_link_even_with_unconfirmed_periods(today, settings):
+    """Phase 8 deliverable 5: an ended streak's history never offers a catch-up link, even if its
+    last (closed) run happens to still contain unconfirmed periods — there's no open run left to
+    catch up on (``engine.catch_up()`` needs ``current_run()``, which is always ``None`` once a
+    streak has ended)."""
+    streak = _mk(
+        date(2026, 1, 1),
+        day_checks={date(2026, 1, 1): {0, 1}},
+        # 2-3 Jan: never checked, never answered -> unconfirmed periods inside the run.
+        ended_on=date(2026, 1, 4),
+    )
+    h = history(streak, today, settings)
+    assert h.catch_up_link is None
 
 
 def test_kept_answer_counts_as_all_goals_done(seeded, today, settings):
