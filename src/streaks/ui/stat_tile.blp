@@ -2,24 +2,30 @@ using Gtk 4.0;
 
 template $StreaksStatTile : Gtk.Box {
   orientation: vertical;
-  margin-start: 16;
-  margin-end: 16;
-  margin-top: 13;
-  margin-bottom: 13;
 
   styles ["card"]
 
-  Gtk.Label value_label {
-    halign: start;
-    xalign: 0;
+  // Padding lives on the inner box: margins on the template itself would sit
+  // outside the card and leave the labels flush with its edge.
+  Gtk.Box {
+    orientation: vertical;
+    margin-start: 16;
+    margin-end: 16;
+    margin-top: 13;
+    margin-bottom: 13;
 
-    styles ["title-1"]
-  }
+    Gtk.Label value_label {
+      halign: start;
+      xalign: 0;
 
-  Gtk.Label caption_label {
-    halign: start;
-    xalign: 0;
+      styles ["title-1"]
+    }
 
-    styles ["caption", "dim-label"]
+    Gtk.Label caption_label {
+      halign: start;
+      xalign: 0;
+
+      styles ["caption", "dim-label"]
+    }
   }
 }
