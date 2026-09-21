@@ -714,8 +714,8 @@ def test_fixture_couch_to_5k(seeded, today, settings):
 
 
 def test_fixture_couch_to_5k_history_ended_streak(seeded, today, settings):
-    """For an ended streak, the first stat tile reports the best run (not "still running"), and
-    the header subtitle says when it ended rather than which run is showing."""
+    """For an ended streak the first tile reports the best run and the header subtitle says when
+    it ended."""
     streak = _streaks()["Couch to 5K"]
     h = history(streak, today, settings)
     assert h.tiles == [
@@ -747,9 +747,7 @@ def test_fixture_today_view(seeded, today, settings):
 
 def test_ended_streak_has_no_catch_up_link_even_with_unconfirmed_periods(today, settings):
     """An ended streak's history never offers a catch-up link, even if its last (closed) run
-    happens to still contain unconfirmed periods — there's no open run left to catch up on
-    (``engine.catch_up()`` needs ``current_run()``, which is always ``None`` once a streak has
-    ended)."""
+    happens to still contain unconfirmed periods — there's no open run left to catch up on."""
     streak = _mk(
         date(2026, 1, 1),
         day_checks={date(2026, 1, 1): {0, 1}},

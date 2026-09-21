@@ -66,7 +66,7 @@ def test_seed_answer_counts(seeded):
         assert DayAnswer.select().where(DayAnswer.streak == streak).count() == 0
 
 
-def test_seed_streak_attributes_match_the_brief(seeded):
+def test_seed_streak_attributes(seeded):
     from streaks.engine import PeriodKind
 
     expected = {

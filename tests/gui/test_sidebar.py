@@ -112,9 +112,7 @@ def test_selection_survives_state_changed(seeded_state, seeded_window, process_e
 
 
 def test_selection_restored_from_gsettings(seeded_state, app, process_events):
-    # `sidebar-selection` only takes effect when the window reads it at construction time (it
-    # isn't one of the settings a live `AppState.changed` re-emits for), so it must be set before
-    # the window is built.
+    # `sidebar-selection` is read once, when the window is built, so it must be set first.
     hard_id = Streak.get(Streak.name == "75 Hard").id
     seeded_state.settings.sidebar_selection = hard_id
 

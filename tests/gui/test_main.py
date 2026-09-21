@@ -1,8 +1,7 @@
 """Tests for `streaks.main` — application startup and the corrupt/unwritable-database path.
 
-These build a throwaway `StreaksApplication` rather than using the shared, session-scoped `app`
-fixture: `do_activate()` mutates `self.window`, and the error path deliberately never builds one,
-which would be confusing to assert on an instance the rest of the suite also shares.
+These build a throwaway `StreaksApplication`: `do_activate()` mutates `self.window`, and
+asserting on the session-scoped `app` would leave it in whatever state the last test put it in.
 """
 
 from __future__ import annotations

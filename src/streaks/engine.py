@@ -1054,9 +1054,10 @@ def history(
     weeks_shown: int = 30,
 ) -> History:
     """The streak history pane for one run (or the streak's lifetime), with its stat tiles,
-    activity chart, goal breakdown and earlier-runs list. ``run_index`` picks a past run (only
-    meaningful when ``chart`` is ``"run"``; ``None`` means the current run). ``chart="lifetime"``
-    shows ``weeks_shown`` weeks spanning every run instead."""
+    activity chart, goal breakdown and earlier-runs list. ``run_index`` picks which run the
+    tiles, header and catch-up link describe (``None`` means the open run). ``chart="run"``
+    draws that run's weeks; ``chart="lifetime"`` draws the last ``weeks_shown`` weeks across
+    every run."""
     all_runs = runs(streak, today, settings)
     if not all_runs:
         selected = None

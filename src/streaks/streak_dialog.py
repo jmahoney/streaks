@@ -28,7 +28,8 @@ _ = gettext.gettext
 
 @Gtk.Template(resource_path="/com/cheerschopper/Streaks/streaks/ui/streak_dialog.ui")
 class StreaksStreakDialog(Adw.Dialog):
-    """The New/Edit streak dialog. Build it with ``for_new()``/``for_edit()``, not ``__init__``."""
+    """The New/Edit streak dialog. ``for_new()``/``for_edit()`` are the constructors; both
+    prepare the goal rows ``__init__`` leaves empty."""
 
     __gtype_name__ = "StreaksStreakDialog"
 
@@ -66,7 +67,8 @@ class StreaksStreakDialog(Adw.Dialog):
     def __init__(self, **kwargs):
         """Initialize the dialog in its "new streak" default state.
 
-        Use ``for_new()``/``for_edit()`` rather than calling this directly.
+        Wires the widget signal handlers and adds one empty goal row; ``for_edit()`` replaces
+        that row via ``_load_from()``.
         """
         super().__init__(**kwargs)
         self.state: AppState | None = None

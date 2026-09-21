@@ -145,9 +145,7 @@ def test_missed_on_friday_requires_unticking_a_goal(seeded_state, seeded_window,
     )
 
 
-def test_combined_answers_summary_matches_engine_and_brief(
-    seeded_state, seeded_window, process_events
-):
+def test_combined_answers_summary_matches_engine(seeded_state, seeded_window, process_events):
     window = seeded_window
 
     dialog = _open_dialog(seeded_state, window)

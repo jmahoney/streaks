@@ -54,9 +54,8 @@ class StreaksApplication(Adw.Application):
     def do_activate(self):
         """Activate the application.
 
-        Opens (creating if needed) the on-disk database before building the window, so a
-        corrupt/unwritable database shows a message and quits cleanly instead of crashing with a
-        traceback partway through building the UI.
+        Opens the database before building the window so a corrupt or unwritable database can be
+        reported in a dialog and the app quit cleanly.
         """
         if not self.window:
             if models.db.database is None:

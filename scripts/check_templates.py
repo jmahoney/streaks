@@ -6,10 +6,9 @@ versa, that every `.blp` is listed in the gresource bundle, `meson.build`,
 and `po/POTFILES`, that every Python source is listed in `meson.build`, and
 that translatable widget properties are not left as bare string literals.
 
-The i18n checks are deliberately conservative: a bare literal is only
-flagged when it contains a letter, so punctuation/placeholder-only strings
-(``":"``, ``""``, ``"04:00"``) that aren't meaningfully translatable don't
-need an explicit exemption list.
+The i18n checks flag a bare literal only when it contains a letter, so
+punctuation/placeholder-only strings (``":"``, ``""``, ``"04:00"``) pass
+without an exemption list.
 """
 
 import re
@@ -68,21 +67,6 @@ def collect_py_template_classes(src_dir: Path) -> dict[str, Path]:
             if is_templated:
                 classes[gtype_match.group(1)] = py_file
     return classes
-
-
-def read_meson_build(meson_build: Path) -> str:
-    """Return the contents of `src/meson.build`, read once for both meson checks."""
-    return meson_build.read_text()
-
-
-def read_gresource_entries(gresource_file: Path) -> str:
-    """Return the contents of `streaks.gresource.xml`."""
-    return gresource_file.read_text()
-
-
-def read_potfiles(po_potfiles: Path) -> str:
-    """Return the contents of `po/POTFILES`."""
-    return po_potfiles.read_text()
 
 
 def check_templates_match_classes(
@@ -221,9 +205,9 @@ def check_py_literals_translated(src_dir: Path) -> list[str]:
 def main() -> int:
     blp_templates = collect_blp_templates(src_dir)
     py_classes = collect_py_template_classes(src_dir)
-    meson_content = read_meson_build(meson_build)
-    gresource_content = read_gresource_entries(gresource_file)
-    potfiles_content = read_potfiles(po_potfiles)
+    meson_content = meson_build.read_text()
+    gresource_content = gresource_file.read_text()
+    potfiles_content = po_potfiles.read_text()
 
     errors = [
         *check_templates_match_classes(blp_templates, py_classes),

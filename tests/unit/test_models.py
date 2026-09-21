@@ -345,8 +345,9 @@ def test_init_db_raises_database_init_error_for_unwritable_data_dir(tmp_path, mo
 
 
 def test_init_db_raises_database_init_error_for_corrupt_database_file(tmp_path):
-    """A path that exists but isn't a valid SQLite database also raises ``DatabaseInitError``
-    rather than letting Peewee's raw exception (or a traceback) reach the caller."""
+    """A path that exists but isn't a valid SQLite database also raises ``DatabaseInitError``,
+    wrapping the ``peewee`` exception so ``main.py`` can show the path and reason in a dialog
+    before quitting."""
     from streaks.models import MODELS, db
 
     corrupt = tmp_path / "corrupt.db"

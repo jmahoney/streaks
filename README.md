@@ -63,6 +63,10 @@ GUI and snapshot tests run under Xvfb by default (`STREAKS_HEADLESS=1`, the defa
 window can never appear on — or hang — your real desktop. Set `STREAKS_HEADLESS=0` only if you
 deliberately want to watch them run on your own display.
 
+Under Xvfb the scripts also pin GTK to the X11 backend (`GDK_BACKEND=x11`, `WAYLAND_DISPLAY`
+unset): with a Wayland socket still visible, GTK 4 prefers it and the "headless" windows would
+open on the real desktop.
+
 Other scripts:
 
 - `scripts/screenshot.sh [screen]` — render one (or all) screens to `_build/screenshots/`
