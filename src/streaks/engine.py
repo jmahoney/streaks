@@ -498,23 +498,46 @@ def evaluate(streak: StreakData, today: date, settings: Settings) -> list[Period
 # --------------------------------------------------------------------------------------
 
 
+def _is_hard_miss(pr: PeriodResult, today: date, settings: Settings) -> bool:
+    """Whether this period would end a run on its own: answered ``MISSED``, or (with
+    ``count_through_unconfirmed`` off) ``UNCONFIRMED`` past its ``backfill_days`` grace window."""
+    if pr.status == Status.MISSED:
+        return True
+    if settings.count_through_unconfirmed or pr.status != Status.UNCONFIRMED:
+        return False
+    return (today - pr.period.end).days > settings.backfill_days
+
+
+def _forgiven_by_weekly_skip(
+    streak: StreakData,
+    pr: PeriodResult,
+    prev_effective_missed: bool,
+    forgiven_weeks: set[tuple[int, int]],
+) -> bool:
+    """Whether ``allow_skip`` waives this hard miss: a genuine ``MISSED`` answer, the first one
+    forgiven in its ISO week, with the period before it still carrying the run. Adds the week to
+    ``forgiven_weeks`` when it does."""
+    if not streak.allow_skip or pr.status != Status.MISSED:
+        return False
+    week_key = pr.period.start.isocalendar()[:2]
+    if week_key in forgiven_weeks or prev_effective_missed:
+        return False
+    forgiven_weeks.add(week_key)
+    return True
+
+
 def _effective_missed(
     streak: StreakData, results: list[PeriodResult], today: date, settings: Settings
 ) -> list[bool]:
-    effective = [False] * len(results)
+    """Which periods count as effectively missed for run-length purposes, in order."""
+    effective: list[bool] = []
     forgiven_weeks: set[tuple[int, int]] = set()
     for i, pr in enumerate(results):
-        hard = pr.status == Status.MISSED
-        if not hard and not settings.count_through_unconfirmed and pr.status == Status.UNCONFIRMED:
-            if (today - pr.period.end).days > settings.backfill_days:
-                hard = True
-        if hard and pr.status == Status.MISSED and streak.allow_skip:
-            week_key = pr.period.start.isocalendar()[:2]
-            prev_hard = i > 0 and effective[i - 1]
-            if week_key not in forgiven_weeks and not prev_hard:
-                forgiven_weeks.add(week_key)
-                hard = False
-        effective[i] = hard
+        hard = _is_hard_miss(pr, today, settings)
+        prev_effective_missed = effective[i - 1] if i > 0 else False
+        if hard and _forgiven_by_weekly_skip(streak, pr, prev_effective_missed, forgiven_weeks):
+            hard = False
+        effective.append(hard)
     return effective
 
 
@@ -1025,13 +1048,15 @@ def history(
     streak: StreakData,
     today: date,
     settings: Settings,
+    *,
+    chart: Literal["run", "lifetime"] = "run",
     run_index: int | None = None,
-    lifetime: bool = False,
     weeks_shown: int = 30,
 ) -> History:
     """The streak history pane for one run (or the streak's lifetime), with its stat tiles,
-    activity chart, goal breakdown and earlier-runs list. ``run_index`` picks a past run;
-    ``lifetime`` shows ``weeks_shown`` weeks spanning every run."""
+    activity chart, goal breakdown and earlier-runs list. ``run_index`` picks a past run (only
+    meaningful when ``chart`` is ``"run"``; ``None`` means the current run). ``chart="lifetime"``
+    shows ``weeks_shown`` weeks spanning every run instead."""
     all_runs = runs(streak, today, settings)
     if not all_runs:
         selected = None
@@ -1069,7 +1094,7 @@ def history(
         Tile(f"{hit_pct}%", _("goals hit"), "strong"),
     ]
 
-    if lifetime:
+    if chart == "lifetime":
         weeks = _lifetime_weeks(streak, today, settings, weeks_shown)
         chart_title = _("Lifetime")
         is_best = False
@@ -1163,19 +1188,12 @@ def _with_answers(
     return dataclasses.replace(streak, answers=tuple(kept + added))
 
 
-def catch_up_preview(
-    streak: StreakData,
-    today: date,
-    settings: Settings,
+def _preview_row_states(
+    unconfirmed_days: list[date],
     answers: dict[date, tuple[Answer, tuple[int, ...]]],
-) -> Preview:
-    """What the catch-up dialog should show for the days answered so far: a status and optional
-    warning per row, an updated strip, and a summary sentence of what saving would do to the
-    run."""
-    cu = catch_up(streak, today, settings)
-    unconfirmed_days = [d.day for d in cu.days]
-    n_goals_total = sum(1 for g in streak.goals if g.removed_on is None)
-
+    n_goals_total: int,
+) -> dict[date, str]:
+    """The status caption shown for each unconfirmed catch-up row."""
     row_state: dict[date, str] = {}
     for d in unconfirmed_days:
         if d not in answers:
@@ -1192,17 +1210,15 @@ def catch_up_preview(
             row_state[d] = _("Untick the goals you missed")
         else:
             row_state[d] = _("Missed — which goals?")
+    return row_state
 
-    hypothetical = _with_answers(streak, answers)
-    old_run = current_run(streak, today, settings)
-    new_runs = runs(hypothetical, today, settings)
-    new_run = next((r for r in new_runs if r.start == old_run.start), None) if old_run else None
-    following = (
-        next((r for r in new_runs if r.index == new_run.index + 1), None)
-        if new_run is not None
-        else None
-    )
 
+def _preview_warnings(
+    answers: dict[date, tuple[Answer, tuple[int, ...]]],
+    new_run: Run | None,
+    following: Run | None,
+) -> dict[date, str]:
+    """The per-row warning for answers that would end the run, keyed by day."""
     warnings: dict[date, str] = {}
     if new_run is not None and new_run.end is not None:
         for d, (status, _mids) in answers.items():
@@ -1216,20 +1232,32 @@ def catch_up_preview(
                     "idx": new_run.index + 1,
                     "ord": words.ordinal_day(following.start) if following else "",
                 }
+    return warnings
 
+
+def _preview_strip(hypothetical: StreakData, today: date, settings: Settings) -> list[Cell]:
+    """The activity strip for the streak with the hypothetical answers applied."""
     strip_results = evaluate(hypothetical, today, settings)
-    strip = [_cell_for_result(pr) for pr in strip_results[-STRIP_LENGTH:]]
+    return [_cell_for_result(pr) for pr in strip_results[-STRIP_LENGTH:]]
 
-    unanswered_after = [d for d in unconfirmed_days if d not in answers]
 
-    def _hollow_sentence(days: list[date]) -> str:
-        names = ", ".join(words.WEEKDAY_NAMES_FULL[d.weekday()] for d in days)
-        return ngettext(
-            "%(days)s stays hollow — unanswered, and it doesn't break anything.",
-            "%(days)s stay hollow — unanswered, and they don't break anything.",
-            len(days),
-        ) % {"days": names}
+def _hollow_sentence(days: list[date]) -> str:
+    names = ", ".join(words.WEEKDAY_NAMES_FULL[d.weekday()] for d in days)
+    return ngettext(
+        "%(days)s stays hollow — unanswered, and it doesn't break anything.",
+        "%(days)s stay hollow — unanswered, and they don't break anything.",
+        len(days),
+    ) % {"days": names}
 
+
+def _preview_summary(
+    old_run: Run | None,
+    new_run: Run | None,
+    following: Run | None,
+    unanswered_after: list[date],
+    n_unconfirmed: int,
+) -> str:
+    """The sentence describing what saving the current answers would do to the run."""
     if new_run is not None and new_run.end is not None:
         parts = [
             _("Run %(idx)d ends at %(len)d days%(best)s.")
@@ -1245,21 +1273,48 @@ def catch_up_preview(
             )
         if unanswered_after:
             parts.append(_hollow_sentence(unanswered_after))
-        summary = " ".join(parts)
-    else:
-        idx = new_run.index if new_run else (old_run.index if old_run else 0)
-        length = new_run.length if new_run else (old_run.length if old_run else 0)
-        if unanswered_after:
-            summary = " ".join(
-                [
-                    _("Run %(idx)d stays at %(len)d days.") % {"idx": idx, "len": length},
-                    _hollow_sentence(unanswered_after),
-                ]
-            )
-        else:
-            summary = _("All %(word)s days confirmed.") % {
-                "word": words.number_word(len(unconfirmed_days))
-            }
+        return " ".join(parts)
+
+    idx = new_run.index if new_run else (old_run.index if old_run else 0)
+    length = new_run.length if new_run else (old_run.length if old_run else 0)
+    if unanswered_after:
+        return " ".join(
+            [
+                _("Run %(idx)d stays at %(len)d days.") % {"idx": idx, "len": length},
+                _hollow_sentence(unanswered_after),
+            ]
+        )
+    return _("All %(word)s days confirmed.") % {"word": words.number_word(n_unconfirmed)}
+
+
+def catch_up_preview(
+    streak: StreakData,
+    today: date,
+    settings: Settings,
+    answers: dict[date, tuple[Answer, tuple[int, ...]]],
+) -> Preview:
+    """What the catch-up dialog should show for the days answered so far: a status and optional
+    warning per row, an updated strip, and a summary sentence of what saving would do to the
+    run."""
+    cu = catch_up(streak, today, settings)
+    unconfirmed_days = [d.day for d in cu.days]
+    n_goals_total = sum(1 for g in streak.goals if g.removed_on is None)
+    row_state = _preview_row_states(unconfirmed_days, answers, n_goals_total)
+
+    hypothetical = _with_answers(streak, answers)
+    old_run = current_run(streak, today, settings)
+    new_runs = runs(hypothetical, today, settings)
+    new_run = next((r for r in new_runs if r.start == old_run.start), None) if old_run else None
+    following = (
+        next((r for r in new_runs if r.index == new_run.index + 1), None)
+        if new_run is not None
+        else None
+    )
+
+    warnings = _preview_warnings(answers, new_run, following)
+    strip = _preview_strip(hypothetical, today, settings)
+    unanswered_after = [d for d in unconfirmed_days if d not in answers]
+    summary = _preview_summary(old_run, new_run, following, unanswered_after, len(unconfirmed_days))
 
     return Preview(row_state=row_state, row_warning=warnings, strip=strip, summary=summary)
 

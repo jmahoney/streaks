@@ -95,9 +95,8 @@ class StreaksStreakView(Adw.Bin):
 
         today = self.state.today()
         settings = self.state.settings.to_engine()
-        lifetime = self.range_toggle.get_active_name() == "lifetime"
-        run_index = None if lifetime else self._run_index
-        hist = engine.history(self._streak, today, settings, run_index=run_index, lifetime=lifetime)
+        chart = self.range_toggle.get_active_name()
+        hist = engine.history(self._streak, today, settings, chart=chart, run_index=self._run_index)
 
         tiles = (self.tile_running, self.tile_unconfirmed, self.tile_confirmed, self.tile_hit)
         for tile, entry in zip(tiles, hist.tiles, strict=True):
@@ -108,7 +107,7 @@ class StreaksStreakView(Adw.Bin):
 
         run_toggle = self.range_toggle.get_toggle_by_name("run")
         if run_toggle is not None:
-            if not lifetime and self._run_index is not None:
+            if chart == "run" and self._run_index is not None:
                 run_toggle.set_label(_("Run %(idx)d") % {"idx": self._run_index})
             else:
                 run_toggle.set_label(_("This run"))
