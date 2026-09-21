@@ -266,9 +266,8 @@ def test_for_edit_prefill_and_reconcile_goals(seeded_state, app, process_events)
 
 
 def test_reorder_goal_row_via_drop_handler(fresh_state, app, process_events):
-    """Phase 8 deliverable 1: dropping a goal row reorders the list. Tests call the drop-handling
-    logic (``_reorder_goal_row``) directly with a (source row, target index) pair rather than
-    driving actual GTK drag input, per the brief."""
+    """Dropping a goal row reorders the list. Drives ``_reorder_goal_row`` directly with
+    (row, index), the same entry point the drop handler uses."""
     window = StreaksWindow(application=app, state=fresh_state)
     window.present()
     process_events()
@@ -290,11 +289,11 @@ def test_reorder_goal_row_via_drop_handler(fresh_state, app, process_events):
     assert moved is True
     assert [r.entry.get_text() for r in _goal_rows(dialog)] == ["B", "C", "A"]
 
-    # A no-op move (already there) reports no change and doesn't reorder further.
+    # A no-op move returns False and leaves the order unchanged.
     assert dialog._reorder_goal_row(rows[0], 2) is False
     assert [r.entry.get_text() for r in _goal_rows(dialog)] == ["B", "C", "A"]
 
-    # Out-of-range indices clamp to the last position instead of raising.
+    # Out-of-range indices clamp to the last position.
     moved = dialog._reorder_goal_row(rows[1], 99)  # rows[1] == "B", currently first
     process_events()
     assert moved is True
@@ -304,8 +303,8 @@ def test_reorder_goal_row_via_drop_handler(fresh_state, app, process_events):
 
 
 def test_reorder_goal_row_keyboard_fallback(fresh_state, app, process_events):
-    """Phase 8 deliverable 1: the ``row.move-up``/``row.move-down`` actions (bound to
-    Alt+Up/Alt+Down while a goal entry is focused) reorder rows the same way dragging does."""
+    """The ``row.move-up``/``row.move-down`` actions (bound to Alt+Up/Alt+Down while a goal
+    entry is focused) reorder rows the same way dragging does."""
     window = StreaksWindow(application=app, state=fresh_state)
     window.present()
     process_events()
@@ -328,7 +327,7 @@ def test_reorder_goal_row_keyboard_fallback(fresh_state, app, process_events):
     process_events()
     assert [r.entry.get_text() for r in _goal_rows(dialog)] == ["A", "B"]
 
-    # Moving the first row up (already at the top) is a no-op, not an error.
+    # A no-op move returns False and leaves the order unchanged.
     rows[0].activate_action("row.move-up")
     process_events()
     assert [r.entry.get_text() for r in _goal_rows(dialog)] == ["A", "B"]
@@ -337,7 +336,7 @@ def test_reorder_goal_row_keyboard_fallback(fresh_state, app, process_events):
 
 
 def test_reorder_goal_row_persists_positions_on_save(fresh_state, app, process_events):
-    """Phase 8 deliverable 1: reordering before Save persists the new order as goal positions."""
+    """Reordering before Save persists the new order as goal positions."""
     window = StreaksWindow(application=app, state=fresh_state)
     window.present()
     process_events()

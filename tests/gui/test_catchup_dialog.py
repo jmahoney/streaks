@@ -1,9 +1,8 @@
 """Tests for the catch-up dialog (design-spec §5), against the seeded "75 Hard" streak.
 
 The unconfirmed days are Wed 9 - Sat 12 September 2026; the fixture's fake "today" is Sunday 13
-September 2026 (``tests/gui/screens.py:SEEDED_TODAY``). Every string/number asserted here is
-cross-checked against ``engine.catch_up``/``engine.catch_up_preview`` directly, per the phase
-brief ("trust the engine for every string and number").
+September 2026 (``tests/gui/conftest.py:SEEDED_TODAY``). Every string/number asserted here is
+cross-checked against ``engine.catch_up``/``catch_up_preview``.
 """
 
 import json
@@ -271,10 +270,8 @@ def test_save_writes_answers_and_refreshes_the_app(seeded_state, app, process_ev
     )
     assert hard_row.count_label.get_label() == "2"
 
-    # NB: per the engine, Thursday's now-orphaned unconfirmed day belongs to run 3, which has
-    # since ended -- `engine.today_view()`'s banners only ever look at the *current* (open) run,
-    # so no catch-up banner reappears for 75 Hard. See the phase report for this discrepancy
-    # against the brief, which expected a "One day without a check-in" banner here.
+    # Thursday's unconfirmed day now belongs to the closed run 3; `today_view()` banners only
+    # cover the open run, so no banner reappears.
     tv = engine.today_view(seeded_state.streaks, today, settings)
     assert [b for b in tv.banners if b.streak_id == streak.id] == []
 

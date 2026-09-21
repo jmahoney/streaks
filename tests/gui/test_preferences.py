@@ -433,7 +433,7 @@ def test_window_state_saved_and_restored(seeded_state, app, process_events):
 # -- keyboard shortcuts window ---------------------------------------------------------------------
 
 # Every shortcut `shortcuts.blp` lists, mapped to the action `main.py`/`window.py` registers it
-# to with `set_accels_for_action` (Phase 8 deliverable 2). Titles are the exact strings from
+# to with `set_accels_for_action`. Titles are the exact strings from
 # `Gtk.ShortcutsShortcut.title` in `src/streaks/ui/shortcuts.blp`.
 _SHORTCUT_TITLE_TO_ACTION = {
     "New streak": "win.new-streak",

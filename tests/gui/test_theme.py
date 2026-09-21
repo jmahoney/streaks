@@ -1,4 +1,4 @@
-"""Colour scheme support (design turn 5): palettes, streak colour classes, live switching."""
+"""Colour scheme support: palettes, streak colour classes, live switching."""
 
 from __future__ import annotations
 

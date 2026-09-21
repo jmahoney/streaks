@@ -210,13 +210,9 @@ def _build_catch_up_missed(ctx: BuildContext) -> Gtk.Widget:
 def _hide_internal_title_buttons(widget: Gtk.Widget) -> None:
     """Recursively turn off ``show-start/end-title-buttons`` on every ``Adw.HeaderBar`` found.
 
-    Only used by ``_build_preferences`` below. ``Adw.PreferencesDialog`` builds its own header
-    bar internally (there is no template hook for it), and that header bar only decides to draw
-    OS-style min/maximize/close window controls once it is actually mapped into a real,
-    decorated top-level — which is exactly what ``build_screen()`` does to render a detached
-    dialog child standalone (see its docstring). In real use, `Adw.PreferencesDialog` is always
-    presented as a floating sheet over the main window, never as its own decorated top-level, so
-    this never happens there; it is purely a rendering-harness artifact.
+    ``Adw.PreferencesDialog`` builds its own header bar, which draws window controls once mapped
+    as a real top-level — which is how ``build_screen()`` renders a detached dialog. Real use
+    never shows them; this is a rendering-harness artifact.
     """
     if isinstance(widget, Adw.HeaderBar):
         widget.set_show_start_title_buttons(False)

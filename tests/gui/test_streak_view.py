@@ -258,8 +258,8 @@ def test_ended_streak_history(seeded_state, app, process_events):
 
     assert window.content_title.get_subtitle() == "Daily · 1 goal · ended 4 Mar"
 
-    # Phase 8 deliverable 5: an ended streak's page is read-only — no "Check in" button, and the
-    # ⋯ menu offers only Delete….
+    # An ended streak's page is read-only: no "Check in" button, and the ⋯ menu offers only
+    # Delete….
     assert not window.checkin_button.get_visible()
     menu = window.more_button.get_menu_model()
     assert menu.get_n_items() == 1

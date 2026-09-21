@@ -36,10 +36,7 @@ def test_window_screen_renders_at_expected_size_and_colour(app, process_events):
         assert texture.get_height() == 760
 
         pixels, stride, _width, _height = texture_pixels(texture)
-        # (580, 400) is the window's exact centre, which is where the centred "Streaks" title-1
-        # label glyphs are — sampling there hits dark text pixels, not the background. (100, 100)
-        # is comfortably inside the plain content background (confirmed uniformly (250, 250, 250)
-        # away from the label) while still exercising the same thing: a light window background.
+        # (100, 100) is plain content background.
         r, g, b = pixel_at(pixels, stride, 100, 100)
         assert r > 200 and g > 200 and b > 200
     finally:

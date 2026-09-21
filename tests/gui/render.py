@@ -3,13 +3,8 @@
 Turns an already realized/mapped/allocated GTK widget into a `Gdk.Texture`, a PNG file, or raw
 pixel bytes, without ever needing a visible window manager.
 
-Pixel format note: `texture_pixels()` round-trips the texture through PNG (`save_to_png_bytes()`
-+ Pillow) rather than `Gdk.Texture.download()`. `download()`'s `data` parameter is under-annotated
-in GDK's own introspection data (no `direction="out"`/array-length annotation), so GObject
-Introspection cannot marshal it as an output buffer — calling it silently leaves the buffer
-untouched (verified: it does this for *any* `Gdk.Texture`, not just ones produced by
-`render_widget()`). The PNG round-trip gives each pixel as 4 bytes in plain **R, G, B, A** order,
-straight (non-premultiplied) alpha — see `pixel_at()`.
+Pixels are read via a PNG round-trip: `Gdk.Texture.download()` is not marshallable from
+PyGObject (its buffer argument lacks an out annotation), so it silently returns nothing.
 """
 
 from __future__ import annotations
@@ -35,7 +30,7 @@ _accent_pin: Gtk.CssProvider | None = None
 
 
 def set_colour_scheme(dark: bool) -> None:
-    """Force the light or dark scheme (design turns 4 and 5 respectively).
+    """Force the light or dark scheme.
 
     In light the accent is pinned to GNOME's default blue regardless of the host session's accent
     colour (libadwaita reads it from the portal or GSettings; the design assumes blue). In dark

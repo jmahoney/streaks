@@ -294,9 +294,8 @@ def test_reminder_time_round_trips():
 
 
 def test_reminder_time_round_trips_through_update_streak():
-    """Phase 8 deliverable 3: editing a streak (not just creating one) round-trips
-    ``reminder_time`` too — nothing schedules a notification from it yet (see README's "Not yet
-    implemented"), but the value itself must survive an edit."""
+    """Editing a streak round-trips ``reminder_time`` (README › Known gaps: nothing schedules a
+    notification from it)."""
     streak = create_streak("A", COLOURS[0], PeriodKind.DAILY, ["g1"], created_on=date(2026, 1, 1))
     goal = Goal.get(Goal.streak == streak)
 
@@ -331,9 +330,9 @@ def test_reminder_time_round_trips_through_update_streak():
 
 
 def test_init_db_raises_database_init_error_for_unwritable_data_dir(tmp_path, monkeypatch):
-    """Phase 8 deliverable 6: a path where ``STREAKS_DATA_DIR`` should be a directory but is
-    actually a file raises ``DatabaseInitError`` (with the attempted path and a reason), never a
-    raw ``OSError``/traceback — ``main.py`` shows this in an ``Adw.AlertDialog`` and quits."""
+    """A path where ``STREAKS_DATA_DIR`` should be a directory but is actually a file raises
+    ``DatabaseInitError`` (with the attempted path and a reason), never a raw
+    ``OSError``/traceback — ``main.py`` shows this in an ``Adw.AlertDialog`` and quits."""
     blocked = tmp_path / "not-a-directory"
     blocked.write_text("this is a file, not a directory")
     monkeypatch.setenv("STREAKS_DATA_DIR", str(blocked))

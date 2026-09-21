@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Check manifest for missing dependencies."""
+"""Cross-checks `com.cheerschopper.Streaks.json` against `src/streaks/`'s third-party imports:
+flags a runtime-version mismatch and any import with no matching Flatpak module."""
 
 import ast
 import json

@@ -1,7 +1,6 @@
 """Unit tests for the design fixture itself (``tests/fixtures/seed.py``).
 
-Counts below were derived by running the fixture and counting rows directly (see the phase 1
-handback report for how); they pin the fixture against silent drift.
+Counts were derived by running the fixture and counting rows; they pin it against drift.
 """
 
 from __future__ import annotations

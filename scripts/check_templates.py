@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Check template consistency between .blp and .py files, and a basic i18n-completeness pass.
 
-The i18n checks (Phase 8 deliverable 4) are deliberately conservative: a bare literal is only
+The i18n checks are deliberately conservative: a bare literal is only
 flagged when it contains a letter, so punctuation/placeholder-only strings (``":"``, ``""``,
 ``"04:00"``) that aren't meaningfully translatable don't need an explicit exemption list.
 """
@@ -142,7 +142,7 @@ for py_file in src_dir.glob("*.py"):
 
 # Check .blp files: every `label:`/`title:`/`subtitle:`/`tooltip-text:`/`placeholder-text:` with
 # a bare (non-`_(...)`) string literal must not contain a letter — i.e. real translatable text
-# must go through `_()` (Phase 8 deliverable 4).
+# must go through `_()`.
 _blp_prop_pattern = re.compile(
     r"\b(?:" + "|".join(re.escape(p) for p in _TRANSLATABLE_PROPS) + r")\s*:\s*"
     r'(?P<value>_\(\s*"(?:[^"\\]|\\.)*"\s*\)|"(?:[^"\\]|\\.)*")'
@@ -163,8 +163,8 @@ for blp_file in src_dir.glob("**/*.blp"):
             )
 
 # Check .py files: a widget built with a translatable-looking keyword (`label=`/`title=`/etc.)
-# must not be given a bare string literal containing a letter — it must be `_(...)`/`ngettext(...)`
-# instead (Phase 8 deliverable 4). Dynamic values (`label=goal.name`, `label=some_var`) have no
+# must not be given a bare string literal containing a letter — it must be `_(...)`/`ngettext(...)`.
+# Dynamic values (`label=goal.name`, `label=some_var`) have no
 # quote right after `=` and are never matched.
 _py_kwarg_pattern = re.compile(
     r"\b(?:" + "|".join(p.replace("-", "_") for p in _TRANSLATABLE_PROPS) + r")\s*=\s*"

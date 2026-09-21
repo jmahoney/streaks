@@ -191,11 +191,8 @@ def _sidebar_today_badge(window):
 
 
 def test_goal_row_keyboard_activation_toggles_check(seeded_state, app, process_events):
-    """Phase 8 deliverable 2: Space/Enter on a focused goal row toggles it. `goals_list` (a plain
-    `Gtk.ListBox`) is focusable by default, and `GtkListBoxRow`'s own Space/Enter keybindings
-    call ``activate()``, which is exactly what this test drives directly rather than injecting
-    synthetic key events (consistent with how the rest of this suite simulates interactions —
-    e.g. ``.emit("clicked")``/``.emit("response", ...)``)."""
+    """Space/Enter on a focused goal row toggles it. `GtkListBoxRow`'s own keybindings call
+    `activate()`, which is what this drives."""
     window = StreaksWindow(application=app, state=seeded_state)
     window.present()
     process_events()

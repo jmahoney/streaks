@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Add a new UI component to the application."""
+"""Scaffold a new GTK widget: creates its `.blp` template and `.py` module, and registers both
+in `src/meson.build`. Usage: `add_ui.py <name>`."""
 
 import re
 import sys

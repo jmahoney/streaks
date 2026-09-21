@@ -1,5 +1,4 @@
-"""Tests for `streaks.main` — application startup and the corrupt/unwritable-database path
-(Phase 8 deliverable 6).
+"""Tests for `streaks.main` — application startup and the corrupt/unwritable-database path.
 
 These build a throwaway `StreaksApplication` rather than using the shared, session-scoped `app`
 fixture: `do_activate()` mutates `self.window`, and the error path deliberately never builds one,

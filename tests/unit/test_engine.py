@@ -514,8 +514,8 @@ def test_number_word(n, expected):
 
 
 def test_number_word_capitalised():
-    assert words.Number_word(2) == "Two"
-    assert words.Number_word(13) == "13"
+    assert words.sentence_number_word(2) == "Two"
+    assert words.sentence_number_word(13) == "13"
 
 
 @pytest.mark.parametrize(
@@ -558,14 +558,8 @@ def test_time_hm():
 
 
 # ================================================================================================
-# Literal-value tests against the design fixture (tests/fixtures/seed.py).
-#
-# All numbers/strings below come straight from the "Expected values" list in
-# tests/fixtures/seed.py's module docstring.
-# The one deliberate deviation (documented in the handback report) is weekday *names*: the brief's
-# prose labels 9/10/11/12 September 2026 as Tue/Wed/Thu/Fri, but 13 September 2026 is a Sunday (by
-# both `datetime` and the Unix `date` command), which makes 9/10/11/12 September Wed/Thu/Fri/Sat.
-# Dates and counts are asserted as given; weekday-name strings use the calendar's actual names.
+# Literal values from the design fixture. The mock labels 9–12 Sep 2026 as Tue–Fri; the calendar
+# says Wed–Sat, and the code follows the calendar.
 # ================================================================================================
 
 
@@ -719,8 +713,8 @@ def test_fixture_couch_to_5k(seeded, today, settings):
 
 
 def test_fixture_couch_to_5k_history_ended_streak(seeded, today, settings):
-    """Phase 5: for an ended streak, the first stat tile reports the best run (not "still
-    running"), and the header subtitle says when it ended rather than which run is showing."""
+    """For an ended streak, the first stat tile reports the best run (not "still running"), and
+    the header subtitle says when it ended rather than which run is showing."""
     streak = _streaks()["Couch to 5K"]
     h = history(streak, today, settings)
     assert h.tiles == [
@@ -745,16 +739,16 @@ def test_fixture_today_view(seeded, today, settings):
         "No snoozing the alarm",
         "Clip fingernails",
     ]
-    # Phase 8 deliverable 5: Today never shows a card for an ended streak — "Couch to 5K" (ended
-    # 4 Mar) has no card above, confirmed explicitly here too.
+    # Today never shows a card for an ended streak — "Couch to 5K" (ended 4 Mar) has no card
+    # above, confirmed explicitly here too.
     assert "Couch to 5K" not in [c.name for c in tv.cards]
 
 
 def test_ended_streak_has_no_catch_up_link_even_with_unconfirmed_periods(today, settings):
-    """Phase 8 deliverable 5: an ended streak's history never offers a catch-up link, even if its
-    last (closed) run happens to still contain unconfirmed periods — there's no open run left to
-    catch up on (``engine.catch_up()`` needs ``current_run()``, which is always ``None`` once a
-    streak has ended)."""
+    """An ended streak's history never offers a catch-up link, even if its last (closed) run
+    happens to still contain unconfirmed periods — there's no open run left to catch up on
+    (``engine.catch_up()`` needs ``current_run()``, which is always ``None`` once a streak has
+    ended)."""
     streak = _mk(
         date(2026, 1, 1),
         day_checks={date(2026, 1, 1): {0, 1}},

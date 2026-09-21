@@ -59,9 +59,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out", required=True, help="output directory for PNGs")
     parser.add_argument("names", nargs="*", help="screen names to render (default: all)")
-    parser.add_argument(
-        "--dark", action="store_true", help="render in the dark colour scheme (design turn 5)"
-    )
+    parser.add_argument("--dark", action="store_true", help="render in the dark colour scheme")
     args = parser.parse_args(argv)
 
     names = args.names or sorted(SCREENS)

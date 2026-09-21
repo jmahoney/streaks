@@ -89,7 +89,8 @@ def _check(goal: Goal, day: date, hour: int, minute: int) -> None:
 def _apply_daily_run_checks(
     goals: list[Goal], run_start: date, run_end: date, unconfirmed_from: date
 ) -> None:
-    """Check off "75 Hard"-style daily goals for one run, per the brief's day-index rule.
+    """Check off "75 Hard"-style daily goals for one run, using a day-index pattern so some days
+    are partial.
 
     ``i`` is the day index from the run's own start. ``i % 7 == 3`` checks everything except
     goal 2 ("45 min second workout"); ``i % 11 == 5`` checks only goals 0, 1, 4; otherwise every
