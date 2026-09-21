@@ -4,8 +4,8 @@
 Two kinds of tests live here: parametrised tables against small, hand-built ``StreakData``
 values (no database involved), and literal-value checks against the design fixture
 (``tests/fixtures/seed.py``), pinned by the ``seeded``/``today``/``settings`` fixtures from
-``tests/unit/conftest.py``. The fixture's literal values come from
-``docs/phases/01-models-engine.md`` and were computed independently of this code.
+``tests/unit/conftest.py``. The rules these tests pin are documented in ``docs/engine-rules.md``;
+the fixture's literal values are documented in ``tests/fixtures/seed.py``'s module docstring.
 """
 
 from __future__ import annotations
@@ -561,7 +561,7 @@ def test_time_hm():
 # Literal-value tests against the design fixture (tests/fixtures/seed.py).
 #
 # All numbers/strings below come straight from the "Expected values" list in
-# docs/phases/01-models-engine.md, which states they were computed independently of this code.
+# tests/fixtures/seed.py's module docstring.
 # The one deliberate deviation (documented in the handback report) is weekday *names*: the brief's
 # prose labels 9/10/11/12 September 2026 as Tue/Wed/Thu/Fri, but 13 September 2026 is a Sunday (by
 # both `datetime` and the Unix `date` command), which makes 9/10/11/12 September Wed/Thu/Fri/Sat.

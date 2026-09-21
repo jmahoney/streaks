@@ -1,13 +1,48 @@
-"""The design fixture: five illustrative streaks anchored on Sunday 13 September 2026.
-
-This dataset is the source of truth used by both the unit test suite (``tests/unit``) and the
-GUI/screenshot scaffold (``tests/gui/screens.py``), so every screen and every expected value in
-``docs/phases/01-models-engine.md`` line up with exactly this data. See that file for the literal
-per-streak description this module implements.
+"""The design fixture: five illustrative streaks anchored on Sunday 13 September 2026, shared by
+the unit test suite (``tests/unit``) and the GUI/screenshot harness (``tests/gui/screens.py``).
 
 Importable (``from fixtures.seed import seed``) and runnable directly
 (``python3 tests/fixtures/seed.py``, which initialises the on-disk database at
 ``$STREAKS_DATA_DIR`` and seeds it).
+
+Five streaks, in sidebar order:
+
+1. **75 Hard** — daily, created 2 Feb 2026, five goals (progress photo, outdoor walk, second
+   workout, reading, diet). Run 1 runs 2 Feb-1 Mar, then every day 2 Mar-13 May is answered
+   missed. Run 2 runs 14 May-16 Jun, then every day 17 Jun-24 Jul is answered missed. Run 3 runs
+   25 Jul to today; within it, a repeating day-index pattern skips the second workout every 7th
+   day and checks only three of the five goals every 11th day, so some days land as partial. The
+   four days 9-12 September are left with no checks and no answer, so they sit unconfirmed; today
+   itself has three of the five goals checked.
+2. **No snoozing the alarm** — weekdays (Mon-Fri), created 27 Aug 2026, one goal, checked every
+   due day through 11 Sep.
+3. **Gym, three times a week** — three sessions a week, created 13 Jul 2026, two goals, both
+   checked on Mon/Wed/Fri every week through 4 Sep; this week only Monday and Wednesday are
+   checked, leaving Friday's session open.
+4. **Clip fingernails** — monthly, created 1 Jun 2026, one goal, checked on the 5th of June,
+   July and August.
+5. **Couch to 5K** — daily, created 2 Feb 2026, ended 4 Mar 2026, one goal checked every day of
+   its single run.
+
+Expected values, pinned by ``tests/unit/test_engine.py``:
+
+- 75 Hard: run lengths [28, 34, 51]; run 3 starts 25 Jul with no end, 47 confirmed periods and 4
+  unconfirmed, and is the best run; hit rate 94%; this month's goal bars are 9/9, 9/9, 6/9 (low),
+  8/9, 9/9; sidebar meta "Daily · 5 goals" at count 51; the banner reads "Four days without a
+  check-in — 9 to 12 September"; catch-up lists Wednesday 9 through Saturday 12 September;
+  marking today missed would end run 3 at 50 days.
+- No snoozing the alarm: count 12, sidebar meta "Mon–Fri · 1 goal", today's card is "Not today"
+  with the next check-in on Monday 14 September, since the streak is due only on weekdays.
+- Gym, three times a week: count 9, sidebar meta "3× a week · 2 goals", today's card reads "2 of
+  3 this week".
+- Clip fingernails: count 4, sidebar meta "Monthly · 1 goal", today's card reads "Due this
+  month" with 17 days left on the goal.
+- Couch to 5K: ended, best run 31 days, sidebar meta "Ended 4 Mar · best 31".
+- Today view: title "Sunday 13 September", two check-ins open (75 Hard and the gym). No
+  snoozing the alarm and Clip fingernails also get cards but stay closed today, and Couch to 5K,
+  being ended, gets no card at all. Four earlier days are unconfirmed.
+
+Tests assert these values literally; they pin the fixture against drift.
 """
 
 from __future__ import annotations

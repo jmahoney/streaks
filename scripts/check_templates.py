@@ -51,9 +51,8 @@ for py_file in src_dir.glob("**/*.py"):
         content = f.read()
 
     # Find __gtype_name__, but only for classes bound to a Blueprint template (immediately
-    # preceded by @Gtk.Template(...)): plain custom-drawn Gtk.Widget subclasses (e.g.
-    # src/streaks/widgets/*.py) have a GType name without ever having a matching .blp template,
-    # by design (see docs/phases/02-shell-sidebar-empty.md).
+    # preceded by @Gtk.Template(...)): custom-drawn Gtk.Widget subclasses (src/streaks/widgets/)
+    # have a GType name and no template.
     class_starts = list(re.finditer(r"(?m)^class\s+\w+\(", content))
     for i, class_match in enumerate(class_starts):
         start = class_match.start()

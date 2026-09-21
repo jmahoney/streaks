@@ -105,10 +105,8 @@ can't accidentally connect to a real desktop's compositor, and the app quits its
   calculator; `models.py` is the Peewee data layer; everything else is GTK view code bound to
   `src/streaks/ui/*.blp` Blueprint templates.
 - `docs/design-spec.md` — the source-of-truth UI/behaviour spec, extracted from `claude-design/`.
-- `docs/phases/*.md` — the phase-by-phase implementation briefs this app was built from (an
-  agent-driven workflow: each phase brief is handed to a coding agent together with
-  `CLAUDE.md`/`docs/design-spec.md`, the agent implements it against `scripts/check.sh`, and the
-  next phase starts from a green baseline).
+- `docs/engine-rules.md` — the rules the engine applies to turn check-ins into period statuses,
+  runs and counts.
 - `tests/unit/` — pure-Python tests against an in-memory database (no GTK).
 - `tests/gui/` — PyGObject integration tests (headless by default) plus the golden-image
   snapshot suite in `tests/gui/test_snapshots.py`.
