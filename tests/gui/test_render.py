@@ -52,13 +52,8 @@ def test_render_screens_cli_writes_png(tmp_path):
         cmd = ["xvfb-run", "-a", "-s", "-screen 0 1600x1000x24 -dpi 96", *cmd]
 
     env = os.environ.copy()
-    # The `app` fixture used elsewhere in this session registers com.cheerschopper.Streaks as the
-    # primary instance on the real session bus and never pumps its main loop afterwards, so a
-    # child process registering the same (unique, by default) application ID on that same bus can
-    # stall waiting for a D-Bus reply that never comes. Point the child at a bus address that
-    # can't be connected to: GApplication.register() degrades gracefully to a local-only
-    # (non-D-Bus) registration in that case, which is exactly what an isolated render process
-    # wants anyway (it must never accidentally activate/attach to another running instance).
+    # Point the child at a dead bus so `register()` falls back to local-only, since the
+    # session's `app` fixture already holds this application ID on the real session bus.
     env["DBUS_SESSION_BUS_ADDRESS"] = f"unix:path={tmp_path / 'no-such-bus'}"
 
     result = subprocess.run(

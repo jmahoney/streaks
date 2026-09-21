@@ -48,6 +48,7 @@ load_resources()
 
 from render import (  # noqa: E402
     configure_for_rendering,
+    make_test_application,
     render_widget,
     set_colour_scheme,
     texture_to_png,
@@ -75,13 +76,7 @@ def main(argv: list[str] | None = None) -> int:
     out_dir = Path(args.out)
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    from gi.repository import Gio
-
-    from streaks.main import StreaksApplication
-
-    # NON_UNIQUE: never attach to (or block on) a real running Streaks instance on the bus.
-    app = StreaksApplication(flags=Gio.ApplicationFlags.NON_UNIQUE)
-    app.register()
+    app = make_test_application()
 
     from gi.repository import Gtk
 

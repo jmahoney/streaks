@@ -60,6 +60,18 @@ class BuildContext:
     settings: object | None = None
 
 
+def _detach_dialog_content(dialog: Adw.Dialog) -> Gtk.Widget:
+    """Pull `dialog`'s child out so it can be rendered on its own, ordinary window.
+
+    Under a headless/no-WM display an `Adw.Dialog` sheet never reaches GTK's "mapped" state (no
+    window manager ever focuses its surface), so content still parented inside it snapshots
+    blank; detached, it renders correctly on a plain `present()`-ed window instead.
+    """
+    child = dialog.get_child()
+    dialog.set_child(None)
+    return child
+
+
 def _build_window(ctx: BuildContext) -> Gtk.Widget:
     window = StreaksWindow(application=ctx.app)
     ctx.window = window
@@ -119,14 +131,7 @@ def _build_new_streak(ctx: BuildContext) -> Gtk.Widget:
     dialog.present(window)
     _process_events()
 
-    # Detach the content from the dialog: under a headless/no-WM display, `AdwDialog`'s floating
-    # sheet never reaches GTK's "mapped" state (no window manager ever focuses the surface), so
-    # anything still parented inside it snapshots as blank. Rendering the (already laid-out,
-    # correctly-sized-to-560) content on its own, ordinary, `present()`-ed window sidesteps that
-    # — this is exactly the "non-window widget" path `build_screen` already handles below.
-    child = dialog.get_child()
-    dialog.set_child(None)
-    return child
+    return _detach_dialog_content(dialog)
 
 
 def _select_streak(window, name: str) -> None:
@@ -173,9 +178,7 @@ def _build_catch_up(ctx: BuildContext) -> Gtk.Widget:
     dialog.present(window)
     _process_events()
 
-    child = dialog.get_child()
-    dialog.set_child(None)
-    return child
+    return _detach_dialog_content(dialog)
 
 
 def _build_catch_up_missed(ctx: BuildContext) -> Gtk.Widget:
@@ -202,9 +205,7 @@ def _build_catch_up_missed(ctx: BuildContext) -> Gtk.Widget:
     rows[date(2026, 9, 12)].kept_button.set_active(True)
     _process_events()
 
-    child = dialog.get_child()
-    dialog.set_child(None)
-    return child
+    return _detach_dialog_content(dialog)
 
 
 def _hide_internal_title_buttons(widget: Gtk.Widget) -> None:
@@ -235,12 +236,7 @@ def _build_preferences(ctx: BuildContext) -> Gtk.Widget:
     dialog.present(window)
     _process_events()
 
-    # Same "detach and render standalone" trick as `_build_new_streak`/`_build_catch_up`: under a
-    # headless/no-WM display `AdwDialog`'s floating sheet never maps, so anything still parented
-    # inside it snapshots blank. Unlike a plain `Adw.Dialog`, `Adw.PreferencesDialog.get_child()`
-    # does return a widget (its internal `AdwToastOverlay`), so the same trick applies unchanged.
-    child = dialog.get_child()
-    dialog.set_child(None)
+    child = _detach_dialog_content(dialog)
     _hide_internal_title_buttons(child)
     return child
 

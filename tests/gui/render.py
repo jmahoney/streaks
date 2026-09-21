@@ -19,6 +19,7 @@ gi.require_version("Graphene", "1.0")
 from gi.repository import (  # noqa: E402
     Adw,
     Gdk,
+    Gio,
     Graphene,  # noqa: E402
     Gtk,
 )
@@ -90,6 +91,19 @@ def configure_for_rendering() -> None:
     settings.set_property("gtk-xft-rgba", "none")
 
     _configured = True
+
+
+def make_test_application() -> Adw.Application:
+    """Build and register a `StreaksApplication`.
+
+    `NON_UNIQUE` so a test process never attaches to a real running Streaks instance on the
+    session bus.
+    """
+    from streaks.main import StreaksApplication
+
+    app = StreaksApplication(flags=Gio.ApplicationFlags.NON_UNIQUE)
+    app.register()
+    return app
 
 
 def render_widget(widget: Gtk.Widget, width: int, height: int) -> Gdk.Texture:

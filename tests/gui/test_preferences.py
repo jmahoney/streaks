@@ -409,11 +409,8 @@ def test_ctrl_f_focuses_search(seeded_state, app, process_events):
 
 
 def test_window_state_saved_and_restored(seeded_state, app, process_events):
-    # Deliberately not `present()`ed: once mapped under a real (even virtual) window manager,
-    # the manager's own placement/sizing can feed back into the bound `default-width`/
-    # `default-height` properties, which would make this test racy. The binding itself (set up
-    # by `AppSettings.bind_window_state`, exercised here) doesn't care whether the window is
-    # mapped.
+    # Not presented: a window manager may resize a mapped window, and the size binding is what's
+    # under test.
     window = StreaksWindow(application=app, state=seeded_state)
     window.set_default_size(900, 650)
     process_events()
@@ -478,15 +475,8 @@ def test_show_help_overlay_action_is_wired_and_lists_new_streak(seeded_state, ap
     window.present()
     process_events()
 
-    # `GtkApplicationWindow` wires this action up on its own from the `gtk/help-overlay.ui`
-    # resource (see window.py) — deliberately NOT activated here. Doing so presents a genuine,
-    # independent `Gtk.ShortcutsWindow` top-level (unlike every other dialog in this app, which
-    # is an `Adw.Dialog` "sheet" that never needs a real window-manager handshake — see
-    # `screens.py`'s `_build_new_streak` docstring). Under this harness's WM-less display that
-    # real top-level's frame clock can never complete its first frame, so any `process_events()`
-    # call afterwards spins forever; on a real desktop it pops up an actual, uncontrolled window.
-    # So this only checks the action is registered/enabled and that its resource is correct,
-    # without ever presenting it.
+    # Checks wiring only: a real `Gtk.ShortcutsWindow` top-level never completes its first
+    # frame under a WM-less display (see `screens._detach_dialog_content`).
     action = window.lookup_action("show-help-overlay")
     assert action is not None
     assert action.get_enabled()
@@ -529,13 +519,8 @@ def test_app_preferences_action_presents_dialog_over_active_window(
 
 
 def test_preferences_screen_renders_at_660_wide(seeded_state, app, process_events):
-    # Deliberately not routed through `screens.build_screen()` (unlike the screenshot script,
-    # which uses it): that helper never destroys the window/dialog it builds, and this is the
-    # only screen whose window+dialog combination leaves the *parent* window's real, negotiated
-    # width bound (via `AppSettings.bind_window_state`) at something other than its requested
-    # default under this suite's Xvfb/X11-without-a-window-manager setup — which then leaks into
-    # every later test's `window-width` GSettings key for the rest of the process. Building it
-    # directly here, and destroying both afterwards, keeps this test's window from outliving it.
+    # Built and destroyed here so the window's negotiated width does not leak into the shared
+    # GSettings backend.
     window = StreaksWindow(application=app, state=seeded_state)
     window.present()
     process_events()

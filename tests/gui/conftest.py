@@ -1,4 +1,12 @@
-"""GUI test configuration."""
+"""GUI test configuration.
+
+Test isolation: the suite runs with `GSETTINGS_BACKEND=memory`, which holds every key's value
+for the life of the whole test process. Window geometry and the sidebar selection written by one
+test are therefore visible to the next test too, unless something resets them: the
+`fresh_state`/`seeded_state` fixtures reset the keys that matter before each test runs, and any
+test that maps a real window destroys it afterwards, or builds its own window and dialog,
+keeping a window's negotiated geometry out of the tests that follow.
+"""
 
 import sys
 from datetime import date
@@ -11,7 +19,7 @@ gi.require_version("Adw", "1")
 
 import pytest
 from gi.repository import Gio, GLib
-from render import configure_for_rendering
+from render import configure_for_rendering, make_test_application
 
 from streaks.resources import load_resources
 
@@ -26,11 +34,7 @@ if str(_TESTS_DIR) not in sys.path:
 # The fixture's pinned "today" (matches `STREAKS_FAKE_TODAY` and `tests/fixtures/seed.py`).
 SEEDED_TODAY = date(2026, 9, 13)
 
-# GSettings keys `seeded_state`/`fresh_state` reset before each test, since the `memory` backend
-# keeps its values for the whole test process rather than per-test. `window-width`/`window-height`
-# are bidirectionally bound to the live window (`AppSettings.bind_window_state`), so a real window
-# manager nudging one test's window a few pixels wider than its default would otherwise leak that
-# size into every window built afterwards for the rest of the process.
+# Keys `seeded_state`/`fresh_state` reset before each test; see the module docstring.
 _RESET_KEYS = (
     "sidebar-selection",
     "show-ended",
@@ -104,13 +108,5 @@ def process_events():
 @pytest.fixture(scope="session")
 def app():
     """Create and register the test application."""
-    from streaks.main import StreaksApplication
-
     configure_for_rendering()
-
-    # Create and register the app
-    # NON_UNIQUE: never attach to (or block on) a real running Streaks instance on the bus.
-    app = StreaksApplication(flags=Gio.ApplicationFlags.NON_UNIQUE)
-    app.register()
-
-    return app
+    return make_test_application()

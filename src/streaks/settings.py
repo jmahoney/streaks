@@ -67,11 +67,8 @@ class AppSettings(GObject.Object):
 
     @sidebar_selection.setter
     def sidebar_selection(self, streak_id: int) -> None:
-        # Guard against a same-value write: GSettings' `memory` backend (used by the test suite)
-        # re-emits `changed` even when the value doesn't actually change, and `sidebar-selection`
-        # is written every time the sidebar picks a row to select — including from inside a
-        # rebuild the settings-changed signal itself can trigger. Skipping the redundant write
-        # here breaks that feedback loop at the source (see `AppState._on_settings_changed`).
+        # Skip same-value writes: GSettings re-emits "changed" for them, and the sidebar writes
+        # this key on every rebuild.
         if self._gio.get_int("sidebar-selection") == streak_id:
             return
         self._gio.set_int("sidebar-selection", streak_id)
