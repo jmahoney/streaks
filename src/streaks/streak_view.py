@@ -65,7 +65,7 @@ class StreaksStreakView(Adw.Bin):
         self.state: AppState | None = None
         self._streak: StreakData | None = None
         self._run_index: int | None = None
-        self._legend: list[tuple[str, str | None, str]] = []
+        self._legend: list[engine.LegendEntry] = []
 
         # The legend swatches carry resolved colours, so repaint them when the scheme flips.
         theme.watch(self, lambda: self._rebuild_legend(self._legend))
@@ -100,8 +100,8 @@ class StreaksStreakView(Adw.Bin):
         hist = engine.history(self._streak, today, settings, run_index=run_index, lifetime=lifetime)
 
         tiles = (self.tile_running, self.tile_unconfirmed, self.tile_confirmed, self.tile_hit)
-        for tile, (value, caption, style) in zip(tiles, hist.tiles, strict=True):
-            tile.configure(value, caption, style)
+        for tile, entry in zip(tiles, hist.tiles, strict=True):
+            tile.configure(entry.value, entry.caption, entry.style)
 
         self.chart_title_label.set_label(hist.chart_title)
         self.best_label.set_visible(hist.is_best)
@@ -135,10 +135,10 @@ class StreaksStreakView(Adw.Bin):
             widget.add_css_class("chart-day-label")
             self.day_labels_box.append(widget)
 
-    def _rebuild_legend(self, legend: list[tuple[str, str | None, str]]) -> None:
+    def _rebuild_legend(self, legend: list[engine.LegendEntry]) -> None:
         self._legend = legend
         clear_children(self.legend_entries_box)
-        for fill, border, label in legend:
+        for legend_entry in legend:
             entry = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
             entry.set_valign(Gtk.Align.CENTER)
 
@@ -148,38 +148,38 @@ class StreaksStreakView(Adw.Bin):
             swatch.add_css_class("chart-legend-swatch")
             provider = Gtk.CssProvider()
             border_css = (
-                f"border: 1px solid {theme.resolve(border)};" if border else "border: none;"
+                f"border: 1px solid {theme.resolve(legend_entry.border)};"
+                if legend_entry.border
+                else "border: none;"
             )
             provider.load_from_string(
-                f"* {{ background-color: {theme.resolve(fill)}; {border_css} }}"
+                f"* {{ background-color: {theme.resolve(legend_entry.fill)}; {border_css} }}"
             )
             swatch.get_style_context().add_provider(
                 provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
             )
             entry.append(swatch)
 
-            caption = Gtk.Label(label=label)
+            caption = Gtk.Label(label=legend_entry.label)
             caption.add_css_class("caption")
             caption.add_css_class("dim-label")
             entry.append(caption)
 
             self.legend_entries_box.append(entry)
 
-    def _rebuild_goal_bars(self, goal_bars: list[tuple[str, float, str, bool]]) -> None:
+    def _rebuild_goal_bars(self, goal_bars: list[engine.GoalBar]) -> None:
         self.goal_bars_list.remove_all()
-        for name, ratio, ratio_text, low in goal_bars:
+        for bar in goal_bars:
             row = StreaksGoalBarRow()
-            row.configure(name, ratio, ratio_text, low)
+            row.configure(bar.name, bar.ratio, bar.ratio_text, bar.low)
             self.goal_bars_list.append(row)
 
-    def _rebuild_earlier_runs(
-        self, earlier_runs: list[tuple[str, str, list[engine.Cell], int]]
-    ) -> None:
+    def _rebuild_earlier_runs(self, earlier_runs: list[engine.EarlierRun]) -> None:
         self.runs_list.remove_all()
         self.runs_card.set_visible(bool(earlier_runs))
-        for title, meta, cells, idx in earlier_runs:
+        for run in earlier_runs:
             row = StreaksRunRow()
-            row.configure(title, meta, cells, idx)
+            row.configure(run.title, run.meta, run.strip, run.index)
             self.runs_list.append(row)
 
     # -- interactions ---------------------------------------------------------------

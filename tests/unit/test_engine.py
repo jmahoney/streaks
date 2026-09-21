@@ -36,6 +36,7 @@ from streaks.engine import (
     Settings,
     Status,
     StreakData,
+    Tile,
     _banner_title,
     _cell_for_result,
     _open_sentence,
@@ -600,19 +601,19 @@ def test_fixture_75_hard_history(seeded, today, settings):
     hard = _streaks()["75 Hard"]
     h = history(hard, today, settings)
     assert h.tiles == [
-        ("51", "days running", "accent"),
-        ("4", "unconfirmed", "dim"),
-        ("47", "confirmed kept", "strong"),
-        ("94%", "goals hit", "strong"),
+        Tile("51", "days running", "accent"),
+        Tile("4", "unconfirmed", "dim"),
+        Tile("47", "confirmed kept", "strong"),
+        Tile("94%", "goals hit", "strong"),
     ]
-    bars = {name: (ratio_text, low) for name, _ratio, ratio_text, low in h.goal_bars}
+    bars = {bar.name: (bar.ratio_text, bar.low) for bar in h.goal_bars}
     assert bars["Progress photo"] == ("9/9", False)
     assert bars["45 min outdoors"] == ("9/9", False)
     assert bars["45 min second workout"] == ("6/9", True)
     assert bars["Read 10 pages"] == ("8/9", False)
     assert bars["Stick to the diet"] == ("9/9", False)
 
-    earlier_metas = [meta for (_title, meta, _strip, _idx) in h.earlier_runs]
+    earlier_metas = [r.meta for r in h.earlier_runs]
     assert earlier_metas == ["14 May – 16 Jun · 34 days", "2 Feb – 1 Mar · 28 days"]
 
 
@@ -639,7 +640,7 @@ def test_fixture_75_hard_banner(seeded, today, settings):
 def test_fixture_75_hard_catch_up(seeded, today, settings):
     hard = _streaks()["75 Hard"]
     cu = catch_up(hard, today, settings)
-    assert [d for d, _label in cu.days] == [
+    assert [d.day for d in cu.days] == [
         date(2026, 9, 9),
         date(2026, 9, 10),
         date(2026, 9, 11),
@@ -718,10 +719,10 @@ def test_fixture_couch_to_5k_history_ended_streak(seeded, today, settings):
     streak = _streaks()["Couch to 5K"]
     h = history(streak, today, settings)
     assert h.tiles == [
-        ("31", "days, best run", "accent"),
-        ("0", "unconfirmed", "dim"),
-        ("31", "confirmed kept", "strong"),
-        ("100%", "goals hit", "strong"),
+        Tile("31", "days, best run", "accent"),
+        Tile("0", "unconfirmed", "dim"),
+        Tile("31", "confirmed kept", "strong"),
+        Tile("100%", "goals hit", "strong"),
     ]
     assert h.header_subtitle == "Daily · 1 goal · ended 4 Mar"
     assert h.chart_title == "Run 1 · 2 Feb – 4 Mar"

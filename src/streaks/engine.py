@@ -197,23 +197,69 @@ class TodayView:
 
 
 @dataclass(frozen=True)
+class Tile:
+    """One ``StreaksStatTile`` entry."""
+
+    value: str
+    caption: str
+    style: str
+
+
+@dataclass(frozen=True)
+class LegendEntry:
+    """One chart legend swatch."""
+
+    fill: str
+    border: str | None
+    label: str
+
+
+@dataclass(frozen=True)
+class GoalBar:
+    """One row of the "Per goal, this month" card."""
+
+    name: str
+    ratio: float
+    ratio_text: str
+    low: bool
+
+
+@dataclass(frozen=True)
+class EarlierRun:
+    """One past run listed below the activity chart."""
+
+    title: str
+    meta: str
+    strip: list[Cell]
+    index: int
+
+
+@dataclass(frozen=True)
+class CatchUpDay:
+    """One unconfirmed day offered by the catch-up dialog."""
+
+    day: date
+    label: str
+
+
+@dataclass(frozen=True)
 class History:
     header_subtitle: str  # the meta line under the streak name, e.g. "Daily · 3 goals · run 2"
-    tiles: list[tuple[str, str, str]]  # StreaksStatTile entries: (value, caption, style)
+    tiles: list[Tile]
     chart_title: str  # heading above the activity chart
     is_best: bool  # whether the shown run is the streak's best
     weeks: list[list[Cell]]  # the activity chart's grid, one row of cells per week
     day_labels: list[str]  # weekday letters above the chart's columns
-    legend: list[tuple[str, str | None, str]]  # chart legend entries: (fill, border, label)
+    legend: list[LegendEntry]
     catch_up_link: str | None  # link text for unconfirmed days, or None to hide the link
-    goal_bars: list[tuple[str, float, str, bool]]  # "Per goal, this month" rows
-    earlier_runs: list[tuple[str, str, list[Cell], int]]  # past runs listed below the chart
+    goal_bars: list[GoalBar]  # "Per goal, this month" rows
+    earlier_runs: list[EarlierRun]  # past runs listed below the chart
 
 
 @dataclass(frozen=True)
 class CatchUp:
     subtitle: str
-    days: list[tuple[date, str]]
+    days: list[CatchUpDay]
 
 
 @dataclass(frozen=True)
@@ -940,21 +986,19 @@ def _lifetime_weeks(
     return _weeks_grid(day_map, grid_start, grid_end, today)
 
 
-def _legend(n_goals: int) -> list[tuple[str, str | None, str]]:
+def _legend(n_goals: int) -> list[LegendEntry]:
     all_label = (
         _("done") if n_goals == 1 else _("all %(word)s") % {"word": words.number_word(n_goals)}
     )
     return [
-        (CHART_FULL, None, all_label),
-        (CHART_MID, None, _("some")),
-        (CHART_HOLLOW, CHART_UNCONFIRMED_BORDER, _("unconfirmed")),
-        (CHART_MISSED, None, _("missed")),
+        LegendEntry(CHART_FULL, None, all_label),
+        LegendEntry(CHART_MID, None, _("some")),
+        LegendEntry(CHART_HOLLOW, CHART_UNCONFIRMED_BORDER, _("unconfirmed")),
+        LegendEntry(CHART_MISSED, None, _("missed")),
     ]
 
 
-def _goal_bars(
-    streak: StreakData, today: date, settings: Settings
-) -> list[tuple[str, float, str, bool]]:
+def _goal_bars(streak: StreakData, today: date, settings: Settings) -> list[GoalBar]:
     results = evaluate(streak, today, settings)
     day_map = _day_result_map(results)
     month_start = date(today.year, today.month, 1)
@@ -973,7 +1017,7 @@ def _goal_bars(
             continue
         numerator = sum(1 for d in confirmed_days if d in checks_by_goal.get(g.id, ()))
         ratio = numerator / denom if denom else 0.0
-        bars.append((g.name, ratio, f"{numerator}/{denom}", ratio < GOAL_BAR_LOW_RATIO))
+        bars.append(GoalBar(g.name, ratio, f"{numerator}/{denom}", ratio < GOAL_BAR_LOW_RATIO))
     return bars
 
 
@@ -1018,11 +1062,11 @@ def history(
     unconfirmed = selected.unconfirmed if selected else 0
     confirmed = selected.confirmed if selected else 0
     hit_pct = _goals_hit_percent(selected, today) if selected else 0
-    tiles: list[tuple[str, str, str]] = [
-        (str(running_len), tile0_caption, "accent"),
-        (str(unconfirmed), _("unconfirmed"), "dim"),
-        (str(confirmed), _("confirmed kept"), "strong"),
-        (f"{hit_pct}%", _("goals hit"), "strong"),
+    tiles: list[Tile] = [
+        Tile(str(running_len), tile0_caption, "accent"),
+        Tile(str(unconfirmed), _("unconfirmed"), "dim"),
+        Tile(str(confirmed), _("confirmed kept"), "strong"),
+        Tile(f"{hit_pct}%", _("goals hit"), "strong"),
     ]
 
     if lifetime:
@@ -1068,7 +1112,7 @@ def history(
             "n": r.length,
         }
         strip = [_cell_for_result(pr) for pr in r.periods]
-        earlier_runs.append((title, meta, strip, r.index))
+        earlier_runs.append(EarlierRun(title, meta, strip, r.index))
 
     return History(
         header_subtitle=header_subtitle,
@@ -1104,7 +1148,7 @@ def catch_up(streak: StreakData, today: date, settings: Settings) -> CatchUp:
         "name": streak.name,
         "n": n,
     }
-    days = [(d, words.fmt_weekday_day(d)) for d in unconfirmed_days]
+    days = [CatchUpDay(d, words.fmt_weekday_day(d)) for d in unconfirmed_days]
     return CatchUp(subtitle=subtitle, days=days)
 
 
@@ -1129,7 +1173,7 @@ def catch_up_preview(
     warning per row, an updated strip, and a summary sentence of what saving would do to the
     run."""
     cu = catch_up(streak, today, settings)
-    unconfirmed_days = [d for d, _label in cu.days]
+    unconfirmed_days = [d.day for d in cu.days]
     n_goals_total = sum(1 for g in streak.goals if g.removed_on is None)
 
     row_state: dict[date, str] = {}

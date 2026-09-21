@@ -25,7 +25,7 @@ class StreaksGoalBarRow(Gtk.ListBoxRow):
     ratio_label = Gtk.Template.Child()
 
     def configure(self, name: str, ratio: float, ratio_text: str, low: bool) -> None:
-        """Populate the row from one ``engine.History.goal_bars`` tuple."""
+        """Populate the row from one ``engine.History.goal_bars`` entry (an ``engine.GoalBar``)."""
         self.name_label.set_label(name)
         self.bar.set_fraction(ratio)
         self.ratio_label.set_markup(f"<b>{GLib.markup_escape_text(ratio_text)}</b>")

@@ -78,9 +78,9 @@ class StreaksCatchupDialog(Adw.Dialog):
         active_goals = sorted(
             (g for g in self._streak.goals if g.removed_on is None), key=lambda g: g.position
         )
-        for day, _label in cu.days:
+        for cu_day in cu.days:
             row = StreaksCatchupRow()
-            row.configure(day, active_goals)
+            row.configure(cu_day.day, active_goals)
             row.connect("answer-changed", self._on_row_changed)
             self.days_list.append(row)
             self._rows.append(row)

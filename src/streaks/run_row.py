@@ -36,7 +36,8 @@ class StreaksRunRow(Gtk.ListBoxRow):
         self.strip_slot.append(self.strip)
 
     def configure(self, title: str, meta: str, cells: list[Cell], run_index: int) -> None:
-        """Populate the row from one ``engine.History.earlier_runs`` tuple."""
+        """Populate the row from one ``engine.History.earlier_runs`` entry (an
+        ``engine.EarlierRun``)."""
         self.run_index = run_index
         self.title_label.set_label(title)
         self.meta_label.set_label(meta)
