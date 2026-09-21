@@ -105,6 +105,21 @@ class Settings:
     show_ended: bool = True
 
 
+# --------------------------------------------------------------------------------------
+# Named constants.
+# --------------------------------------------------------------------------------------
+
+WEEKDAYS_MON_TO_FRI = 0b0011111
+MONTHLY_OPEN_WINDOW_DAYS = 7  # a monthly card counts as open in the month's last N days
+STRIP_LENGTH = 24  # cells shown in a banner/catch-up strip
+
+CELL_RATIO_LOW = 0.3  # below this ratio, a chart cell uses the "low" fill
+CELL_RATIO_MID = 0.6  # below this ratio, "mid"; below CELL_RATIO_FULL, "high"
+CELL_RATIO_FULL = 0.99
+
+GOAL_BAR_LOW_RATIO = 0.75  # below this ratio, a "Per goal, this month" bar is flagged low
+
+
 @dataclass(frozen=True)
 class Period:
     start: date
@@ -602,11 +617,11 @@ def _cell_for_result(pr: PeriodResult) -> Cell:
     ratio = pr.ratio
     if ratio == 0:
         fill = CHART_ZERO
-    elif ratio < 0.3:
+    elif ratio < CELL_RATIO_LOW:
         fill = CHART_LOW
-    elif ratio < 0.6:
+    elif ratio < CELL_RATIO_MID:
         fill = CHART_MID
-    elif ratio < 0.99:
+    elif ratio < CELL_RATIO_FULL:
         fill = CHART_HIGH
     else:
         fill = CHART_FULL
@@ -618,7 +633,7 @@ def _upcoming_cell() -> Cell:
 
 
 def _banner_strip(results: tuple[PeriodResult, ...]) -> list[Cell]:
-    last = list(results[-24:])
+    last = list(results[-STRIP_LENGTH:])
     cells = []
     for pr in last:
         if pr.status == Status.UNCONFIRMED:
@@ -695,7 +710,7 @@ def _is_open_today(streak: StreakData, today: date) -> bool:
         return False
     if streak.period_kind == PeriodKind.MONTHLY:
         days_left = (period.end - today).days
-        if days_left >= 7:
+        if days_left >= MONTHLY_OPEN_WINDOW_DAYS:
             return False
     goals = active_goals(streak, period)
     checked_today = {c.goal_id for c in streak.checks if c.day == today}
@@ -707,8 +722,7 @@ def _build_card(
 ) -> Card:
     if streak.period_kind == PeriodKind.WEEKDAYS and not is_due(streak, today):
         nxt = next_due_day(streak, today)
-        standard_weekdays = 0b0011111
-        if streak.weekdays_mask == standard_weekdays:
+        if streak.weekdays_mask == WEEKDAYS_MON_TO_FRI:
             body = _("Weekdays only. Next check-in %(day)s.") % {"day": words.fmt_weekday_day(nxt)}
         else:
             body = _("%(days)s only. Next check-in %(day)s.") % {
@@ -959,7 +973,7 @@ def _goal_bars(
             continue
         numerator = sum(1 for d in confirmed_days if d in checks_by_goal.get(g.id, ()))
         ratio = numerator / denom if denom else 0.0
-        bars.append((g.name, ratio, f"{numerator}/{denom}", ratio < 0.75))
+        bars.append((g.name, ratio, f"{numerator}/{denom}", ratio < GOAL_BAR_LOW_RATIO))
     return bars
 
 
@@ -1160,7 +1174,7 @@ def catch_up_preview(
                 }
 
     strip_results = evaluate(hypothetical, today, settings)
-    strip = [_cell_for_result(pr) for pr in strip_results[-24:]]
+    strip = [_cell_for_result(pr) for pr in strip_results[-STRIP_LENGTH:]]
 
     unanswered_after = [d for d in unconfirmed_days if d not in answers]
 

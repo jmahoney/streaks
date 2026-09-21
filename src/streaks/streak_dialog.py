@@ -25,8 +25,6 @@ from streaks.state import AppState
 
 _ = gettext.gettext
 
-_STANDARD_WEEKDAYS = 0b0011111  # Mon-Fri
-
 
 @Gtk.Template(resource_path="/com/cheerschopper/Streaks/streaks/ui/streak_dialog.ui")
 class StreaksStreakDialog(Adw.Dialog):

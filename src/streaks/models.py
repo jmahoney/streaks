@@ -30,6 +30,7 @@ from peewee import (
 )
 
 from streaks.engine import (
+    WEEKDAYS_MON_TO_FRI,
     Answer,
     AnswerData,
     CheckData,
@@ -78,7 +79,7 @@ class Streak(BaseModel):
     name = CharField()
     colour = CharField(max_length=7)
     period_kind = CharField()
-    weekdays_mask = IntegerField(default=0b0011111)
+    weekdays_mask = IntegerField(default=WEEKDAYS_MON_TO_FRI)
     times_per_week = IntegerField(default=3)
     reminder_time = TimeField(null=True)
     allow_skip = BooleanField(default=False)
@@ -177,7 +178,7 @@ def create_streak(
     period_kind: PeriodKind | str,
     goals: list[str],
     *,
-    weekdays_mask: int = 0b0011111,
+    weekdays_mask: int = WEEKDAYS_MON_TO_FRI,
     times_per_week: int = 3,
     reminder_time: time | None = None,
     allow_skip: bool = False,
