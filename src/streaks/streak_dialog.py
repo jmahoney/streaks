@@ -1,9 +1,8 @@
-"""New/Edit streak dialog (design-spec §6), also used for editing (Phase 5's `win.edit-streak`).
+"""New/Edit streak dialog (design-spec §6). Opened by `win.new-streak` and `win.edit-streak`.
 
-No engine logic lives here beyond the handful of writes a streak editor has to make
-(``models.create_streak``/``models.update_streak``) — everything else is plain widget wiring.
-Call ``set_state()`` before presenting so ``Save`` has an ``AppState`` to write through and
-reload.
+Writes go through ``models.create_streak``/``models.update_streak``; everything else is plain
+widget wiring. Call ``set_state()`` before presenting so ``Save`` has an ``AppState`` to write
+through and reload.
 """
 
 from __future__ import annotations
@@ -101,9 +100,8 @@ class StreaksStreakDialog(Adw.Dialog):
 
         self.reminder_popover.set_parent(self.reminder_row)
 
-        # Goal drag-reorder (design-spec §6/Phase 8 deliverable 1): one `Gtk.DropTarget` on the
-        # whole list (rather than one per row) is enough, since dropping anywhere in the list
-        # only ever needs to know which row is being dragged and which row it landed on.
+        # One drop target on the list is enough: a drop only needs the dragged row and the row
+        # under the pointer.
         self._drop_target = Gtk.DropTarget.new(GObject.TYPE_PYOBJECT, Gdk.DragAction.MOVE)
         self._drop_target.connect("drop", self._on_goal_row_dropped)
         self.goals_list.add_controller(self._drop_target)

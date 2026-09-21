@@ -1,42 +1,13 @@
-/* Streaks custom styles
+/* Streaks custom styles: classes not covered by a libadwaita style class (colour-dot, today-dot,
+ * badge, catchup-banner(+.title), catchup-row(.missed), catchup-goal-list, colour-swatch,
+ * stat-accent, streak-blue/green/yellow/red/purple, ended-dot, strike, goal-bar.low,
+ * chart-legend-swatch, chart-day-label, sidebar-footer, sidebar-empty, checkin-card(+.footer),
+ * goal-row, caption-heading dim-label).
  *
- * Allowed custom CSS classes:
- * - colour-dot (8×8 circle)
- * - today-dot (square)
- * - badge (pill count)
- * - catchup-banner
- * - catchup-row.missed
- * - catchup-goal-list
- * - colour-swatch + :checked
- * - stat-accent (#1a68c7 number)
- * - streak-blue/green/yellow/red/purple (a streak's colour on dots and swatches)
- * - ended-dot
- * - strike (strike-through label)
- * - goal-bar.low (amber)
- * - chart-legend-swatch
- * - sidebar-footer
- * - sidebar-empty
- * - catchup-banner (+ .title)
- * - checkin-card (+ .footer)
- * - goal-row
- * - card (built-in libadwaita)
- * - caption-heading dim-label (section headings)
- *
- * Phase 5 (streak history, design-spec §4):
- * - stat-accent (already listed above; used on a stat tile's value_label)
- * - goal-bar.low / progressbar.low > trough > progress (amber progress fill)
- * - chart-legend-swatch (11×11 rounded swatch in the chart legend)
- * - chart-day-label (10px, 40% opacity day-of-week letters beside the heatmap)
- *
- * Phase 6 (catch-up dialog, design-spec §5):
- * - catchup-row.missed (already listed above; bg #fdf2f2, border #f0d7d9) + .date (#a51d2d)
- * - catchup-goal-list (already listed above; radius 9, border 1px #f0d7d9)
- *
- * Dark scheme (design turn 5, "Dark variant — amber accent"): every colour below is a CSS
- * variable declared on :root and overridden in the prefers-color-scheme block at the end, so no
- * widget needs to know which scheme is active. Streak colours are the streak-* classes (stored
- * hex -> class via streaks.theme.colour_class); the chart palette the drawing widgets use lives
- * in streaks.theme, since GSK can't read CSS.
+ * Every colour is a CSS variable declared on :root and overridden once in the
+ * prefers-color-scheme: dark block at the end, so no widget needs to know which scheme is
+ * active. Streak colours are the .streak-* classes selected by streaks.theme.colour_class();
+ * the chart palette lives in streaks.theme because GSK cannot read CSS.
  */
 
 :root {

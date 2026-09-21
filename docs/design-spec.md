@@ -1,9 +1,9 @@
-# Streaks — design specification (source of truth for coding agents)
+# Streaks — design specification
 
-Extracted from `claude-design/streak-tracking-gnome-app/project/Streaks for GNOME.dc.html` (turn 4, options 4a–4f;
-dark colours from turn 5, options 5a–5f).
-Coding agents work from **this file**; open the HTML only if something here is unclear. Every quoted string below is
-exact and must be wrapped in `_()` in code. The fixture date is **Sunday 13 September 2026**.
+Extracted from the design mock in `claude-design/streak-tracking-gnome-app/`. This file is the
+source of truth for layout, wording and colours; the HTML mock is reference material. Every
+quoted string below is exact and must be wrapped in `_()` in code. The fixture date is **Sunday
+13 September 2026**.
 
 Design tokens (px, light theme; libadwaita's Adwaita already provides most of these — use style classes, not custom CSS,
 unless the class is listed in §9):
@@ -42,7 +42,7 @@ Chart cell colour scale (from the design's script), by fraction of goals done th
 Cells: 13×13, radius `max(2, round(13/4))` = 3, gap 4. Strips (banner, earlier runs, catch-up result): 8×22 gap 3
 (banner), 7×18 gap 2 (earlier runs), 9×20 gap 3 (catch-up result), radius 2.
 
-### Dark scheme (turn 5, "Dark variant — amber accent")
+### Dark scheme ("Dark variant — amber accent")
 
 Same six views in Adwaita dark; **only colours change, never layout**. Blue at 13px on a `#1e1e20` ground goes muddy
 and the chart scale collapses, so dark runs on **amber**: `#ffa348` for fills, buttons and the top of the chart scale,

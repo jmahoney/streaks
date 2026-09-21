@@ -76,8 +76,8 @@ class StreaksWindow(Adw.ApplicationWindow):
         self.search_bar.set_key_capture_widget(self)
         self.search_bar.set_visible(False)
         self.search_bar.connect("notify::search-mode-enabled", self._on_search_mode_changed)
-        # `Gtk.Editable::changed` (not `GtkSearchEntry::search-changed`, which is debounced by a
-        # short idle timeout) so filtering is synchronous and deterministic for tests.
+        # "changed" fires synchronously on every keystroke, so filtering is deterministic in
+        # tests.
         self.search_entry.connect("changed", self._on_search_changed)
 
         self.today_view.set_state(self.state)
@@ -111,10 +111,8 @@ class StreaksWindow(Adw.ApplicationWindow):
         toggle_search.connect("activate", self._on_toggle_search)
         self.add_action(toggle_search)
 
-        # No "show-help-overlay" action here: `GtkApplicationWindow` wires one up on its own,
-        # building it from the `gtk/help-overlay.ui` resource under the application's
-        # `resource-base-path` (see `src/streaks/ui/shortcuts.blp`), as long as no action of
-        # that name already exists on the window.
+        # win.show-help-overlay is provided by GtkApplicationWindow from the
+        # gtk/help-overlay.ui resource (src/streaks/ui/shortcuts.blp).
 
     def _on_new_streak(self, *_args) -> None:
         dialog = StreaksStreakDialog.for_new()
@@ -215,10 +213,8 @@ class StreaksWindow(Adw.ApplicationWindow):
 
     def _on_search_mode_changed(self, *_args) -> None:
         active = self.search_bar.get_search_mode()
-        # Keep the collapsed search bar out of the sidebar box's layout entirely (not just
-        # visually collapsed via its internal revealer): a `visible` widget still claims its
-        # share of the box's inter-child spacing even at zero height, which would nudge the
-        # streak list down a couple of pixels whether or not anyone ever opens search.
+        # Hide the bar entirely when search is off: a visible-but-collapsed bar still takes its
+        # share of the box spacing.
         self.search_bar.set_visible(active)
         if not active:
             self.search_entry.set_text("")
@@ -238,8 +234,8 @@ class StreaksWindow(Adw.ApplicationWindow):
     def _set_header_for_page(self, page: str) -> None:
         """Show only the end-of-header controls that belong to ``page`` (design-spec §1).
 
-        An ended streak's page is read-only (design-spec §4/Phase 8 deliverable 5): no "Check
-        in" button, and the ⋯ menu offers only Delete… (see ``_build_more_menu``).
+        An ended streak's page is read-only (design-spec §4): no "Check in" button, and the ⋯
+        menu offers only Delete… (see ``_build_more_menu``).
         """
         is_streak = page == "streak"
         is_ended = is_streak and self._current_streak_ended
@@ -273,9 +269,7 @@ class StreaksWindow(Adw.ApplicationWindow):
             row.set_header(None)
             return
 
-        # Don't trust `_before`: it is the previous row regardless of whether the search filter
-        # has hidden it, so a filtered-out first row of a section would otherwise leave the next
-        # visible row of that same section wrongly believing it isn't the section's first.
+        # Find the previous *visible* row: _before ignores the search filter.
         prev_section = None
         sibling = row.get_prev_sibling()
         while sibling is not None:
@@ -297,9 +291,7 @@ class StreaksWindow(Adw.ApplicationWindow):
         row.set_header(label)
 
     def _clear_sidebar(self) -> None:
-        # `remove_all()` also cleans up the per-row header widgets GtkListBox manages as row
-        # siblings (see `_header_func`) — a manual child-by-child removal loop fights that and
-        # warns about removing widgets already gone.
+        # remove_all() also disposes the header widgets GtkListBox attached via _header_func.
         self.sidebar_list.remove_all()
 
     def _rebuild_sidebar(self) -> None:

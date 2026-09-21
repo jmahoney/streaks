@@ -1,4 +1,4 @@
-"""Colour scheme support (design turn 5: the dark variant runs on amber instead of blue).
+"""Colour scheme support. The dark scheme uses an amber accent.
 
 Two things live here:
 
@@ -34,7 +34,7 @@ from streaks.engine import (
 )
 from streaks.models import COLOURS
 
-# The empty state's single "hint" cell (design 4f/5f): light reuses the low chart step.
+# The empty state's single "hint" cell (design-spec §8): light reuses the low chart step.
 CHART_EMPTY_HINT = "chart-empty-hint"
 
 LIGHT_PALETTE: dict[str, str] = {

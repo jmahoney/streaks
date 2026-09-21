@@ -1,9 +1,8 @@
 """One editable goal row inside the new/edit streak dialog (design-spec §6).
 
-No engine/database logic lives here: the row just holds a name entry and a remove button, and
-reports drag/keyboard reorder requests via signals; the owning dialog (``streak_dialog.py``)
-decides what removing/renaming/adding/reordering means (it owns the row order, since that's what
-gets saved as goal position).
+The row holds a name entry and a remove button, and reports drag/keyboard reorder requests via
+signals. The owning dialog (``streak_dialog.py``) decides what removing/renaming/adding/
+reordering means; it owns the row order, since that's what gets saved as goal position.
 """
 
 from __future__ import annotations
@@ -19,11 +18,9 @@ from gi.repository import Gio, GObject, Gtk
 class StreaksGoalEditRow(Gtk.ListBoxRow):
     """One goal being named/edited: a drag handle, a name entry, and a remove button.
 
-    Emits ``move-requested`` (direction: ``-1`` up / ``+1`` down) when its keyboard fallback
-    actions (``row.move-up``/``row.move-down``, bound to Alt+Up/Alt+Down while the entry is
-    focused — design-spec §6/Phase 8 deliverable 1) fire. Drag-and-drop reordering is wired by the
-    owning dialog directly onto ``handle``/the goals list, since that needs a single
-    ``Gtk.DropTarget`` shared by every row rather than one per row.
+    Emits ``move-requested`` (-1 up / +1 down) from the Alt+Up/Alt+Down shortcuts on the entry.
+    Drag-and-drop is wired by the owning dialog, which holds the one `Gtk.DropTarget` for the
+    whole list.
     """
 
     __gtype_name__ = "StreaksGoalEditRow"
@@ -65,7 +62,5 @@ class StreaksGoalEditRow(Gtk.ListBoxRow):
                 Gtk.ShortcutTrigger.parse_string("<Alt>Down"), Gtk.NamedAction.new("row.move-down")
             )
         )
-        # On the entry (not the row): that's what actually holds focus while editing a goal's
-        # name, which is what "when a goal entry is focused" (design-spec/Phase 8 deliverable 1)
-        # means.
+        # The entry holds focus while a goal is being edited, so the shortcuts live there.
         self.entry.add_controller(shortcuts)

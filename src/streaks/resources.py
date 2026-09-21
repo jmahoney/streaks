@@ -28,7 +28,6 @@ def load_resources() -> None:
     resource = Gio.Resource.load(resource_path)
     resource._register()
 
-    # Load and apply CSS
     css_provider = Gtk.CssProvider()
     css_provider.load_from_resource("/com/cheerschopper/Streaks/style.css")
     display = Gdk.Display.get_default()
@@ -36,7 +35,7 @@ def load_resources() -> None:
         display, css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
     )
 
-    # Fallback gettext for development
+    # Install _() into builtins so modules work without the launcher's gettext setup.
     gettext.install("streaks")
 
     _loaded = True

@@ -1,9 +1,9 @@
 """Catch-up dialog (design-spec §5): answer every unconfirmed day for one streak at once.
 
-No engine logic lives here beyond the writes ``Save`` has to make (``models.answer_day``) —
-every string, colour and sensitivity rule comes straight from ``engine.catch_up``/
-``engine.catch_up_preview``. Build it with ``StreaksCatchupDialog(state, streak_id)`` and
-``present(window)`` it, same as ``StreaksStreakDialog``.
+Every string, colour and sensitivity rule comes from ``engine.catch_up``/
+``engine.catch_up_preview``; ``Save`` writes through ``models.answer_day``. Build it with
+``StreaksCatchupDialog(state, streak_id)`` and ``present(window)`` it, same as
+``StreaksStreakDialog``.
 """
 
 from __future__ import annotations
@@ -27,7 +27,7 @@ from streaks.widgets.grid_widgets import StripWidget  # noqa: F401  registers $S
 
 _ = gettext.gettext
 
-# Design-spec §5: the result strip is 9×20 (gap 3), unlike the banner's default 8×22 strip.
+# Design-spec §5: the result strip is 9×20 with a 3px gap.
 _RESULT_CELL_WIDTH = 9
 _RESULT_CELL_HEIGHT = 20
 _RESULT_GAP = 3
