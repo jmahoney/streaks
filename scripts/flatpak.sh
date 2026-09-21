@@ -2,6 +2,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 export PATH="$HOME/.local/bin:$PATH"
+source scripts/lib/headless.sh
 
 # Parse arguments
 action="${1:-build}"
@@ -44,7 +45,8 @@ case "$action" in
     # mounted even though a Wayland socket also exists on the host.
     # `STREAKS_QUIT_AFTER_STARTUP=1` makes the app quit itself right after the window is realised
     # (see `main.py`), so this exits 0 well before `timeout` would otherwise have to kill it.
-    env -u WAYLAND_DISPLAY GDK_BACKEND=x11 xvfb-run -a -s '-screen 0 1600x1000x24 -dpi 96' \
+    headless_setup always
+    "${HEADLESS_RUNNER[@]}" \
       timeout 30 flatpak run --nosocket=wayland --socket=x11 --no-documents-portal \
       --env=GDK_BACKEND=x11 --env=STREAKS_QUIT_AFTER_STARTUP=1 com.cheerschopper.Streaks
     echo "PASS flatpak window-open check"
