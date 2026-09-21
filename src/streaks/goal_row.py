@@ -16,11 +16,10 @@ from streaks.engine import CardGoal
 class StreaksGoalRow(Gtk.ListBoxRow):
     """A single check-in goal: a checkbox, its name, and a trailing time/countdown caption.
 
-    No engine/database logic lives here — ``configure()`` only places already-computed strings
-    from an ``engine.CardGoal``. The row emits ``toggle-requested`` when its checkbox changes as
-    a result of user interaction (a direct click, or the owning card flipping it in response to
-    row activation); the card is the one that decides what a toggle means (writing a
-    ``GoalCheck``).
+    ``configure()`` places already-computed strings from an ``engine.CardGoal``. The row emits
+    ``toggle-requested`` when its checkbox changes, whether from a direct click or the owning
+    card flipping it in response to row activation; the card decides what a toggle means, writing
+    a ``GoalCheck``.
     """
 
     __gtype_name__ = "StreaksGoalRow"

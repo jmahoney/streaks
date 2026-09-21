@@ -1,9 +1,8 @@
 """Preferences dialog (design-spec §7): check-in, run and data settings.
 
-Every row binds straight to a ``Gio.Settings`` key via ``settings.bind()`` — no engine logic
-here beyond the writes "Delete all data" has to make (``models.delete_all()``). ``AppState``
-picks up every GSettings change itself (see ``AppState._on_settings_changed``) and re-notifies
-its own subscribers, so this dialog does not need to poke the window directly.
+Every row binds straight to a ``Gio.Settings`` key via ``settings.bind()``; "Delete all data"
+writes through ``models.delete_all()``. ``AppState`` picks up every GSettings change itself (see
+``AppState._on_settings_changed``) and re-notifies its own subscribers.
 """
 
 from __future__ import annotations

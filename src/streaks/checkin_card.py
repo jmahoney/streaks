@@ -21,9 +21,9 @@ _ = gettext.gettext
 class StreaksCheckinCard(Gtk.Box):
     """One streak's check-in card: header, goal rows, and an optional progress footer.
 
-    No engine/database logic lives here — ``configure()`` only places already-computed strings
-    and numbers from an ``engine.Card``. Interactions bubble up as signals for the owning view to
-    act on (writing to the database is the view's job, via ``models``).
+    ``configure()`` places already-computed strings and numbers from an ``engine.Card``.
+    Interactions bubble up as signals for the owning view to act on, writing to the database via
+    ``models``.
     """
 
     __gtype_name__ = "StreaksCheckinCard"

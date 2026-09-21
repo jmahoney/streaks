@@ -87,8 +87,8 @@ def number_word(n: int) -> str:
     return str(n)
 
 
-def Number_word(n: int) -> str:  # noqa: N802 - deliberately capitalised, see brief
-    """Sentence-initial capitalised spelling, e.g. ``Number_word(2) == "Two"``."""
+def sentence_number_word(n: int) -> str:
+    """Sentence-initial capitalised spelling, e.g. ``sentence_number_word(2) == "Two"``."""
     return number_word(n).capitalize()
 
 

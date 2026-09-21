@@ -1,8 +1,8 @@
 """The streak history content pane: stat tiles, activity chart, and per-goal/earlier-run
 breakdowns (design-spec §4).
 
-No engine/database logic lives here beyond picking which run/range the chart currently shows —
-every string, number and cell colour rendered comes straight from ``engine.history()``.
+Every string, number and cell colour rendered comes from ``engine.history()``; this view's own
+job is picking which run/range the chart currently shows.
 """
 
 from __future__ import annotations

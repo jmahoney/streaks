@@ -15,8 +15,7 @@ _LOW_CLASS = "low"
 class StreaksGoalBarRow(Gtk.ListBoxRow):
     """One goal's this-month completion ratio: a name, a progress bar, and a ratio caption.
 
-    No engine logic lives here — ``configure()`` only places an already-computed entry of
-    ``engine.History.goal_bars``.
+    ``configure()`` places an already-computed entry of ``engine.History.goal_bars``.
     """
 
     __gtype_name__ = "StreaksGoalBarRow"

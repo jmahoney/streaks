@@ -1,4 +1,5 @@
-"""Peewee data layer. No engine logic lives here — see ``engine.py`` for that.
+"""Peewee data layer: SQLite-backed models and the functions that create, read and update them.
+``engine.py`` computes the streak/run/history data these models store.
 
 ``Answer`` and ``PeriodKind`` are defined in ``engine.py`` (which has no dependencies) and
 re-exported here so both the database layer and the pure engine can share them without a

@@ -1,9 +1,8 @@
 """One unconfirmed day inside the catch-up dialog (design-spec §5).
 
-No engine logic lives here: the row only reports its own raw toggle state (kept/missed/
-unanswered, and which goals are ticked) via ``current_answer()`` and ``answer-changed``. The
-owning ``StreaksCatchupDialog`` is the one that feeds this back through
-``engine.catch_up_preview`` and pushes the resulting strings back onto the row with
+The row reports its own raw toggle state (kept/missed/unanswered, and which goals are ticked)
+via ``current_answer()`` and ``answer-changed``. The owning ``StreaksCatchupDialog`` feeds this
+through ``engine.catch_up_preview`` and pushes the resulting strings back onto the row with
 ``set_state_text()``/``set_warning()``.
 """
 

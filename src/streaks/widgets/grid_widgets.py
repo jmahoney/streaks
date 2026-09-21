@@ -2,9 +2,9 @@
 
 All three (design-spec §10) share one drawing routine: a plain ``Gtk.Widget`` that lays a flat
 list of ``engine.Cell`` values on a fixed grid and paints each cell as a rounded rectangle, with
-an optional 1px border and a per-cell tooltip. No engine/business logic lives here — colours and
-tooltip text are always supplied by the caller as plain strings via ``set_cells()``; colour
-tokens (``engine.CHART_*``) are resolved for the current light/dark scheme by ``streaks.theme``.
+an optional 1px border and a per-cell tooltip. The caller supplies colours and tooltip text as
+plain strings via ``set_cells()``; colour tokens (``engine.CHART_*``) are resolved for the
+current light/dark scheme by ``streaks.theme``.
 """
 
 from __future__ import annotations

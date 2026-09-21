@@ -115,8 +115,8 @@ class Period:
 class PeriodResult:
     period: Period
     status: Status
-    done: int
-    total: int
+    done: int  # goals completed within the period
+    total: int  # goals due within the period
 
     @property
     def ratio(self) -> float:
@@ -129,8 +129,8 @@ class Run:
     start: date
     end: date | None
     length: int
-    confirmed: int
-    unconfirmed: int
+    confirmed: int  # periods with a recorded answer
+    unconfirmed: int  # periods past due with no answer yet
     is_best: bool
     periods: tuple[PeriodResult, ...]
 
@@ -156,7 +156,7 @@ class Card:
     name: str
     colour: str
     meta: str
-    kind: Literal["goals", "not_due", "monthly"]
+    kind: Literal["goals", "not_due", "monthly"]  # which check-in layout the card renders
     goals: list[CardGoal]
     progress: float | None
     progress_text: str | None
@@ -169,7 +169,7 @@ class Banner:
     streak_id: int
     title: str
     body: str
-    strip: list[Cell]
+    strip: list[Cell]  # the run's unconfirmed days, rendered as a compact strip
 
 
 @dataclass(frozen=True)
@@ -183,16 +183,16 @@ class TodayView:
 
 @dataclass(frozen=True)
 class History:
-    header_subtitle: str
-    tiles: list[tuple[str, str, str]]
-    chart_title: str
-    is_best: bool
-    weeks: list[list[Cell]]
-    day_labels: list[str]
-    legend: list[tuple[str, str | None, str]]
-    catch_up_link: str | None
-    goal_bars: list[tuple[str, float, str, bool]]
-    earlier_runs: list[tuple[str, str, list[Cell], int]]
+    header_subtitle: str  # the meta line under the streak name, e.g. "Daily · 3 goals · run 2"
+    tiles: list[tuple[str, str, str]]  # StreaksStatTile entries: (value, caption, style)
+    chart_title: str  # heading above the activity chart
+    is_best: bool  # whether the shown run is the streak's best
+    weeks: list[list[Cell]]  # the activity chart's grid, one row of cells per week
+    day_labels: list[str]  # weekday letters above the chart's columns
+    legend: list[tuple[str, str | None, str]]  # chart legend entries: (fill, border, label)
+    catch_up_link: str | None  # link text for unconfirmed days, or None to hide the link
+    goal_bars: list[tuple[str, float, str, bool]]  # "Per goal, this month" rows
+    earlier_runs: list[tuple[str, str, list[Cell], int]]  # past runs listed below the chart
 
 
 @dataclass(frozen=True)
@@ -203,7 +203,7 @@ class CatchUp:
 
 @dataclass(frozen=True)
 class Preview:
-    row_state: dict[date, str]
+    row_state: dict[date, str]  # status caption per unconfirmed day, keyed by day
     row_warning: dict[date, str]
     strip: list[Cell]
     summary: str
@@ -406,8 +406,8 @@ def evaluate(streak: StreakData, today: date, settings: Settings) -> list[Period
             if answer.status == Answer.MISSED:
                 status = Status.MISSED
             else:
-                # An explicit "Kept" answer means every goal was done that day, whether or
-                # not the goals were ticked individually (catch-up: "All five goals").
+                # A "Kept" answer means every goal was done that day, even if none were ticked
+                # individually.
                 status = Status.KEPT
                 done = max(done, total)
             results.append(PeriodResult(period, status, done, total))
@@ -515,6 +515,7 @@ def current_run(streak: StreakData, today: date, settings: Settings) -> Run | No
 
 
 def best_run(streak: StreakData, today: date, settings: Settings) -> Run | None:
+    """The longest run so far, or ``None`` if the streak has no runs yet."""
     for r in runs(streak, today, settings):
         if r.is_best:
             return r
@@ -570,6 +571,7 @@ def sidebar_meta(streak: StreakData) -> str:
 
 
 def sidebar_ended_meta(streak: StreakData, best: int) -> str:
+    """The sidebar meta line for an ended streak: its end date and best-run length."""
     return _("Ended %(date)s · best %(best)d") % {
         "date": words.fmt_day_short(streak.ended_on),
         "best": best,
@@ -636,7 +638,7 @@ def _open_sentence(n: int) -> str:
         return _("No check-ins open.")
     if n == 1:
         return _("One check-in open.")
-    return _("%(n)s check-ins open.") % {"n": words.Number_word(n)}
+    return _("%(n)s check-ins open.") % {"n": words.sentence_number_word(n)}
 
 
 def _unconfirmed_sentence(n: int) -> str | None:
@@ -644,7 +646,7 @@ def _unconfirmed_sentence(n: int) -> str | None:
         return None
     if n == 1:
         return _("One earlier day is unconfirmed.")
-    return _("%(n)s earlier days are unconfirmed.") % {"n": words.Number_word(n)}
+    return _("%(n)s earlier days are unconfirmed.") % {"n": words.sentence_number_word(n)}
 
 
 def _banner_title(start: date, end: date) -> str:
@@ -656,7 +658,7 @@ def _banner_title(start: date, end: date) -> str:
     else:
         range_str = f"{words.fmt_day(start)} to {words.fmt_day(end)}"
     return _("%(n)s days without a check-in — %(range)s") % {
-        "n": words.Number_word(n),
+        "n": words.sentence_number_word(n),
         "range": range_str,
     }
 
@@ -797,6 +799,7 @@ _CARD_KIND_ORDER = {"goals": 0, "not_due": 1, "monthly": 2}
 
 
 def today_view(streaks: list[StreakData], today: date, settings: Settings) -> TodayView:
+    """The Today pane for every non-ended streak: its quiet-day banners and check-in cards."""
     banners: list[Banner] = []
     cards: list[Card] = []
     open_count = 0
@@ -968,6 +971,9 @@ def history(
     lifetime: bool = False,
     weeks_shown: int = 30,
 ) -> History:
+    """The streak history pane for one run (or the streak's lifetime), with its stat tiles,
+    activity chart, goal breakdown and earlier-runs list. ``run_index`` picks a past run;
+    ``lifetime`` shows ``weeks_shown`` weeks spanning every run."""
     all_runs = runs(streak, today, settings)
     if not all_runs:
         selected = None
@@ -1029,10 +1035,7 @@ def history(
 
     legend = _legend(n_goals)
 
-    # An ended streak has no open run to catch up on (`engine.catch_up()` needs `current_run()`,
-    # which is always `None` once a streak has ended) — never offer the link for one, even if its
-    # last (now-closed) run happens to still have unconfirmed periods in it (Phase 8 deliverable
-    # 5: an ended streak's history is read-only).
+    # An ended streak has no open run to catch up on, so its history never offers the link.
     catch_up_link = None
     if not is_ended and selected is not None and selected.unconfirmed > 0:
         catch_up_link = ngettext(
@@ -1073,6 +1076,8 @@ def history(
 
 
 def catch_up(streak: StreakData, today: date, settings: Settings) -> CatchUp:
+    """The catch-up dialog's opening state: every unconfirmed day in the current run, with its
+    weekday/date label."""
     run = current_run(streak, today, settings)
     unconfirmed_days: list[date] = []
     if run is not None:
@@ -1106,6 +1111,9 @@ def catch_up_preview(
     settings: Settings,
     answers: dict[date, tuple[Answer, tuple[int, ...]]],
 ) -> Preview:
+    """What the catch-up dialog should show for the days answered so far: a status and optional
+    warning per row, an updated strip, and a summary sentence of what saving would do to the
+    run."""
     cu = catch_up(streak, today, settings)
     unconfirmed_days = [d for d, _label in cu.days]
     n_goals_total = sum(1 for g in streak.goals if g.removed_on is None)

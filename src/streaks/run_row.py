@@ -16,9 +16,9 @@ from streaks.widgets.grid_widgets import StripWidget
 class StreaksRunRow(Gtk.ListBoxRow):
     """One finished run: its title, date range/length, and a compact strip of its days.
 
-    No engine logic lives here — ``configure()`` only places an already-computed entry of
-    ``engine.History.earlier_runs``. Activating the row is the owning view's job to interpret
-    (switching the chart to show this run).
+    ``configure()`` places an already-computed entry of ``engine.History.earlier_runs``.
+    Activating the row is the owning view's job to interpret, switching the chart to show
+    this run.
     """
 
     __gtype_name__ = "StreaksRunRow"

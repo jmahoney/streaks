@@ -1,9 +1,8 @@
 """The Today content pane: header, quiet-day banners, and per-streak check-in cards
 (design-spec §3).
 
-No engine/database logic lives here beyond the two writes a check-in view has to make (toggling
-a ``GoalCheck``, recording a ``DayAnswer``) — every string and number displayed comes straight
-from ``engine.today_view``/``engine.mark_missed_preview``.
+Every string and number displayed comes from ``engine.today_view``/``engine.mark_missed_preview``.
+This view makes two writes of its own: toggling a ``GoalCheck`` and recording a ``DayAnswer``.
 """
 
 from __future__ import annotations

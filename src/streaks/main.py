@@ -1,4 +1,5 @@
-"""Main application module."""
+"""Application entry point: registers app actions and accelerators, opens the database, shows
+the main window or a database-error dialog."""
 
 import gettext
 import os
@@ -12,13 +13,14 @@ gi.require_version("Adw", "1")
 from gi.repository import Adw, Gio, GLib, Gtk
 
 from streaks import models
-from streaks.resources import load_resources  # noqa: F401  (re-exported for callers)
+from streaks.resources import load_resources
 
 _ = gettext.gettext
 
 
 class StreaksApplication(Adw.Application):
-    """Main application class."""
+    """Registers app actions and accelerators, opens the database, and shows the main window or
+    a database-error dialog."""
 
     def __init__(self, *, version: str = "0.1.0", **kwargs):
         """Initialize the application."""
@@ -31,7 +33,6 @@ class StreaksApplication(Adw.Application):
         self._db_error_dialog: Adw.AlertDialog | None = None
         self._preferences_dialog: Adw.Dialog | None = None
 
-        # Create actions
         action = Gio.SimpleAction.new("quit", None)
         action.connect("activate", lambda *_: self.quit())
         self.add_action(action)
@@ -55,7 +56,7 @@ class StreaksApplication(Adw.Application):
 
         Opens (creating if needed) the on-disk database before building the window, so a
         corrupt/unwritable database shows a message and quits cleanly instead of crashing with a
-        traceback partway through building the UI (design-spec/Phase 8 deliverable 6).
+        traceback partway through building the UI.
         """
         if not self.window:
             if models.db.database is None:
@@ -69,9 +70,8 @@ class StreaksApplication(Adw.Application):
 
             self.window = StreaksWindow(application=self)
 
-            # `scripts/flatpak.sh test`'s headless "does the window actually open" check sets
-            # this so the app can prove it and quit on its own, instead of the check having to
-            # kill a window that would otherwise sit open until its `timeout` wrapper expires.
+            # STREAKS_QUIT_AFTER_STARTUP makes the app quit once the window maps, for the
+            # headless Flatpak smoke check.
             if os.environ.get("STREAKS_QUIT_AFTER_STARTUP"):
                 self.window.connect("map", lambda *_args: GLib.idle_add(self.quit))
         self.window.present()

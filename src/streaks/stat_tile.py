@@ -16,8 +16,8 @@ _DIM_CLASS = "dim-label"
 class StreaksStatTile(Gtk.Box):
     """A single stat tile: a big number and a caption underneath.
 
-    No engine logic lives here — ``configure()`` only places an already-computed
-    ``(value, caption, style)`` triple, one entry of ``engine.History.tiles``.
+    ``configure()`` takes one ``engine.History.tiles`` entry: a ``(value, caption, style)``
+    triple.
     """
 
     __gtype_name__ = "StreaksStatTile"

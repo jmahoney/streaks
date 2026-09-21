@@ -1,8 +1,8 @@
 """A single row in the sidebar list: the Today row, a running streak, or an ended one.
 
-No engine logic lives here — the caller (``window.py``) passes already-formatted strings and
-numbers (from ``engine.sidebar_meta``/``sidebar_ended_meta``/``sidebar_count`` etc.); this module
-only lays them out and applies the per-row colour dot.
+The caller (``window.py``) passes already-formatted strings and numbers (from
+``engine.sidebar_meta``/``sidebar_ended_meta``/``sidebar_count`` etc.); this module lays them out
+and applies the per-row colour dot.
 """
 
 from __future__ import annotations

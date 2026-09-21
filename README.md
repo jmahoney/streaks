@@ -101,6 +101,12 @@ can't accidentally connect to a real desktop's compositor, and the app quits its
 
 ## Project layout
 
+Three layers. `engine` computes every string, number and colour token from
+plain data. `models` loads that data from SQLite and performs writes.
+Everything else is a GTK view: it places what the engine produced into a
+Blueprint template and reports user actions as signals or `models` writes
+followed by `AppState.reload()`.
+
 - `src/streaks/` — application code: `engine.py` is the pure (no GTK/DB) streak/run/history
   calculator; `models.py` is the Peewee data layer; everything else is GTK view code bound to
   `src/streaks/ui/*.blp` Blueprint templates.
