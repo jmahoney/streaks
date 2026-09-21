@@ -7,6 +7,8 @@ import json
 import sys
 from pathlib import Path
 
+EXPECTED_RUNTIME_VERSION = "50"
+
 repo_root = Path(__file__).parent.parent
 src_dir = repo_root / "src" / "streaks"
 manifest_file = repo_root / "com.cheerschopper.Streaks.json"
@@ -18,9 +20,10 @@ with open(manifest_file) as f:
     manifest = json.load(f)
 
 # Check runtime version
-if manifest.get("runtime-version") != "50":
+if manifest.get("runtime-version") != EXPECTED_RUNTIME_VERSION:
     errors.append(
-        f"FAIL manifest: runtime-version should be '50', got '{manifest.get('runtime-version')}'"
+        f"FAIL manifest: runtime-version should be '{EXPECTED_RUNTIME_VERSION}', "
+        f"got '{manifest.get('runtime-version')}'"
     )
 
 # Collect module names from manifest

@@ -56,11 +56,16 @@ else
   missing_other+=("uv tool install ruff")
 fi
 
-if flatpak info org.gnome.Sdk//50 >/dev/null 2>&1 && flatpak info org.gnome.Platform//50 >/dev/null 2>&1; then
-  pass "flatpak: org.gnome.Sdk//50 + Platform//50"
+# Matches com.cheerschopper.Streaks.json's own "runtime-version".
+runtime_version=$(python3 -c "import json; print(json.load(open('com.cheerschopper.Streaks.json'))['runtime-version'])")
+
+if flatpak info "org.gnome.Sdk//$runtime_version" >/dev/null 2>&1 \
+  && flatpak info "org.gnome.Platform//$runtime_version" >/dev/null 2>&1; then
+  pass "flatpak: org.gnome.Sdk//$runtime_version + Platform//$runtime_version"
 else
-  failmsg "flatpak: org.gnome.Sdk//50" "flatpak install flathub org.gnome.Sdk//50 org.gnome.Platform//50"
-  missing_other+=("flatpak install flathub org.gnome.Sdk//50 org.gnome.Platform//50")
+  failmsg "flatpak: org.gnome.Sdk//$runtime_version" \
+    "flatpak install flathub org.gnome.Sdk//$runtime_version org.gnome.Platform//$runtime_version"
+  missing_other+=("flatpak install flathub org.gnome.Sdk//$runtime_version org.gnome.Platform//$runtime_version")
 fi
 
 if (( fail )); then
