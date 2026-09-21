@@ -52,9 +52,7 @@ from collections.abc import Iterator
 from datetime import date, datetime, timedelta
 from pathlib import Path
 
-_SRC_DIR = Path(__file__).resolve().parents[2] / "src"
-if str(_SRC_DIR) not in sys.path:
-    sys.path.insert(0, str(_SRC_DIR))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
 from streaks.engine import Answer, PeriodKind  # noqa: E402
 from streaks.models import (  # noqa: E402
@@ -65,6 +63,10 @@ from streaks.models import (  # noqa: E402
     end_streak,
     toggle_goal_check,
 )
+
+# The design fixture's pinned "today", shared by the unit and GUI test suites and by
+# scripts/render_screens.py.
+FIXTURE_TODAY = date(2026, 9, 13)
 
 # The story stops answering/checking in the last active run a few days before the fixture
 # "today", to leave some days unconfirmed for the catch-up/banner screens to show.
@@ -147,7 +149,7 @@ def _seed_75_hard(today: date) -> Streak:
     return streak
 
 
-def _seed_no_snoozing(today: date) -> Streak:
+def _seed_no_snoozing() -> Streak:
     streak = create_streak(
         "No snoozing the alarm",
         "#2ec27e",
@@ -163,7 +165,7 @@ def _seed_no_snoozing(today: date) -> Streak:
     return streak
 
 
-def _seed_gym(today: date) -> Streak:
+def _seed_gym() -> Streak:
     streak = create_streak(
         "Gym, three times a week",
         "#9141ac",
@@ -184,7 +186,7 @@ def _seed_gym(today: date) -> Streak:
     return streak
 
 
-def _seed_clip_fingernails(today: date) -> Streak:
+def _seed_clip_fingernails() -> Streak:
     streak = create_streak(
         "Clip fingernails",
         "#e5a50a",
@@ -198,7 +200,7 @@ def _seed_clip_fingernails(today: date) -> Streak:
     return streak
 
 
-def _seed_couch_to_5k(today: date) -> Streak:
+def _seed_couch_to_5k() -> Streak:
     streak = create_streak(
         "Couch to 5K",
         "#e01b24",
@@ -213,7 +215,7 @@ def _seed_couch_to_5k(today: date) -> Streak:
     return streak
 
 
-def seed(today: date = date(2026, 9, 13)) -> dict[str, Streak]:
+def seed(today: date = FIXTURE_TODAY) -> dict[str, Streak]:
     """Populate the (already-initialised) database with the design fixture.
 
     Returns the created streaks keyed by name, in the order the design spec's sidebar shows
@@ -221,10 +223,10 @@ def seed(today: date = date(2026, 9, 13)) -> dict[str, Streak]:
     """
     return {
         "75 Hard": _seed_75_hard(today),
-        "No snoozing the alarm": _seed_no_snoozing(today),
-        "Gym, three times a week": _seed_gym(today),
-        "Clip fingernails": _seed_clip_fingernails(today),
-        "Couch to 5K": _seed_couch_to_5k(today),
+        "No snoozing the alarm": _seed_no_snoozing(),
+        "Gym, three times a week": _seed_gym(),
+        "Clip fingernails": _seed_clip_fingernails(),
+        "Couch to 5K": _seed_couch_to_5k(),
     }
 
 

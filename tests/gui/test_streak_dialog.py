@@ -2,20 +2,16 @@
 
 from datetime import date, time
 
+from helpers import listbox_rows
+
 from streaks import engine
 from streaks.models import Goal, Streak, load_streak_data
 from streaks.streak_dialog import StreaksStreakDialog
-from streaks.window import StreaksWindow
 
 
 def _goal_rows(dialog):
-    rows = []
-    row = dialog.goals_list.get_row_at_index(0)
-    while row is not None:
-        if row is not dialog.add_goal_row:
-            rows.append(row)
-        row = row.get_next_sibling()
-    return rows
+    """`dialog`'s goal rows, excluding the trailing add-goal row."""
+    return [row for row in listbox_rows(dialog.goals_list) if row is not dialog.add_goal_row]
 
 
 def _new_dialog(state, window):
@@ -25,10 +21,8 @@ def _new_dialog(state, window):
     return dialog
 
 
-def test_for_new_defaults(fresh_state, app, process_events):
-    window = StreaksWindow(application=app, state=fresh_state)
-    window.present()
-    process_events()
+def test_for_new_defaults(fresh_state, fresh_window, process_events):
+    window = fresh_window
 
     dialog = _new_dialog(fresh_state, window)
     process_events()
@@ -46,13 +40,9 @@ def test_for_new_defaults(fresh_state, app, process_events):
     assert not rows[0].remove_button.get_visible()
     assert dialog.goals_group.get_title() == "Goals — 1"
 
-    window.destroy()
 
-
-def test_save_sensitivity_tracks_name_and_goal(fresh_state, app, process_events):
-    window = StreaksWindow(application=app, state=fresh_state)
-    window.present()
-    process_events()
+def test_save_sensitivity_tracks_name_and_goal(fresh_state, fresh_window, process_events):
+    window = fresh_window
 
     dialog = _new_dialog(fresh_state, window)
     process_events()
@@ -70,13 +60,9 @@ def test_save_sensitivity_tracks_name_and_goal(fresh_state, app, process_events)
     process_events()
     assert not dialog.save_button.get_sensitive()
 
-    window.destroy()
 
-
-def test_period_switching(fresh_state, app, process_events):
-    window = StreaksWindow(application=app, state=fresh_state)
-    window.present()
-    process_events()
+def test_period_switching(fresh_state, fresh_window, process_events):
+    window = fresh_window
 
     dialog = _new_dialog(fresh_state, window)
     process_events()
@@ -105,13 +91,9 @@ def test_period_switching(fresh_state, app, process_events):
     assert not dialog.weekday_box.get_sensitive()
     assert not dialog.times_row.get_visible()
 
-    window.destroy()
 
-
-def test_add_and_remove_goal_rows(fresh_state, app, process_events):
-    window = StreaksWindow(application=app, state=fresh_state)
-    window.present()
-    process_events()
+def test_add_and_remove_goal_rows(fresh_state, fresh_window, process_events):
+    window = fresh_window
 
     dialog = _new_dialog(fresh_state, window)
     process_events()
@@ -130,13 +112,9 @@ def test_add_and_remove_goal_rows(fresh_state, app, process_events):
     assert dialog.goals_group.get_title() == "Goals — 1"
     assert not rows[0].remove_button.get_visible()
 
-    window.destroy()
 
-
-def test_reminder_popover_sets_label(fresh_state, app, process_events):
-    window = StreaksWindow(application=app, state=fresh_state)
-    window.present()
-    process_events()
+def test_reminder_popover_sets_label(fresh_state, fresh_window, process_events):
+    window = fresh_window
 
     dialog = _new_dialog(fresh_state, window)
     process_events()
@@ -151,13 +129,9 @@ def test_reminder_popover_sets_label(fresh_state, app, process_events):
 
     assert dialog.reminder_label.get_label() == "20:00 ›"
 
-    window.destroy()
 
-
-def test_save_new_streak(fresh_state, app, process_events):
-    window = StreaksWindow(application=app, state=fresh_state)
-    window.present()
-    process_events()
+def test_save_new_streak(fresh_state, fresh_window, process_events):
+    window = fresh_window
 
     dialog = _new_dialog(fresh_state, window)
     process_events()
@@ -202,13 +176,9 @@ def test_save_new_streak(fresh_state, app, process_events):
     assert selected_row.streak_id == streak.id
     assert selected_row.name_label.get_label() == "75 Hard"
 
-    window.destroy()
 
-
-def test_for_edit_prefill_and_reconcile_goals(seeded_state, app, process_events):
-    window = StreaksWindow(application=app, state=seeded_state)
-    window.present()
-    process_events()
+def test_for_edit_prefill_and_reconcile_goals(seeded_state, seeded_window, process_events):
+    window = seeded_window
 
     streak_data = next(s for s in seeded_state.streaks if s.name == "75 Hard")
     dialog = StreaksStreakDialog.for_edit(streak_data)
@@ -262,15 +232,11 @@ def test_for_edit_prefill_and_reconcile_goals(seeded_state, app, process_events)
     assert len(hist_runs) == 3
     assert hist_runs[-1].length == 51
 
-    window.destroy()
 
-
-def test_reorder_goal_row_via_drop_handler(fresh_state, app, process_events):
+def test_reorder_goal_row_via_drop_handler(fresh_state, fresh_window, process_events):
     """Dropping a goal row reorders the list. Drives ``_reorder_goal_row`` directly with
     (row, index), the same entry point the drop handler uses."""
-    window = StreaksWindow(application=app, state=fresh_state)
-    window.present()
-    process_events()
+    window = fresh_window
 
     dialog = _new_dialog(fresh_state, window)
     process_events()
@@ -299,15 +265,11 @@ def test_reorder_goal_row_via_drop_handler(fresh_state, app, process_events):
     assert moved is True
     assert [r.entry.get_text() for r in _goal_rows(dialog)] == ["C", "A", "B"]
 
-    window.destroy()
 
-
-def test_reorder_goal_row_keyboard_fallback(fresh_state, app, process_events):
+def test_reorder_goal_row_keyboard_fallback(fresh_state, fresh_window, process_events):
     """The ``row.move-up``/``row.move-down`` actions (bound to Alt+Up/Alt+Down while a goal
     entry is focused) reorder rows the same way dragging does."""
-    window = StreaksWindow(application=app, state=fresh_state)
-    window.present()
-    process_events()
+    window = fresh_window
 
     dialog = _new_dialog(fresh_state, window)
     process_events()
@@ -332,14 +294,10 @@ def test_reorder_goal_row_keyboard_fallback(fresh_state, app, process_events):
     process_events()
     assert [r.entry.get_text() for r in _goal_rows(dialog)] == ["A", "B"]
 
-    window.destroy()
 
-
-def test_reorder_goal_row_persists_positions_on_save(fresh_state, app, process_events):
+def test_reorder_goal_row_persists_positions_on_save(fresh_state, fresh_window, process_events):
     """Reordering before Save persists the new order as goal positions."""
-    window = StreaksWindow(application=app, state=fresh_state)
-    window.present()
-    process_events()
+    window = fresh_window
 
     dialog = _new_dialog(fresh_state, window)
     process_events()
@@ -363,13 +321,9 @@ def test_reorder_goal_row_persists_positions_on_save(fresh_state, app, process_e
     assert [g.name for g in goals] == ["Second", "First"]
     assert [g.position for g in goals] == [0, 1]
 
-    window.destroy()
 
-
-def test_cancel_writes_nothing(fresh_state, app, process_events):
-    window = StreaksWindow(application=app, state=fresh_state)
-    window.present()
-    process_events()
+def test_cancel_writes_nothing(fresh_state, fresh_window, process_events):
+    window = fresh_window
 
     dialog = _new_dialog(fresh_state, window)
     process_events()
@@ -382,5 +336,3 @@ def test_cancel_writes_nothing(fresh_state, app, process_events):
     process_events()
 
     assert Streak.select().count() == 0
-
-    window.destroy()

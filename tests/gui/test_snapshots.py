@@ -4,7 +4,6 @@ tests/snapshots/<name>.png (light) and tests/snapshots/dark/<name>.png (dark).
 
 from __future__ import annotations
 
-import sys
 from pathlib import Path
 
 import gi
@@ -14,10 +13,6 @@ gi.require_version("Gtk", "4.0")
 from gi.repository import Gtk  # noqa: E402
 from render import render_widget, set_colour_scheme, texture_to_png  # noqa: E402
 from screens import SCREENS, build_screen  # noqa: E402
-
-_SCRIPTS_DIR = Path(__file__).resolve().parent.parent.parent / "scripts"
-if str(_SCRIPTS_DIR) not in sys.path:
-    sys.path.insert(0, str(_SCRIPTS_DIR))
 
 import compare_png  # noqa: E402
 

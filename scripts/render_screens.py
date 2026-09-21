@@ -18,7 +18,6 @@ os.environ.setdefault("GSK_RENDERER", "cairo")
 os.environ.setdefault("GDK_SCALE", "1")
 os.environ.setdefault("ADW_DISABLE_PORTAL", "1")
 os.environ.setdefault("GTK_A11Y", "none")
-os.environ.setdefault("STREAKS_FAKE_TODAY", "2026-09-13")
 
 import argparse  # noqa: E402
 import sys  # noqa: E402
@@ -30,9 +29,11 @@ os.environ.setdefault("STREAKS_GRESOURCE", str(REPO_ROOT / "_build" / "src" / "s
 os.environ.setdefault("GSETTINGS_SCHEMA_DIR", str(REPO_ROOT / "_build" / "data"))
 os.environ.setdefault("GSETTINGS_BACKEND", "memory")
 
-for _path in (REPO_ROOT / "src", REPO_ROOT / "tests", REPO_ROOT / "tests" / "gui"):
-    if str(_path) not in sys.path:
-        sys.path.insert(0, str(_path))
+sys.path[0:0] = [str(REPO_ROOT / "src"), str(REPO_ROOT / "tests"), str(REPO_ROOT / "tests" / "gui")]
+
+from fixtures.seed import FIXTURE_TODAY  # noqa: E402
+
+os.environ.setdefault("STREAKS_FAKE_TODAY", FIXTURE_TODAY.isoformat())
 
 import gi  # noqa: E402
 

@@ -109,18 +109,14 @@ def test_create_streak(today):
 #### B. Automated GUI Integration Tests (`tests/gui/`)
 Initialize components and iteratively flush the standard GLib context pipeline to simulate desktop
 interactions without needing manual clicking. Reuse the `app`/`fresh_state`/`seeded_state`/
-`process_events` fixtures `tests/gui/conftest.py` provides.
+`fresh_window`/`seeded_window`/`process_events` fixtures `tests/gui/conftest.py` provides.
 
 ```python
-from streaks.window import StreaksWindow
-
-def test_window_initialization(app, fresh_state, process_events):
-    window = StreaksWindow(application=app, state=fresh_state)
-    window.present()
+def test_window_initialization(fresh_window, process_events):
+    window = fresh_window
     process_events()
 
     assert window.content_stack.get_visible_child_name() == "empty"
-    window.destroy()
 ```
 
 ---

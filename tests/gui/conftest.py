@@ -8,9 +8,7 @@ test that maps a real window destroys it afterwards, or builds its own window an
 keeping a window's negotiated geometry out of the tests that follow.
 """
 
-import sys
-from datetime import date
-from pathlib import Path
+import os
 
 import gi
 
@@ -18,21 +16,19 @@ gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 
 import pytest
-from gi.repository import Gio, GLib
+from gi.repository import Gio
 from render import configure_for_rendering, make_test_application
+from render import process_events as _process_events
 
+from fixtures.db import bind_memory_db
+from fixtures.seed import FIXTURE_TODAY, seed
 from streaks.resources import load_resources
 
 # Templates validate their resource path at class-definition time, so the bundle must be
 # registered before any test module imports a view class.
 load_resources()
 
-_TESTS_DIR = Path(__file__).resolve().parent.parent
-if str(_TESTS_DIR) not in sys.path:
-    sys.path.insert(0, str(_TESTS_DIR))
-
-# The fixture's pinned "today" (matches `STREAKS_FAKE_TODAY` and `tests/fixtures/seed.py`).
-SEEDED_TODAY = date(2026, 9, 13)
+from streaks.window import StreaksWindow  # noqa: E402
 
 # Keys `seeded_state`/`fresh_state` reset before each test; see the module docstring.
 _RESET_KEYS = (
@@ -56,47 +52,25 @@ def _fresh_app_settings():
     return AppSettings()
 
 
-def _bind_memory_db() -> None:
-    from streaks.models import MODELS, db
-
-    if not db.is_closed():
-        db.close()
-    db.init(":memory:", pragmas={"foreign_keys": 1})
-    db.connect()
-    db.create_tables(MODELS)
-
-
 @pytest.fixture
 def fresh_state():
     """An `AppState` bound to a fresh, empty in-memory database (no streaks)."""
-    import os
-
     from streaks.state import AppState
 
-    os.environ["STREAKS_FAKE_TODAY"] = SEEDED_TODAY.isoformat()
-    _bind_memory_db()
+    os.environ["STREAKS_FAKE_TODAY"] = FIXTURE_TODAY.isoformat()
+    bind_memory_db()
     yield AppState(settings=_fresh_app_settings())
 
 
 @pytest.fixture
 def seeded_state():
     """An `AppState` bound to an in-memory database seeded with the design fixture."""
-    import os
-
-    from fixtures.seed import seed
     from streaks.state import AppState
 
-    os.environ["STREAKS_FAKE_TODAY"] = SEEDED_TODAY.isoformat()
-    _bind_memory_db()
-    seed(SEEDED_TODAY)
+    os.environ["STREAKS_FAKE_TODAY"] = FIXTURE_TODAY.isoformat()
+    bind_memory_db()
+    seed(FIXTURE_TODAY)
     yield AppState(settings=_fresh_app_settings())
-
-
-def _process_events():
-    """Iterate GLib main context while pending."""
-    context = GLib.MainContext.default()
-    while context.pending():
-        context.iteration(False)
 
 
 @pytest.fixture
@@ -110,3 +84,25 @@ def app():
     """Create and register the test application."""
     configure_for_rendering()
     return make_test_application()
+
+
+@pytest.fixture
+def seeded_window(app, seeded_state):
+    """A `StreaksWindow` presented for `seeded_state`, destroyed after the test."""
+    window = StreaksWindow(application=app, state=seeded_state)
+    window.present()
+    _process_events()
+    yield window
+    window.destroy()
+    _process_events()
+
+
+@pytest.fixture
+def fresh_window(app, fresh_state):
+    """A `StreaksWindow` presented for `fresh_state`, destroyed after the test."""
+    window = StreaksWindow(application=app, state=fresh_state)
+    window.present()
+    _process_events()
+    yield window
+    window.destroy()
+    _process_events()

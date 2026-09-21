@@ -25,8 +25,9 @@ export PYTHONPATH="src"
 # Seed data if requested
 if [[ $seed -eq 1 ]]; then
   rm -rf _build/devdata
+  # Matches tests/fixtures/seed.py::FIXTURE_TODAY.
+  export STREAKS_FAKE_TODAY="2026-09-13"
   if [[ -f tests/fixtures/seed.py ]]; then
-    export STREAKS_FAKE_TODAY="2026-09-13"
     python3 tests/fixtures/seed.py
   else
     echo "warning: tests/fixtures/seed.py not found, skipping seed"
@@ -34,7 +35,4 @@ if [[ $seed -eq 1 ]]; then
 fi
 
 # Run the app
-if [[ $seed -eq 1 ]]; then
-  export STREAKS_FAKE_TODAY="2026-09-13"
-fi
 python3 -m streaks

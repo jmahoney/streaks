@@ -1,38 +1,14 @@
 """Tests for the streak history content pane (design-spec §4)."""
 
+from helpers import listbox_rows, select_streak, sidebar_rows
+
 from streaks import engine
-from streaks.sidebar_row import StreaksSidebarRow
-from streaks.window import StreaksWindow
-
-
-def _rows(window):
-    """The sidebar's actual rows, skipping the section-header labels GtkListBox interleaves
-    as row siblings (see `Gtk.ListBoxRow.set_header`)."""
-    rows = []
-    child = window.sidebar_list.get_first_child()
-    while child is not None:
-        if isinstance(child, StreaksSidebarRow):
-            rows.append(child)
-        child = child.get_next_sibling()
-    return rows
 
 
 def _select_by_name(window, name, process_events):
-    for row in _rows(window):
-        if row.name_label.get_label() == name:
-            window.sidebar_list.select_row(row)
-            process_events()
-            return row
-    raise AssertionError(f"no sidebar row named {name!r}")
-
-
-def _list_rows(listbox):
-    rows = []
-    row = listbox.get_row_at_index(0)
-    while row is not None:
-        rows.append(row)
-        row = row.get_next_sibling()
-    return rows
+    row = select_streak(window, name)
+    process_events()
+    return row
 
 
 def _legend_entries(streak_view):
@@ -47,10 +23,8 @@ def _legend_entries(streak_view):
     return entries
 
 
-def test_75_hard_tiles(seeded_state, app, process_events):
-    window = StreaksWindow(application=app, state=seeded_state)
-    window.present()
-    process_events()
+def test_75_hard_tiles(seeded_window, process_events):
+    window = seeded_window
 
     _select_by_name(window, "75 Hard", process_events)
     view = window.streak_view
@@ -68,13 +42,9 @@ def test_75_hard_tiles(seeded_state, app, process_events):
     assert view.tile_hit.value_label.get_label() == "94%"
     assert view.tile_hit.caption_label.get_label() == "goals hit"
 
-    window.destroy()
 
-
-def test_75_hard_chart(seeded_state, app, process_events):
-    window = StreaksWindow(application=app, state=seeded_state)
-    window.present()
-    process_events()
+def test_75_hard_chart(seeded_window, process_events):
+    window = seeded_window
 
     _select_by_name(window, "75 Hard", process_events)
     view = window.streak_view
@@ -110,13 +80,9 @@ def test_75_hard_chart(seeded_state, app, process_events):
     assert view.catch_up_link.get_visible()
     assert view.catch_up_link.get_label() == "4 days unconfirmed — catch up"
 
-    window.destroy()
 
-
-def test_lifetime_toggle(seeded_state, app, process_events):
-    window = StreaksWindow(application=app, state=seeded_state)
-    window.present()
-    process_events()
+def test_lifetime_toggle(seeded_window, process_events):
+    window = seeded_window
 
     _select_by_name(window, "75 Hard", process_events)
     view = window.streak_view
@@ -135,18 +101,14 @@ def test_lifetime_toggle(seeded_state, app, process_events):
     index = (date(2026, 3, 15) - grid_start).days
     assert cells[index].fill == engine.CHART_MISSED
 
-    window.destroy()
 
-
-def test_goal_bars(seeded_state, app, process_events):
-    window = StreaksWindow(application=app, state=seeded_state)
-    window.present()
-    process_events()
+def test_goal_bars(seeded_window, process_events):
+    window = seeded_window
 
     _select_by_name(window, "75 Hard", process_events)
     view = window.streak_view
 
-    rows = _list_rows(view.goal_bars_list)
+    rows = listbox_rows(view.goal_bars_list)
     names = [r.name_label.get_label() for r in rows]
     assert names == [
         "Progress photo",
@@ -167,19 +129,15 @@ def test_goal_bars(seeded_state, app, process_events):
     assert rows[2].bar.has_css_class("low")
     assert not rows[0].bar.has_css_class("low")
 
-    window.destroy()
 
-
-def test_earlier_runs_and_switching_charts(seeded_state, app, process_events):
-    window = StreaksWindow(application=app, state=seeded_state)
-    window.present()
-    process_events()
+def test_earlier_runs_and_switching_charts(seeded_window, process_events):
+    window = seeded_window
 
     _select_by_name(window, "75 Hard", process_events)
     view = window.streak_view
 
     assert view.runs_card.get_visible()
-    rows = _list_rows(view.runs_list)
+    rows = listbox_rows(view.runs_list)
     assert len(rows) == 2
 
     assert rows[0].title_label.get_label() == "Run 2"
@@ -211,13 +169,9 @@ def test_earlier_runs_and_switching_charts(seeded_state, app, process_events):
     assert view.chart_title_label.get_label() == "Run 3 · since 25 Jul"
     assert view.best_label.get_visible()
 
-    window.destroy()
 
-
-def test_window_header_on_streak_page(seeded_state, app, process_events):
-    window = StreaksWindow(application=app, state=seeded_state)
-    window.present()
-    process_events()
+def test_window_header_on_streak_page(seeded_window, process_events):
+    window = seeded_window
 
     assert not window.checkin_button.get_visible()
 
@@ -236,13 +190,9 @@ def test_window_header_on_streak_page(seeded_state, app, process_events):
     assert window.content_stack.get_visible_child_name() == "today"
     assert not window.checkin_button.get_visible()
 
-    window.destroy()
 
-
-def test_ended_streak_history(seeded_state, app, process_events):
-    window = StreaksWindow(application=app, state=seeded_state)
-    window.present()
-    process_events()
+def test_ended_streak_history(seeded_window, process_events):
+    window = seeded_window
 
     _select_by_name(window, "Couch to 5K", process_events)
     view = window.streak_view
@@ -266,13 +216,9 @@ def test_ended_streak_history(seeded_state, app, process_events):
     label_value = menu.get_item_attribute_value(0, "label", None)
     assert label_value.get_string() == "Delete…"
 
-    window.destroy()
 
-
-def test_end_streak_action(seeded_state, app, process_events):
-    window = StreaksWindow(application=app, state=seeded_state)
-    window.present()
-    process_events()
+def test_end_streak_action(seeded_state, seeded_window, process_events):
+    window = seeded_window
 
     row = _select_by_name(window, "75 Hard", process_events)
     streak_id = row.streak_id
@@ -289,17 +235,13 @@ def test_end_streak_action(seeded_state, app, process_events):
     streak = Streak.get_by_id(streak_id)
     assert streak.ended_on == seeded_state.today()
 
-    rows = _rows(window)
+    rows = sidebar_rows(window)
     ended_row = next(r for r in rows if r.streak_id == streak_id)
     assert ended_row.section == "ended"
 
-    window.destroy()
 
-
-def test_delete_streak_action(seeded_state, app, process_events):
-    window = StreaksWindow(application=app, state=seeded_state)
-    window.present()
-    process_events()
+def test_delete_streak_action(seeded_window, process_events):
+    window = seeded_window
 
     row = _select_by_name(window, "75 Hard", process_events)
     streak_id = row.streak_id
@@ -315,9 +257,7 @@ def test_delete_streak_action(seeded_state, app, process_events):
 
     assert Streak.get_or_none(Streak.id == streak_id) is None
     assert window.content_stack.get_visible_child_name() == "today"
-    assert all(r.streak_id != streak_id for r in _rows(window))
-
-    window.destroy()
+    assert all(r.streak_id != streak_id for r in sidebar_rows(window))
 
 
 def _variant(streak_id):

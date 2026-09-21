@@ -13,24 +13,13 @@ import gi
 gi.require_version("Gio", "2.0")
 
 from gi.repository import Gio
+from helpers import sidebar_rows
 
 from streaks import clock, engine
 from streaks.engine import Settings
 from streaks.models import DayAnswer, Goal, GoalCheck, Streak
 from streaks.preferences_dialog import StreaksPreferencesDialog
 from streaks.window import StreaksWindow
-
-
-def _rows(window):
-    from streaks.sidebar_row import StreaksSidebarRow
-
-    rows = []
-    child = window.sidebar_list.get_first_child()
-    while child is not None:
-        if isinstance(child, StreaksSidebarRow):
-            rows.append(child)
-        child = child.get_next_sibling()
-    return rows
 
 
 def _open_preferences(state, window):
@@ -42,10 +31,8 @@ def _open_preferences(state, window):
 # -- rows: titles, subtitles, group description, error class -------------------------------
 
 
-def test_row_titles_and_subtitles(seeded_state, app, process_events):
-    window = StreaksWindow(application=app, state=seeded_state)
-    window.present()
-    process_events()
+def test_row_titles_and_subtitles(seeded_state, seeded_window, process_events):
+    window = seeded_window
 
     dialog = _open_preferences(seeded_state, window)
     process_events()
@@ -69,13 +56,9 @@ def test_row_titles_and_subtitles(seeded_state, app, process_events):
     assert dialog.delete_row.get_title() == "Delete all data"
     assert "error" in dialog.delete_row.get_css_classes()
 
-    window.destroy()
 
-
-def test_data_group_description(seeded_state, app, process_events):
-    window = StreaksWindow(application=app, state=seeded_state)
-    window.present()
-    process_events()
+def test_data_group_description(seeded_state, seeded_window, process_events):
+    window = seeded_window
 
     dialog = _open_preferences(seeded_state, window)
     process_events()
@@ -86,16 +69,12 @@ def test_data_group_description(seeded_state, app, process_events):
     assert parent is not None
     assert parent.get_description() == "Everything stays on this machine. There is no account."
 
-    window.destroy()
-
 
 # -- show ended ------------------------------------------------------------------------------
 
 
-def test_show_ended_row_toggles_sidebar_section(seeded_state, app, process_events):
-    window = StreaksWindow(application=app, state=seeded_state)
-    window.present()
-    process_events()
+def test_show_ended_row_toggles_sidebar_section(seeded_state, seeded_window, process_events):
+    window = seeded_window
 
     dialog = _open_preferences(seeded_state, window)
     process_events()
@@ -106,26 +85,22 @@ def test_show_ended_row_toggles_sidebar_section(seeded_state, app, process_event
     process_events()
 
     assert seeded_state.settings.gio.get_boolean("show-ended") is False
-    names = [r.name_label.get_label() for r in _rows(window)]
+    names = [r.name_label.get_label() for r in sidebar_rows(window)]
     assert "Couch to 5K" not in names
 
     dialog.show_ended_row.set_active(True)
     process_events()
 
     assert seeded_state.settings.gio.get_boolean("show-ended") is True
-    names = [r.name_label.get_label() for r in _rows(window)]
+    names = [r.name_label.get_label() for r in sidebar_rows(window)]
     assert "Couch to 5K" in names
-
-    window.destroy()
 
 
 # -- backfill window --------------------------------------------------------------------------
 
 
-def test_backfill_row_value_and_label(seeded_state, app, process_events):
-    window = StreaksWindow(application=app, state=seeded_state)
-    window.present()
-    process_events()
+def test_backfill_row_value_and_label(seeded_state, seeded_window, process_events):
+    window = seeded_window
 
     dialog = _open_preferences(seeded_state, window)
     process_events()
@@ -142,16 +117,12 @@ def test_backfill_row_value_and_label(seeded_state, app, process_events):
     assert seeded_state.settings.gio.get_int("backfill-days") == 1
     assert dialog.backfill_label.get_label() == "1 day"
 
-    window.destroy()
-
 
 # -- day starts at ----------------------------------------------------------------------------
 
 
-def test_day_start_popover_sets_minutes_and_label(seeded_state, app, process_events):
-    window = StreaksWindow(application=app, state=seeded_state)
-    window.present()
-    process_events()
+def test_day_start_popover_sets_minutes_and_label(seeded_state, seeded_window, process_events):
+    window = seeded_window
 
     dialog = _open_preferences(seeded_state, window)
     process_events()
@@ -166,8 +137,6 @@ def test_day_start_popover_sets_minutes_and_label(seeded_state, app, process_eve
     assert seeded_state.settings.gio.get_int("day-start-minutes") == 150
     assert dialog.day_start_label.get_label() == "02:30"
 
-    window.destroy()
-
 
 def test_day_start_minutes_shifts_todays_checkin_day(monkeypatch):
     monkeypatch.setenv("STREAKS_FAKE_NOW", "2026-09-14T02:00:00")
@@ -179,10 +148,8 @@ def test_day_start_minutes_shifts_todays_checkin_day(monkeypatch):
 # -- count through unconfirmed -----------------------------------------------------------------
 
 
-def test_count_through_row_changes_sidebar_run_count(seeded_state, app, process_events):
-    window = StreaksWindow(application=app, state=seeded_state)
-    window.present()
-    process_events()
+def test_count_through_row_changes_sidebar_run_count(seeded_state, seeded_window, process_events):
+    window = seeded_window
 
     dialog = _open_preferences(seeded_state, window)
     process_events()
@@ -205,19 +172,15 @@ def test_count_through_row_changes_sidebar_run_count(seeded_state, app, process_
     expected_run = engine.current_run(hard_data, today, expected_settings)
     expected_count = expected_run.length if expected_run else 0
 
-    hard_row = next(r for r in _rows(window) if r.name_label.get_label() == "75 Hard")
+    hard_row = next(r for r in sidebar_rows(window) if r.name_label.get_label() == "75 Hard")
     assert hard_row.count_label.get_label() == str(expected_count)
-
-    window.destroy()
 
 
 # -- export -------------------------------------------------------------------------------------
 
 
-def test_export_row_writes_full_json_dump(seeded_state, app, process_events, tmp_path):
-    window = StreaksWindow(application=app, state=seeded_state)
-    window.present()
-    process_events()
+def test_export_row_writes_full_json_dump(seeded_state, seeded_window, process_events, tmp_path):
+    window = seeded_window
 
     dialog = _open_preferences(seeded_state, window)
     process_events()
@@ -229,13 +192,11 @@ def test_export_row_writes_full_json_dump(seeded_state, app, process_events, tmp
     assert data["version"] == 1
     assert len(data["streaks"]) == 5
 
-    window.destroy()
 
-
-def test_export_row_initial_name_uses_todays_date(seeded_state, app, process_events, monkeypatch):
-    window = StreaksWindow(application=app, state=seeded_state)
-    window.present()
-    process_events()
+def test_export_row_initial_name_uses_todays_date(
+    seeded_state, seeded_window, process_events, monkeypatch
+):
+    window = seeded_window
 
     dialog = _open_preferences(seeded_state, window)
     process_events()
@@ -257,16 +218,14 @@ def test_export_row_initial_name_uses_todays_date(seeded_state, app, process_eve
     assert captured["name"] == "streaks-export-2026-09-13.json"
     assert captured["called"]
 
-    window.destroy()
-
 
 # -- delete all data ------------------------------------------------------------------------------
 
 
-def test_delete_all_wipes_database_and_shows_empty_state(seeded_state, app, process_events):
-    window = StreaksWindow(application=app, state=seeded_state)
-    window.present()
-    process_events()
+def test_delete_all_wipes_database_and_shows_empty_state(
+    seeded_state, seeded_window, process_events
+):
+    window = seeded_window
 
     dialog = _open_preferences(seeded_state, window)
     process_events()
@@ -284,13 +243,9 @@ def test_delete_all_wipes_database_and_shows_empty_state(seeded_state, app, proc
     assert DayAnswer.select().count() == 0
     assert window.content_stack.get_visible_child_name() == "empty"
 
-    window.destroy()
 
-
-def test_delete_all_cancel_keeps_data(seeded_state, app, process_events):
-    window = StreaksWindow(application=app, state=seeded_state)
-    window.present()
-    process_events()
+def test_delete_all_cancel_keeps_data(seeded_state, seeded_window, process_events):
+    window = seeded_window
 
     dialog = _open_preferences(seeded_state, window)
     process_events()
@@ -305,16 +260,12 @@ def test_delete_all_cancel_keeps_data(seeded_state, app, process_events):
     assert Streak.select().count() == before
     assert window.content_stack.get_visible_child_name() == "today"
 
-    window.destroy()
-
 
 # -- sidebar search --------------------------------------------------------------------------------
 
 
-def test_search_filters_by_name(seeded_state, app, process_events):
-    window = StreaksWindow(application=app, state=seeded_state)
-    window.present()
-    process_events()
+def test_search_filters_by_name(seeded_window, process_events):
+    window = seeded_window
 
     window.search_button.set_active(True)
     process_events()
@@ -323,10 +274,14 @@ def test_search_filters_by_name(seeded_state, app, process_events):
     window.search_entry.set_text("gym")
     process_events()
 
-    visible_names = [r.name_label.get_label() for r in _rows(window) if r.get_child_visible()]
+    visible_names = [
+        r.name_label.get_label() for r in sidebar_rows(window) if r.get_child_visible()
+    ]
     assert visible_names == ["Today", "Gym, three times a week"]
 
-    hidden_names = [r.name_label.get_label() for r in _rows(window) if not r.get_child_visible()]
+    hidden_names = [
+        r.name_label.get_label() for r in sidebar_rows(window) if not r.get_child_visible()
+    ]
     assert set(hidden_names) == {
         "75 Hard",
         "No snoozing the alarm",
@@ -337,7 +292,9 @@ def test_search_filters_by_name(seeded_state, app, process_events):
     window.search_entry.set_text("")
     process_events()
 
-    visible_names = [r.name_label.get_label() for r in _rows(window) if r.get_child_visible()]
+    visible_names = [
+        r.name_label.get_label() for r in sidebar_rows(window) if r.get_child_visible()
+    ]
     assert visible_names == [
         "Today",
         "75 Hard",
@@ -347,20 +304,16 @@ def test_search_filters_by_name(seeded_state, app, process_events):
         "Couch to 5K",
     ]
 
-    window.destroy()
 
-
-def test_search_does_not_leave_orphan_section_headers(seeded_state, app, process_events):
-    window = StreaksWindow(application=app, state=seeded_state)
-    window.present()
-    process_events()
+def test_search_does_not_leave_orphan_section_headers(seeded_window, process_events):
+    window = seeded_window
 
     window.search_button.set_active(True)
     process_events()
     window.search_entry.set_text("gym")
     process_events()
 
-    visible = [r for r in _rows(window) if r.get_child_visible()]
+    visible = [r for r in sidebar_rows(window) if r.get_child_visible()]
     gym_row = next(r for r in visible if r.name_label.get_label() == "Gym, three times a week")
     # "Gym" is not the first RUNNING row in the unfiltered list, but with "75 Hard" and "No
     # snoozing the alarm" filtered out it must pick up the "RUNNING" header itself.
@@ -368,13 +321,9 @@ def test_search_does_not_leave_orphan_section_headers(seeded_state, app, process
     assert header is not None
     assert header.get_label() == "RUNNING"
 
-    window.destroy()
 
-
-def test_search_escape_closes_and_clears(seeded_state, app, process_events):
-    window = StreaksWindow(application=app, state=seeded_state)
-    window.present()
-    process_events()
+def test_search_escape_closes_and_clears(seeded_window, process_events):
+    window = seeded_window
 
     window.search_button.set_active(True)
     process_events()
@@ -387,22 +336,16 @@ def test_search_escape_closes_and_clears(seeded_state, app, process_events):
     assert not window.search_bar.get_search_mode()
     assert not window.search_button.get_active()
     assert window.search_entry.get_text() == ""
-    assert all(r.get_child_visible() for r in _rows(window))
-
-    window.destroy()
+    assert all(r.get_child_visible() for r in sidebar_rows(window))
 
 
-def test_ctrl_f_focuses_search(seeded_state, app, process_events):
-    window = StreaksWindow(application=app, state=seeded_state)
-    window.present()
-    process_events()
+def test_ctrl_f_focuses_search(seeded_window, process_events):
+    window = seeded_window
 
     window.activate_action("win.toggle-search", None)
     process_events()
 
     assert window.search_bar.get_search_mode()
-
-    window.destroy()
 
 
 # -- window state ----------------------------------------------------------------------------------
@@ -470,10 +413,8 @@ def test_shortcuts_blp_accelerators_match_registered_actions(app):
         )
 
 
-def test_show_help_overlay_action_is_wired_and_lists_new_streak(seeded_state, app, process_events):
-    window = StreaksWindow(application=app, state=seeded_state)
-    window.present()
-    process_events()
+def test_show_help_overlay_action_is_wired_and_lists_new_streak(seeded_window, process_events):
+    window = seeded_window
 
     # Checks wiring only: a real `Gtk.ShortcutsWindow` top-level never completes its first
     # frame under a WM-less display (see `screens._detach_dialog_content`).
@@ -486,8 +427,6 @@ def test_show_help_overlay_action_is_wired_and_lists_new_streak(seeded_state, ap
     )
     text = bytes(data.get_data()).decode("utf-8")
     assert "New streak" in text
-
-    window.destroy()
 
 
 # -- app.preferences action ------------------------------------------------------------------------
@@ -518,12 +457,8 @@ def test_app_preferences_action_presents_dialog_over_active_window(
 # -- rendered screen -------------------------------------------------------------------------------
 
 
-def test_preferences_screen_renders_at_660_wide(seeded_state, app, process_events):
-    # Built and destroyed here so the window's negotiated width does not leak into the shared
-    # GSettings backend.
-    window = StreaksWindow(application=app, state=seeded_state)
-    window.present()
-    process_events()
+def test_preferences_screen_renders_at_660_wide(seeded_window, process_events):
+    window = seeded_window
 
     dialog = StreaksPreferencesDialog(window.state)
     dialog.present(window)
@@ -534,4 +469,3 @@ def test_preferences_screen_renders_at_660_wide(seeded_state, app, process_event
 
     dialog.force_close()
     process_events()
-    window.destroy()

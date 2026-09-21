@@ -16,10 +16,6 @@ from PIL import Image  # noqa: E402
 from render import pixel_at, render_widget, texture_pixels  # noqa: E402
 from screens import build_screen  # noqa: E402
 
-_SCRIPTS_DIR = Path(__file__).resolve().parent.parent.parent / "scripts"
-if str(_SCRIPTS_DIR) not in sys.path:
-    sys.path.insert(0, str(_SCRIPTS_DIR))
-
 import compare_png  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent

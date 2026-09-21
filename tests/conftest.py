@@ -5,12 +5,16 @@ import sys
 import tempfile
 from pathlib import Path
 
-import pytest
-
-repo_src = Path(__file__).parent.parent / "src"
-sys.path.insert(0, str(repo_src))
-
 repo_root = Path(__file__).parent.parent
+for _path in (
+    repo_root / "src",
+    repo_root / "tests",
+    repo_root / "tests" / "gui",
+    repo_root / "scripts",
+):
+    if str(_path) not in sys.path:
+        sys.path.insert(0, str(_path))
+
 os.environ.setdefault("STREAKS_GRESOURCE", str(repo_root / "_build" / "src" / "streaks.gresource"))
 os.environ.setdefault("GSETTINGS_SCHEMA_DIR", str(repo_root / "_build" / "data"))
 os.environ.setdefault("GSETTINGS_BACKEND", "memory")
@@ -23,22 +27,7 @@ os.environ.setdefault("GSK_RENDERER", "cairo")
 os.environ.setdefault("GDK_SCALE", "1")
 os.environ.setdefault("ADW_DISABLE_PORTAL", "1")
 os.environ.setdefault("GTK_A11Y", "none")
-os.environ.setdefault("STREAKS_FAKE_TODAY", "2026-09-13")
 
+from fixtures.seed import FIXTURE_TODAY  # noqa: E402
 
-def process_events():
-    """Iterate GLib main context while pending."""
-    import gi
-
-    gi.require_version("GLib", "2.0")
-    from gi.repository import GLib
-
-    context = GLib.MainContext.default()
-    while context.pending():
-        context.iteration(False)
-
-
-@pytest.fixture
-def process_events_fixture():
-    """Fixture for event processing."""
-    return process_events
+os.environ.setdefault("STREAKS_FAKE_TODAY", FIXTURE_TODAY.isoformat())

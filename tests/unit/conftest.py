@@ -10,6 +10,7 @@ from datetime import date
 
 import pytest
 
+from fixtures.db import bind_memory_db
 from streaks.engine import Settings
 from streaks.models import MODELS, db
 
@@ -17,9 +18,7 @@ from streaks.models import MODELS, db
 @pytest.fixture(autouse=True)
 def in_memory_db():
     """Swap the production database for an isolated, in-memory database for the test's duration."""
-    db.init(":memory:", pragmas={"foreign_keys": 1})
-    db.connect()
-    db.create_tables(MODELS)
+    bind_memory_db()
     yield db
     db.drop_tables(MODELS)
     db.close()

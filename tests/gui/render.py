@@ -20,11 +20,24 @@ from gi.repository import (  # noqa: E402
     Adw,
     Gdk,
     Gio,
+    GLib,
     Graphene,  # noqa: E402
     Gtk,
 )
 
 _configured = False
+
+_MAX_EVENT_ITERATIONS = 10_000
+
+
+def process_events(max_iterations: int = _MAX_EVENT_ITERATIONS) -> None:
+    """Iterate the default GLib main context while events are pending, bounded so a stuck
+    idle/timeout source can never hang a test or render."""
+    context = GLib.MainContext.default()
+    iterations = 0
+    while context.pending() and iterations < max_iterations:
+        context.iteration(False)
+        iterations += 1
 
 
 _accent_pin: Gtk.CssProvider | None = None

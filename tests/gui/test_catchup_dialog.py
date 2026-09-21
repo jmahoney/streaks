@@ -1,18 +1,19 @@
 """Tests for the catch-up dialog (design-spec §5), against the seeded "75 Hard" streak.
 
 The unconfirmed days are Wed 9 - Sat 12 September 2026; the fixture's fake "today" is Sunday 13
-September 2026 (``tests/gui/conftest.py:SEEDED_TODAY``). Every string/number asserted here is
+September 2026 (``tests/fixtures/seed.py::FIXTURE_TODAY``). Every string/number asserted here is
 cross-checked against ``engine.catch_up``/``catch_up_preview``.
 """
 
 import json
 from datetime import date
 
+from helpers import sidebar_rows
+
 from streaks import engine
 from streaks.catchup_dialog import StreaksCatchupDialog
 from streaks.engine import Answer
 from streaks.models import DayAnswer, Goal, Streak
-from streaks.window import StreaksWindow
 
 WED, THU, FRI, SAT = date(2026, 9, 9), date(2026, 9, 10), date(2026, 9, 11), date(2026, 9, 12)
 
@@ -41,10 +42,8 @@ def _settings(state):
     return state.settings.to_engine()
 
 
-def test_initial_state(seeded_state, app, process_events):
-    window = StreaksWindow(application=app, state=seeded_state)
-    window.present()
-    process_events()
+def test_initial_state(seeded_state, seeded_window, process_events):
+    window = seeded_window
 
     dialog = _open_dialog(seeded_state, window)
     process_events()
@@ -86,13 +85,9 @@ def test_initial_state(seeded_state, app, process_events):
         "unanswered, and they don't break anything."
     )
 
-    window.destroy()
 
-
-def test_kept_on_wednesday(seeded_state, app, process_events):
-    window = StreaksWindow(application=app, state=seeded_state)
-    window.present()
-    process_events()
+def test_kept_on_wednesday(seeded_state, seeded_window, process_events):
+    window = seeded_window
 
     dialog = _open_dialog(seeded_state, window)
     process_events()
@@ -117,13 +112,9 @@ def test_kept_on_wednesday(seeded_state, app, process_events):
     assert dialog.result_strip._cells[-5].fill == engine.CHART_FULL
     assert dialog.result_strip._cells[-5].border is None
 
-    window.destroy()
 
-
-def test_missed_on_friday_requires_unticking_a_goal(seeded_state, app, process_events):
-    window = StreaksWindow(application=app, state=seeded_state)
-    window.present()
-    process_events()
+def test_missed_on_friday_requires_unticking_a_goal(seeded_state, seeded_window, process_events):
+    window = seeded_window
 
     dialog = _open_dialog(seeded_state, window)
     process_events()
@@ -153,13 +144,11 @@ def test_missed_on_friday_requires_unticking_a_goal(seeded_state, app, process_e
         "Saving this ends the 48-day run on 11 September and starts run 4 on the 12th."
     )
 
-    window.destroy()
 
-
-def test_combined_answers_summary_matches_engine_and_brief(seeded_state, app, process_events):
-    window = StreaksWindow(application=app, state=seeded_state)
-    window.present()
-    process_events()
+def test_combined_answers_summary_matches_engine_and_brief(
+    seeded_state, seeded_window, process_events
+):
+    window = seeded_window
 
     dialog = _open_dialog(seeded_state, window)
     process_events()
@@ -191,13 +180,11 @@ def test_combined_answers_summary_matches_engine_and_brief(seeded_state, app, pr
     )
     assert dialog.save_button.get_sensitive()
 
-    window.destroy()
 
-
-def test_clicking_active_kept_again_reverts_to_unanswered(seeded_state, app, process_events):
-    window = StreaksWindow(application=app, state=seeded_state)
-    window.present()
-    process_events()
+def test_clicking_active_kept_again_reverts_to_unanswered(
+    seeded_state, seeded_window, process_events
+):
+    window = seeded_window
 
     dialog = _open_dialog(seeded_state, window)
     process_events()
@@ -214,13 +201,9 @@ def test_clicking_active_kept_again_reverts_to_unanswered(seeded_state, app, pro
     assert not wed_row.kept_button.get_active()
     assert not dialog.save_button.get_sensitive()
 
-    window.destroy()
 
-
-def test_save_writes_answers_and_refreshes_the_app(seeded_state, app, process_events):
-    window = StreaksWindow(application=app, state=seeded_state)
-    window.present()
-    process_events()
+def test_save_writes_answers_and_refreshes_the_app(seeded_state, seeded_window, process_events):
+    window = seeded_window
 
     dialog = _open_dialog(seeded_state, window)
     process_events()
@@ -263,11 +246,7 @@ def test_save_writes_answers_and_refreshes_the_app(seeded_state, app, process_ev
     runs = engine.runs(streak_data, today, settings)
     assert [r.length for r in runs] == [28, 34, 48, 2]
 
-    hard_row = next(
-        r
-        for r in _all_sidebar_rows(window)
-        if getattr(r, "name_label", None) and r.name_label.get_label() == "75 Hard"
-    )
+    hard_row = next(r for r in sidebar_rows(window) if r.name_label.get_label() == "75 Hard")
     assert hard_row.count_label.get_label() == "2"
 
     # Thursday's unconfirmed day now belongs to the closed run 3; `today_view()` banners only
@@ -275,23 +254,9 @@ def test_save_writes_answers_and_refreshes_the_app(seeded_state, app, process_ev
     tv = engine.today_view(seeded_state.streaks, today, settings)
     assert [b for b in tv.banners if b.streak_id == streak.id] == []
 
-    window.destroy()
 
-
-def _all_sidebar_rows(window):
-    rows = []
-    child = window.sidebar_list.get_first_child()
-    while child is not None:
-        if hasattr(child, "name_label"):
-            rows.append(child)
-        child = child.get_next_sibling()
-    return rows
-
-
-def test_cancel_writes_nothing(seeded_state, app, process_events):
-    window = StreaksWindow(application=app, state=seeded_state)
-    window.present()
-    process_events()
+def test_cancel_writes_nothing(seeded_state, seeded_window, process_events):
+    window = seeded_window
 
     before = DayAnswer.select().count()
 
@@ -310,13 +275,9 @@ def test_cancel_writes_nothing(seeded_state, app, process_events):
     assert DayAnswer.select().count() == before
     assert DayAnswer.get_or_none(DayAnswer.day == WED) is None
 
-    window.destroy()
 
-
-def test_open_from_today_banner(seeded_state, app, process_events):
-    window = StreaksWindow(application=app, state=seeded_state)
-    window.present()
-    process_events()
+def test_open_from_today_banner(seeded_state, seeded_window, process_events):
+    window = seeded_window
 
     today_view = window.today_view
     banner = today_view.banners_box.get_first_child()
@@ -329,13 +290,9 @@ def test_open_from_today_banner(seeded_state, app, process_events):
     assert today_view.catchup_dialog is not None
     assert today_view.catchup_dialog.dialog_title.get_subtitle() == "75 Hard · 4 days"
 
-    window.destroy()
 
-
-def test_open_from_streak_view_link(seeded_state, app, process_events):
-    window = StreaksWindow(application=app, state=seeded_state)
-    window.present()
-    process_events()
+def test_open_from_streak_view_link(seeded_state, seeded_window, process_events):
+    window = seeded_window
 
     streak = Streak.get(Streak.name == "75 Hard")
     hard_data = _hard_streak_data(seeded_state)
@@ -350,5 +307,3 @@ def test_open_from_streak_view_link(seeded_state, app, process_events):
     assert window.catchup_dialog is not None
     assert window.catchup_dialog.dialog_title.get_subtitle() == "75 Hard · 4 days"
     assert window.catchup_dialog.streak_id == streak.id
-
-    window.destroy()

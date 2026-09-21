@@ -1,31 +1,17 @@
 """Tests for the sidebar list (design-spec §2)."""
 
 import pytest
+from helpers import sidebar_rows
 
 from streaks.empty_view import StreaksEmptyView
 from streaks.models import Streak
-from streaks.sidebar_row import StreaksSidebarRow
 from streaks.window import StreaksWindow
 
 
-def _rows(window):
-    """The sidebar's actual rows, skipping the section-header labels GtkListBox interleaves
-    as row siblings (see `Gtk.ListBoxRow.set_header`)."""
-    rows = []
-    child = window.sidebar_list.get_first_child()
-    while child is not None:
-        if isinstance(child, StreaksSidebarRow):
-            rows.append(child)
-        child = child.get_next_sibling()
-    return rows
+def test_sidebar_rows_from_seed(seeded_window, process_events):
+    window = seeded_window
 
-
-def test_sidebar_rows_from_seed(seeded_state, app, process_events):
-    window = StreaksWindow(application=app, state=seeded_state)
-    window.present()
-    process_events()
-
-    rows = _rows(window)
+    rows = sidebar_rows(window)
     names = [r.name_label.get_label() for r in rows]
     assert names == [
         "Today",
@@ -68,15 +54,11 @@ def test_sidebar_rows_from_seed(seeded_state, app, process_events):
     assert window.footer_label.get_label() == "Everything stays on this machine."
     assert window.footer_label.get_visible()
 
-    window.destroy()
 
+def test_section_headers(seeded_window, process_events):
+    window = seeded_window
 
-def test_section_headers(seeded_state, app, process_events):
-    window = StreaksWindow(application=app, state=seeded_state)
-    window.present()
-    process_events()
-
-    rows = _rows(window)
+    rows = sidebar_rows(window)
 
     assert rows[0].get_header() is None  # Today
 
@@ -91,15 +73,11 @@ def test_section_headers(seeded_state, app, process_events):
     assert header is not None
     assert header.get_label() == "ENDED"
 
-    window.destroy()
 
+def test_selecting_a_streak_switches_content(seeded_window, process_events):
+    window = seeded_window
 
-def test_selecting_a_streak_switches_content(seeded_state, app, process_events):
-    window = StreaksWindow(application=app, state=seeded_state)
-    window.present()
-    process_events()
-
-    rows = _rows(window)
+    rows = sidebar_rows(window)
     hard_row = rows[1]
     window.sidebar_list.select_row(hard_row)
     process_events()
@@ -114,15 +92,11 @@ def test_selecting_a_streak_switches_content(seeded_state, app, process_events):
 
     assert window.content_stack.get_visible_child_name() == "today"
 
-    window.destroy()
 
+def test_selection_survives_state_changed(seeded_state, seeded_window, process_events):
+    window = seeded_window
 
-def test_selection_survives_state_changed(seeded_state, app, process_events):
-    window = StreaksWindow(application=app, state=seeded_state)
-    window.present()
-    process_events()
-
-    rows = _rows(window)
+    rows = sidebar_rows(window)
     hard_row = rows[1]
     hard_id = hard_row.streak_id
     window.sidebar_list.select_row(hard_row)
@@ -136,10 +110,11 @@ def test_selection_survives_state_changed(seeded_state, app, process_events):
     assert selected.streak_id == hard_id
     assert window.content_stack.get_visible_child_name() == "streak"
 
-    window.destroy()
-
 
 def test_selection_restored_from_gsettings(seeded_state, app, process_events):
+    # `sidebar-selection` only takes effect when the window reads it at construction time (it
+    # isn't one of the settings a live `AppState.changed` re-emits for), so it must be set before
+    # the window is built.
     hard_id = Streak.get(Streak.name == "75 Hard").id
     seeded_state.settings.sidebar_selection = hard_id
 
@@ -153,25 +128,19 @@ def test_selection_restored_from_gsettings(seeded_state, app, process_events):
     window.destroy()
 
 
-def test_show_ended_false_hides_ended_section(seeded_state, app, process_events):
+def test_show_ended_false_hides_ended_section(seeded_state, seeded_window, process_events):
     seeded_state.settings.show_ended = False
 
-    window = StreaksWindow(application=app, state=seeded_state)
-    window.present()
-    process_events()
+    window = seeded_window
 
-    rows = _rows(window)
+    rows = sidebar_rows(window)
     names = [r.name_label.get_label() for r in rows]
     assert "Couch to 5K" not in names
     assert not any(getattr(r, "section", None) == "ended" for r in rows)
 
-    window.destroy()
 
-
-def test_empty_state(fresh_state, app, process_events):
-    window = StreaksWindow(application=app, state=fresh_state)
-    window.present()
-    process_events()
+def test_empty_state(fresh_window, process_events):
+    window = fresh_window
 
     assert window.content_stack.get_visible_child_name() == "empty"
     assert window.sidebar_empty_label.get_visible()
@@ -184,5 +153,3 @@ def test_empty_state(fresh_state, app, process_events):
     assert empty_view.create_button.has_css_class("suggested-action")
     assert empty_view.create_button.has_css_class("pill")
     assert empty_view.create_button.get_action_name() == "win.new-streak"
-
-    window.destroy()

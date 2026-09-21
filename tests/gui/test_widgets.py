@@ -2,18 +2,10 @@
 
 from __future__ import annotations
 
-import sys
-from pathlib import Path
-
 import gi
 
 gi.require_version("Gtk", "4.0")
 from gi.repository import Gtk  # noqa: E402
-
-_THIS_DIR = Path(__file__).resolve().parent
-if str(_THIS_DIR) not in sys.path:
-    sys.path.insert(0, str(_THIS_DIR))
-
 from render import pixel_at, render_widget, texture_pixels  # noqa: E402
 
 from streaks.engine import Cell  # noqa: E402
