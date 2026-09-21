@@ -1,7 +1,5 @@
 """Registry of GUI "screens" that can be rendered offscreen for screenshots and golden snapshots.
 
-Later phases register more entries (dialogs, the shell, catch-up, ...).
-
 This module is imported both by pytest (as a bare top-level module, since `tests/gui` has no
 `__init__.py` and pytest inserts that directory onto `sys.path`) and by `scripts/render_screens.py`
 (which inserts `tests/gui` onto `sys.path` itself). Either way `render.py` next to this file must

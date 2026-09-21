@@ -145,7 +145,7 @@ Header bar: `Adw.WindowTitle` title "Today", subtitle "Sunday 13 September" (`%A
 
 **Quiet-days banner** (only when the selected/any running streak has unconfirmed days; one banner per streak with quiet
 days, 75 Hard in the fixture): box, bg `#f4f8fe`, border `#bcd4f2`, radius 12, padding 14 16, gap 16.
-- Text: bold 13.5 `#1a5fb4` "Four days without a check-in — 9 to 12 September"; below, 12 at 60 %: "Your 47-day run
+- Text: bold 13.5 `#1a5fb4` "Four days without a check-in — 9 to 12 September"; below, 12 at 60 %: "Your 51-day run
   is still counted as running. It only ends if you tell me a goal was missed."
 - Middle: `StripWidget` of the last 24 due days (8×22, gap 3): kept days `#1a68c7`, unconfirmed white w/ `#a9c9ef` border.
 - Right: `Gtk.Button` "Catch up" `suggested-action` → opens Catch-up dialog (§5) for that streak.
@@ -163,7 +163,7 @@ column that currently has fewer rows (fixture: 75 Hard left; Gym, No snoozing, C
   with >1 goal; single-goal cards have no footer.
 
 Fixture cards:
-- **75 Hard** — meta "3 of 5 · day 48"; goals: Progress photo ✓ 07:12, 45 min outdoors ✓ 07:55, 45 min second workout ☐,
+- **75 Hard** — meta "3 of 5 · day 51"; goals: Progress photo ✓ 07:12, 45 min outdoors ✓ 07:55, 45 min second workout ☐,
   Read 10 pages ☐, Stick to the diet ✓ 21:30; footer 60 %, "3 of 5", Mark day missed.
 - **Gym, three times a week** — meta "2 of 3 this week"; goals: 45 min session ☐, Log the weights ☐; no footer.
 - **No snoozing the alarm** — meta "Not today"; no goal rows; body caption (padding 12 16, 12.5 at 50 %):
@@ -177,7 +177,7 @@ counting today); n_per_week → `"{sessions} of {N} this week"`; weekdays not du
 
 Interactions: toggling a goal writes/removes a `GoalCheck` for the check-in day with `done_at = now`; card meta,
 progress and time captions update; sidebar badge updates. "Mark day missed" → `Adw.AlertDialog` "Mark today as missed?"
-(body "This ends run 3 at 47 days." — engine-computed) → writes `DayAnswer(missed)`. "Check in for another day" →
+(body "This ends run 3 at 50 days." — engine-computed) → writes `DayAnswer(missed)`. "Check in for another day" →
 `Gtk.Popover` with `Gtk.Calendar` limited to the backfill window; picking a day shows the same view for that day with
 title "{A d B}" and the header subtitle "Checking in for an earlier day." plus a "Back to today" button.
 
@@ -194,7 +194,7 @@ Content padding 24 28, gap 18:
 | 51 | days running | `#1a68c7` (accent) |
 | 4 | unconfirmed | 55 % black |
 | 47 | confirmed kept | 85 % black |
-| 89% | goals hit | 85 % black |
+| 94% | goals hit | 85 % black |
 Captions: "days running" / "weeks running" / "months running" per period kind.
 
 **Chart card** (padding 16 18):
@@ -212,9 +212,9 @@ Captions: "days running" / "weeks running" / "months running" per period kind.
 
 **Lower grid** (columns 1.1fr / 1fr, gap 18):
 - **Per goal, this month** card: header row padding 12 16 bold 13.5. Rows (padding 10 16): goal name 13 (ellipsized),
-  140×6 bar (track `#ebebe9`), ratio bold 12 at 60 % width 38 right-aligned "13/13". Bar colour accent `#1a68c7`, or
-  `#e5a50a` when the ratio is below 75 %. Fixture: Progress photo 13/13, 45 min outdoors 12/13, Second workout 9/13
-  (amber), Read 10 pages 11/13, Stick to the diet 12/13. Denominator = due days so far this month (excluding today
+  140×6 bar (track `#ebebe9`), ratio bold 12 at 60 % width 38 right-aligned "9/9". Bar colour accent `#1a68c7`, or
+  `#e5a50a` when the ratio is below 75 %. Fixture: Progress photo 9/9, 45 min outdoors 9/9, Second workout 6/9
+  (amber), Read 10 pages 8/9, Stick to the diet 9/9. Denominator = due days so far this month (excluding today
   unless something was done today).
 - **Earlier runs** card: header "Earlier runs". One row per finished run, newest first (padding 12 16): bold 13 "Run 2",
   caption 11.5 "14 May – 16 Jun · 34 days", spacer, "›" 12 at 40 %; below, `StripWidget` (7×18, gap 2) one cell per day
@@ -243,10 +243,10 @@ periods elapsed in the run, excluding today) rounded.
        12.5. Kept goals: accent ✓, name at 60 %; missed goals: `#c01c28` ×, name at 85 %. Goals default to kept; the user
        unticks the ones missed (at least one must be missed — if all ticked, the row's state text says
        "Untick the goals you missed").
-     - caption 11.5 `#a51d2d`, margin-top 9: "Saving this ends the 47-day run on 11 September and starts run 4 on the
+     - caption 11.5 `#a51d2d`, margin-top 9: "Saving this ends the 48-day run on 11 September and starts run 4 on the
        12th." (engine sentence).
   3. **Result card** (padding 14 16): bold 13 "Result of these answers"; `StripWidget` 9×20 gap 3 of the last 24 due
-     days reflecting the pending answers; caption 12 at 60 %: "Run 3 ends at 47 days — your best run so far. Run 4 is on
+     days reflecting the pending answers; caption 12 at 60 %: "Run 3 ends at 48 days — your best run so far. Run 4 is on
      2 days. Thursday stays hollow — unanswered, and it doesn't break anything." (engine: first sentence when a miss is
      pending, "— your best run so far" only when true; second when a new run starts; third lists unanswered weekday
      names; when nothing is missed: "Run 3 stays at 51 days. {Weekday} stays hollow …" / "All four days confirmed.").
@@ -322,7 +322,7 @@ Sidebar: caption "No streaks yet" (see §2). Content: centred vertical box (gap 
   many goals as that thing needs."
 - `Gtk.Button` "Create a streak" `suggested-action` + `pill`, margin-top 4 → `win.new-streak`.
 
-Header shows "Today" only, with the primary menu button.
+Header title is "Streaks" with the primary menu button only.
 
 ## 9. Custom CSS allowed (`data/style.css`)
 

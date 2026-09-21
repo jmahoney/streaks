@@ -108,7 +108,7 @@ can't accidentally connect to a real desktop's compositor, and the app quits its
 - `docs/phases/*.md` — the phase-by-phase implementation briefs this app was built from (an
   agent-driven workflow: each phase brief is handed to a coding agent together with
   `CLAUDE.md`/`docs/design-spec.md`, the agent implements it against `scripts/check.sh`, and the
-  next phase starts from a green baseline). Phase 8 (this one) is polish, i18n and packaging.
+  next phase starts from a green baseline).
 - `tests/unit/` — pure-Python tests against an in-memory database (no GTK).
 - `tests/gui/` — PyGObject integration tests (headless by default) plus the golden-image
   snapshot suite in `tests/gui/test_snapshots.py`.
@@ -122,9 +122,8 @@ can't accidentally connect to a real desktop's compositor, and the app quits its
 - **Narrow-window layout.** The design (and this implementation) only covers the desktop-width
   layout in `docs/design-spec.md`; there's no adaptive/narrow breakpoint for the sidebar or the
   Today two-column card grid.
-- **Dark variant** follows the design's turn 5 (amber accent, amber chart scale, dark streak
-  hues) via `@media (prefers-color-scheme: dark)` in `data/style.css` and `streaks.theme`; it
-  follows the system setting, and there is no in-app light/dark toggle.
+- **Dark scheme.** Amber accent and chart scale via `@media (prefers-color-scheme: dark)` in
+  `data/style.css` and `streaks.theme`; follows the system setting, no in-app toggle.
 
 ## License
 

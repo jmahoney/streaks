@@ -1,10 +1,8 @@
-"""``AppState``: the single owner of the database connection and the in-memory snapshot of it.
-
-Views never talk to ``models``/``engine`` directly for anything but read-only formatting —
-they read ``AppState.streaks``/``AppState.today()`` and subscribe to ``changed`` to know when to
-rebuild themselves. Every write helper this class grows in later phases (create/check-in/answer/
-end/delete/reorder) is expected to call ``reload()`` when it's done, which is what fires
-``changed``.
+"""`AppState` owns the database connection, the app's `AppSettings`, and `streaks` — the last
+snapshot loaded from the database. Views read `streaks`/`today()` and subscribe to `changed` to
+know when to rebuild. Whoever writes to the database (views call `models.*` directly) calls
+`reload()` afterwards, which reloads the snapshot and emits `changed`. Settings changes emit
+`changed` without a reload, since only derived values change.
 """
 
 from __future__ import annotations

@@ -1,10 +1,5 @@
 """Golden-image regression tests: render every registered screen and diff it against
-tests/snapshots/<name>.png (light, design turn 4) and tests/snapshots/dark/<name>.png (dark,
-design turn 5).
-
-Not generating a golden here for `window` is intentional (see docs/phases/01b-snapshot-infra.md) —
-`scripts/check.sh` skips this whole stage while `tests/snapshots/` has no PNGs in it yet. Once a
-golden exists (`scripts/snapshots.sh update`, after reviewing the PNG), this test enforces it.
+tests/snapshots/<name>.png (light) and tests/snapshots/dark/<name>.png (dark).
 """
 
 from __future__ import annotations

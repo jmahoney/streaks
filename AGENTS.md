@@ -20,7 +20,7 @@ The application helps the user keep track of things they want to do regularly - 
 | **Build System** | Meson (`meson.build`) |
 | **Database & ORM** | **Peewee ORM** with an underlying SQLite engine |
 | **Testing** | `pytest` + `pytest-mock` (Unit) & PyGObject integration (GUI) |
-| **Distribution** | Flatpak (via `org.gnome.Sdk//47` or latest stable) |
+| **Distribution** | Flatpak (via `org.gnome.Sdk//50` or latest stable) |
 | **Formatting / Lint**| Ruff (black-compatible styling) |
 
 ---
@@ -77,80 +77,50 @@ class AppWindow(Adw.ApplicationWindow):
 ### 2. Secure Database Layer (Peewee ORM)
 Using an ORM completely eliminates raw string manipulation, protecting the application against SQL injections. It also enforces strong relational data constraints natively in Python code.
 
-*   **Isolation:** Keep database models separate from your view/UI logic (e.g., inside `src/models.py`). 
+*   **Isolation:** Keep database models separate from your view/UI logic (e.g., inside `src/streaks/models.py`). 
 *   **Thread Safety:** Use Peewee's `SqliteDatabase` engine. For high-volume UI interactions, wrap read/write queries in worker threads and return results to the UI thread using `GLib.idle_add()`.
 *   **Sandbox Storage:** Production data must always resolve to the secure user data sandbox provided by GLib.
 
 ```python
-import os
-from peewee import SqliteDatabase, Model, CharField, DateTimeField, IntegerField
-from gi.repository import GLib
+from streaks.models import Streak, init_db
 
-# Safe data path resolution inside Flatpak sandbox
-data_dir = os.path.join(GLib.get_user_data_dir(), "streaks")
-os.makedirs(data_dir, exist_ok=True)
-db_path = os.path.join(data_dir, "streaks.db")
+init_db()  # resolves the sandboxed path via GLib.get_user_data_dir() and creates tables
 
-db = SqliteDatabase(db_path, pragmas={'foreign_keys': 1})
-
-class BaseModel(Model):
-    class Meta:
-        database = db
-
-class Streak(BaseModel):
-    title = CharField()
-    current_count = IntegerField(default=0)
-    created_at = DateTimeField()
+streak = Streak.create(name="75 Hard", colour="#3584e4", period_kind="daily", created_on=today)
 ```
 
 ### 3. Testing Strategy
 We enforce rigorous, automated separation between pure unit logic and active UI tests.
 
-#### A. Automated Unit Tests (`tests/test_unit.py`)
-When testing database operations, **NEVER** write to the user's live production database. Use Peewee's built-in support for an in-memory SQLite database context during execution.
+#### A. Automated Unit Tests (`tests/unit/`)
+When testing database operations, **NEVER** write to the user's live production database. The
+`in_memory_db` fixture in `tests/unit/conftest.py` swaps in an isolated, in-memory SQLite database
+for every test (autouse) — use it rather than reimplementing it.
 
 ```python
-import pytest
-from peewee import SqliteDatabase
-from com.cheerschopper.Streaks.models import Streak
+from streaks.models import Streak
 
-@pytest.fixture(autouse=True)
-def test_db():
-    """Swaps the production database for an isolated, safe in-memory database."""
-    test_db = SqliteDatabase(':memory:')
-    test_db.bind([Streak])
-    test_db.connect()
-    test_db.create_tables([Streak])
-    yield test_db
-    test_db.close()
-
-def test_create_streak():
-    streak = Streak.create(title="Gym Routine", current_count=5)
+def test_create_streak(today):
+    streak = Streak.create(name="Gym Routine", colour="#2ec27e", period_kind="daily", created_on=today)
     assert streak.id is not None
-    assert streak.title == "Gym Routine"
+    assert streak.name == "Gym Routine"
 ```
 
-#### B. Automated GUI Integration Tests (`tests/test_gui.py`)
-Initialize components and iteratively flush the standard GLib context pipeline to simulate desktop interactions without needing manual clicking.
+#### B. Automated GUI Integration Tests (`tests/gui/`)
+Initialize components and iteratively flush the standard GLib context pipeline to simulate desktop
+interactions without needing manual clicking. `tests/gui/conftest.py` provides the `app`,
+`fresh_state`/`seeded_state`, and `process_events` fixtures — use those rather than reimplementing them.
 
 ```python
-import pytest
-gi.require_version('Gtk', '4.0')
-from gi.repository import Gtk, GLib
-from com.cheerschopper.Streaks.window import AppWindow
+from streaks.window import StreaksWindow
 
-def process_events():
-    """Flushes the current GLib main context queue to simulate runtime loop."""
-    context = GLib.MainContext.default()
-    while context.pending():
-        context.iteration(False)
-
-def test_window_initialization(app):
-    window = AppWindow(application=app)
+def test_window_initialization(app, fresh_state, process_events):
+    window = StreaksWindow(application=app, state=fresh_state)
     window.present()
     process_events()
-    
-    assert window.title_text == "Default Title"
+
+    assert window.content_stack.get_visible_child_name() == "empty"
+    window.destroy()
 ```
 
 ---
@@ -162,7 +132,7 @@ Meson compiles your Blueprint files, checks resources, and packages the environm
 
 *   **Configure Build:** `meson setup _build`
 *   **Compile Code & Layouts:** `meson compile -C _build`
-*   **Run App Locally:** `_build/src/com.cheerschopper.Streaks`
+*   **Run App Locally:** `scripts/run.sh` (add `--seed` to pre-load the design-fixture data)
 
 ### Running Tests Automatically via Meson
 *   **Run all automated test suites:**
@@ -170,10 +140,10 @@ Meson compiles your Blueprint files, checks resources, and packages the environm
     meson test -C _build --verbose
     ```
 *   **Headless CI Execution:**
-    If running UI tests in an environment without an active display server, prefix the test harness command with a virtual framebuffer wrapper:
     ```bash
-    xvfb-run pytest tests/
+    scripts/check.sh
     ```
+    Pins GTK to the X11 backend under Xvfb, keeping GUI and snapshot test windows on a virtual display.
 
 ---
 

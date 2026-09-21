@@ -21,8 +21,8 @@ class StreaksCatchupBanner(Gtk.Box):
     """One streak's "days without a check-in" banner, with a catch-up shortcut.
 
     No engine logic lives here — ``configure()`` only places already-computed strings and cells
-    from an ``engine.Banner``. Clicking "Catch up" emits ``catch-up``; a later phase connects it
-    to the catch-up dialog.
+    from an ``engine.Banner``. Clicking "Catch up" emits ``catch-up`` with the streak id; the
+    Today view opens the catch-up dialog for it.
     """
 
     __gtype_name__ = "StreaksCatchupBanner"

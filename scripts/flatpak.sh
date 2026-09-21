@@ -14,8 +14,9 @@ case "$action" in
     flatpak run com.cheerschopper.Streaks
     ;;
   test)
-    # Two deterministic, headless checks that the installed bundle is actually usable — never on
-    # a live display (see CLAUDE.md's hard rule): both run under Xvfb, pinned to the X11 backend.
+    # Two deterministic, headless checks that the installed bundle is actually usable. Runs under
+    # Xvfb on the X11 backend so the check is deterministic and never opens a window on the
+    # developer's desktop (see README › Development).
 
     echo "-- bundle import check --"
     # Proves the sandbox's Python can see both the vendored `peewee` module and the app's own
@@ -32,8 +33,9 @@ case "$action" in
     echo "PASS flatpak import check"
 
     echo "-- headless window-open check --"
-    # Proves `flatpak run` actually opens the main window, without ever putting it on the live
-    # display (see CLAUDE.md's hard rule): runs under Xvfb, forced onto the X11 backend.
+    # Proves `flatpak run` actually opens the main window. Runs under Xvfb on the X11 backend so
+    # the check is deterministic and never opens a window on the developer's desktop (see README
+    # › Development).
     # `--nosocket=wayland` overrides the manifest's `--socket=wayland` finish-arg for this one
     # run: on a real desktop session (as in this dev sandbox, which has a live Wayland compositor
     # alongside Xvfb) GTK would otherwise happily connect to *that* real, live compositor instead
