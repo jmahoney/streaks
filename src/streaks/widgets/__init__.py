@@ -35,11 +35,11 @@ def confirm_dialog(
     confirm_id: str,
     confirm_label: str,
     destructive: bool,
-    on_confirm: Callable[[Adw.AlertDialog, str], None],
+    on_response: Callable[[Adw.AlertDialog, str], None],
 ) -> Adw.AlertDialog:
     """Build, wire and present a Cancel/confirm ``Adw.AlertDialog``, returning it.
 
-    ``on_confirm`` is connected to the dialog's ``response`` signal, so it receives the dialog
+    ``on_response`` is connected to the dialog's ``response`` signal, so it receives the dialog
     and the response id (``"cancel"`` or ``confirm_id``); wrap it in a ``lambda`` to pass through
     any extra context the caller needs. "Cancel" is both the default and the close response.
     """
@@ -50,6 +50,6 @@ def confirm_dialog(
         dialog.set_response_appearance(confirm_id, Adw.ResponseAppearance.DESTRUCTIVE)
     dialog.set_default_response("cancel")
     dialog.set_close_response("cancel")
-    dialog.connect("response", on_confirm)
+    dialog.connect("response", on_response)
     dialog.present(parent)
     return dialog

@@ -135,7 +135,7 @@ class StreaksPreferencesDialog(Adw.PreferencesDialog):
             confirm_id="delete",
             confirm_label=_("Delete"),
             destructive=True,
-            on_confirm=self._on_delete_response,
+            on_response=self._on_delete_response,
         )
 
     def _on_delete_response(self, _dialog: Adw.AlertDialog, response: str) -> None:

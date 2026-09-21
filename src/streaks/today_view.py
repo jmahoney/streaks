@@ -191,7 +191,7 @@ class StreaksTodayView(Adw.Bin):
             confirm_id="missed",
             confirm_label=_("Mark missed"),
             destructive=True,
-            on_confirm=lambda dialog, response: self._on_mark_missed_response(
+            on_response=lambda dialog, response: self._on_mark_missed_response(
                 dialog, response, streak_id
             ),
         )

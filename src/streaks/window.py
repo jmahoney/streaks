@@ -141,7 +141,7 @@ class StreaksWindow(Adw.ApplicationWindow):
             confirm_id="end",
             confirm_label=_("End streak"),
             destructive=True,
-            on_confirm=lambda dialog, response: self._on_end_streak_response(
+            on_response=lambda dialog, response: self._on_end_streak_response(
                 dialog, response, streak_id
             ),
         )
@@ -167,7 +167,7 @@ class StreaksWindow(Adw.ApplicationWindow):
             confirm_id="delete",
             confirm_label=_("Delete"),
             destructive=True,
-            on_confirm=lambda dialog, response: self._on_delete_streak_response(
+            on_response=lambda dialog, response: self._on_delete_streak_response(
                 dialog, response, streak_id
             ),
         )

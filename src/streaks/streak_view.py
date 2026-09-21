@@ -125,14 +125,13 @@ class StreaksStreakView(Adw.Bin):
         self._rebuild_earlier_runs(hist.earlier_runs)
 
     def _rebuild_day_labels(self, day_labels: list[str]) -> None:
-        clear_children(self.day_labels_box)
-        for label in day_labels:
-            widget = Gtk.Label(label=label)
-            widget.set_xalign(0)
-            widget.set_size_request(-1, 13)
-            widget.set_valign(Gtk.Align.CENTER)
-            widget.add_css_class("chart-day-label")
-            self.day_labels_box.append(widget)
+        children = []
+        child = self.day_labels_box.get_first_child()
+        while child is not None:
+            children.append(child)
+            child = child.get_next_sibling()
+        for widget, label in zip(children, day_labels, strict=True):
+            widget.set_label(label)
 
     def _rebuild_legend(self, legend: list[engine.LegendEntry]) -> None:
         self._legend = legend
