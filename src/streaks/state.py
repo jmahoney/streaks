@@ -1,8 +1,8 @@
-"""`AppState` owns the database connection, the app's `AppSettings`, and `streaks` — the last
-snapshot loaded from the database. Views read `streaks`/`today()` and subscribe to `changed` to
-know when to rebuild. Whoever writes to the database (views call `models.*` directly) calls
-`reload()` afterwards, which reloads the snapshot and emits `changed`. Settings changes emit
-`changed` without a reload, since only derived values change.
+"""``AppState`` owns the database connection, the app's ``AppSettings``, and ``streaks`` — the
+last snapshot loaded from the database. Views read ``streaks``/``today()`` and subscribe to
+``changed`` to know when to rebuild. Whoever writes to the database (views call ``models.*``
+directly) calls ``reload()`` afterwards, which reloads the snapshot and emits ``changed``.
+Settings changes emit ``changed`` without a reload, since only derived values change.
 """
 
 from __future__ import annotations

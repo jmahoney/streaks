@@ -95,7 +95,7 @@ We enforce rigorous, automated separation between pure unit logic and active UI 
 #### A. Automated Unit Tests (`tests/unit/`)
 When testing database operations, **NEVER** write to the user's live production database. The
 `in_memory_db` fixture in `tests/unit/conftest.py` swaps in an isolated, in-memory SQLite database
-for every test (autouse) — use it rather than reimplementing it.
+for every test (autouse); reuse it.
 
 ```python
 from streaks.models import Streak
@@ -108,8 +108,8 @@ def test_create_streak(today):
 
 #### B. Automated GUI Integration Tests (`tests/gui/`)
 Initialize components and iteratively flush the standard GLib context pipeline to simulate desktop
-interactions without needing manual clicking. `tests/gui/conftest.py` provides the `app`,
-`fresh_state`/`seeded_state`, and `process_events` fixtures — use those rather than reimplementing them.
+interactions without needing manual clicking. Reuse the `app`/`fresh_state`/`seeded_state`/
+`process_events` fixtures `tests/gui/conftest.py` provides.
 
 ```python
 from streaks.window import StreaksWindow
