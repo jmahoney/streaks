@@ -11,6 +11,7 @@ from datetime import date
 import pytest
 
 from fixtures.db import bind_memory_db
+from fixtures.seed import FIXTURE_TODAY
 from streaks.engine import Settings
 from streaks.models import MODELS, db
 
@@ -28,7 +29,7 @@ def in_memory_db():
 @pytest.fixture
 def today() -> date:
     """The fixture's pinned "today", matching ``STREAKS_FAKE_TODAY`` and the design fixture."""
-    return date(2026, 9, 13)
+    return FIXTURE_TODAY
 
 
 @pytest.fixture
