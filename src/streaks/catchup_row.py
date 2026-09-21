@@ -44,7 +44,7 @@ class StreaksCatchupRow(Gtk.ListBoxRow):
         super().__init__(**kwargs)
         self.day: date | None = None
         self._goal_checks: list[tuple[int, Gtk.CheckButton]] = []
-        self._updating = False
+        self._configuring = False
 
         self.kept_button.connect("toggled", self._on_kept_toggled)
         self.missed_button.connect("toggled", self._on_missed_toggled)
@@ -56,7 +56,8 @@ class StreaksCatchupRow(Gtk.ListBoxRow):
         self.day = day
         self.date_label.set_label(words.fmt_weekday_day(day))
 
-        self._clear_goals()
+        self.goals_list.remove_all()
+        self._goal_checks.clear()
         for goal in goals:
             check = Gtk.CheckButton(label=goal.name, active=True)
             check.connect("toggled", self._on_goal_toggled)
@@ -64,13 +65,6 @@ class StreaksCatchupRow(Gtk.ListBoxRow):
             self._goal_checks.append((goal.id, check))
 
         self._update_visual()
-
-    def _clear_goals(self) -> None:
-        row = self.goals_list.get_row_at_index(0)
-        while row is not None:
-            self.goals_list.remove(row)
-            row = self.goals_list.get_row_at_index(0)
-        self._goal_checks.clear()
 
     # -- reading state ---------------------------------------------------------------
 
@@ -97,27 +91,27 @@ class StreaksCatchupRow(Gtk.ListBoxRow):
     # -- interactions ---------------------------------------------------------------
 
     def _on_kept_toggled(self, button: Gtk.ToggleButton) -> None:
-        if self._updating:
+        if self._configuring:
             return
-        self._updating = True
+        self._configuring = True
         if button.get_active():
             self.missed_button.set_active(False)
-        self._updating = False
+        self._configuring = False
         self._update_visual()
         self.emit("answer-changed")
 
     def _on_missed_toggled(self, button: Gtk.ToggleButton) -> None:
-        if self._updating:
+        if self._configuring:
             return
-        self._updating = True
+        self._configuring = True
         if button.get_active():
             self.kept_button.set_active(False)
-        self._updating = False
+        self._configuring = False
         self._update_visual()
         self.emit("answer-changed")
 
     def _on_goal_toggled(self, _check: Gtk.CheckButton) -> None:
-        if self._updating:
+        if self._configuring:
             return
         self.emit("answer-changed")
 

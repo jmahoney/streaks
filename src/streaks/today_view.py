@@ -27,6 +27,7 @@ from streaks.checkin_card import StreaksCheckinCard  # noqa: F401  registers $St
 from streaks.engine import Answer, Banner, Card
 from streaks.models import Goal, Streak, answer_day, toggle_goal_check
 from streaks.state import AppState
+from streaks.widgets import clear_children, confirm_dialog
 
 _ = gettext.gettext
 ngettext = gettext.ngettext
@@ -99,14 +100,6 @@ class StreaksTodayView(Adw.Bin):
 
     # -- rebuilding ---------------------------------------------------------------
 
-    @staticmethod
-    def _clear_box(box: Gtk.Box) -> None:
-        child = box.get_first_child()
-        while child is not None:
-            nxt = child.get_next_sibling()
-            box.remove(child)
-            child = nxt
-
     def _rebuild(self) -> None:
         if self.state is None:
             return
@@ -130,7 +123,7 @@ class StreaksTodayView(Adw.Bin):
         if viewing_past:
             self.title_label.set_label(words.fmt_weekday_day(display_day))
             self.subtitle_label.set_label(_("Checking in for an earlier day."))
-            self._clear_box(self.banners_box)
+            clear_children(self.banners_box)
         else:
             self.title_label.set_label(view.title)
             self.subtitle_label.set_label(view.subtitle)
@@ -139,7 +132,7 @@ class StreaksTodayView(Adw.Bin):
         self._rebuild_cards(view.cards)
 
     def _rebuild_banners(self, banners: list[Banner]) -> None:
-        self._clear_box(self.banners_box)
+        clear_children(self.banners_box)
         for banner in banners:
             widget = StreaksCatchupBanner()
             widget.configure(banner)
@@ -147,8 +140,8 @@ class StreaksTodayView(Adw.Bin):
             self.banners_box.append(widget)
 
     def _rebuild_cards(self, cards: list[Card]) -> None:
-        self._clear_box(self.column_left)
-        self._clear_box(self.column_right)
+        clear_children(self.column_left)
+        clear_children(self.column_right)
         left_rows = 0
         right_rows = 0
         for card in cards:
@@ -191,15 +184,17 @@ class StreaksTodayView(Adw.Bin):
         settings = self.state.settings.to_engine()
         body = engine.mark_missed_preview(streak_data, today, settings)
 
-        dialog = Adw.AlertDialog(heading=_("Mark today as missed?"), body=body)
-        dialog.add_response("cancel", _("Cancel"))
-        dialog.add_response("missed", _("Mark missed"))
-        dialog.set_response_appearance("missed", Adw.ResponseAppearance.DESTRUCTIVE)
-        dialog.set_default_response("cancel")
-        dialog.set_close_response("cancel")
-        dialog.connect("response", self._on_mark_missed_response, streak_id)
-        self.missed_dialog = dialog
-        dialog.present(self)
+        self.missed_dialog = confirm_dialog(
+            self,
+            heading=_("Mark today as missed?"),
+            body=body,
+            confirm_id="missed",
+            confirm_label=_("Mark missed"),
+            destructive=True,
+            on_confirm=lambda dialog, response: self._on_mark_missed_response(
+                dialog, response, streak_id
+            ),
+        )
 
     def _on_mark_missed_response(
         self, _dialog: Adw.AlertDialog, response: str, streak_id: int

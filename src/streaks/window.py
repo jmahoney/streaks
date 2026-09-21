@@ -21,6 +21,7 @@ from streaks.state import AppState
 from streaks.streak_dialog import StreaksStreakDialog
 from streaks.streak_view import StreaksStreakView  # noqa: F401  registers $StreaksStreakView
 from streaks.today_view import StreaksTodayView  # noqa: F401  registers $StreaksTodayView
+from streaks.widgets import confirm_dialog
 
 _ = gettext.gettext
 _logger = logging.getLogger(__name__)
@@ -133,18 +134,17 @@ class StreaksWindow(Adw.ApplicationWindow):
         streak = next((s for s in self.state.streaks if s.id == streak_id), None)
         if streak is None:
             return
-        dialog = Adw.AlertDialog(
+        self.end_streak_dialog = confirm_dialog(
+            self,
             heading=_("End this streak?"),
             body=_("It moves to Ended in the sidebar. Its history stays readable."),
+            confirm_id="end",
+            confirm_label=_("End streak"),
+            destructive=True,
+            on_confirm=lambda dialog, response: self._on_end_streak_response(
+                dialog, response, streak_id
+            ),
         )
-        dialog.add_response("cancel", _("Cancel"))
-        dialog.add_response("end", _("End streak"))
-        dialog.set_response_appearance("end", Adw.ResponseAppearance.DESTRUCTIVE)
-        dialog.set_default_response("cancel")
-        dialog.set_close_response("cancel")
-        dialog.connect("response", self._on_end_streak_response, streak_id)
-        self.end_streak_dialog = dialog
-        dialog.present(self)
 
     def _on_end_streak_response(
         self, _dialog: Adw.AlertDialog, response: str, streak_id: int
@@ -160,18 +160,17 @@ class StreaksWindow(Adw.ApplicationWindow):
         streak = next((s for s in self.state.streaks if s.id == streak_id), None)
         if streak is None:
             return
-        dialog = Adw.AlertDialog(
+        self.delete_streak_dialog = confirm_dialog(
+            self,
             heading=_("Delete %(name)s?") % {"name": streak.name},
             body=_("Every check-in for this streak will be removed. This cannot be undone."),
+            confirm_id="delete",
+            confirm_label=_("Delete"),
+            destructive=True,
+            on_confirm=lambda dialog, response: self._on_delete_streak_response(
+                dialog, response, streak_id
+            ),
         )
-        dialog.add_response("cancel", _("Cancel"))
-        dialog.add_response("delete", _("Delete"))
-        dialog.set_response_appearance("delete", Adw.ResponseAppearance.DESTRUCTIVE)
-        dialog.set_default_response("cancel")
-        dialog.set_close_response("cancel")
-        dialog.connect("response", self._on_delete_streak_response, streak_id)
-        self.delete_streak_dialog = dialog
-        dialog.present(self)
 
     def _on_delete_streak_response(
         self, _dialog: Adw.AlertDialog, response: str, streak_id: int

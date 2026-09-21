@@ -60,12 +60,6 @@ class StreaksCheckinCard(Gtk.Box):
     def _on_goal_toggle_requested(self, row: StreaksGoalRow) -> None:
         self.emit("goal-toggled", row.goal_id)
 
-    def _clear_goals(self) -> None:
-        row = self.goals_list.get_row_at_index(0)
-        while row is not None:
-            self.goals_list.remove(row)
-            row = self.goals_list.get_row_at_index(0)
-
     def configure(self, card: Card) -> None:
         """Populate the card from an ``engine.Card``."""
         self.streak_id = card.streak_id
@@ -75,7 +69,7 @@ class StreaksCheckinCard(Gtk.Box):
         self.name_label.set_label(card.name)
         self.meta_label.set_label(card.meta)
 
-        self._clear_goals()
+        self.goals_list.remove_all()
         for goal in card.goals:
             row = StreaksGoalRow()
             row.configure(goal)

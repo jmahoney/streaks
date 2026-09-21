@@ -22,6 +22,7 @@ from streaks.goal_bar_row import StreaksGoalBarRow  # noqa: F401  registers $Str
 from streaks.run_row import StreaksRunRow  # noqa: F401  registers $StreaksRunRow
 from streaks.stat_tile import StreaksStatTile  # noqa: F401  registers $StreaksStatTile
 from streaks.state import AppState
+from streaks.widgets import clear_children
 from streaks.widgets.grid_widgets import HeatmapWidget  # noqa: F401  registers $HeatmapWidget
 
 _ = gettext.gettext
@@ -88,21 +89,6 @@ class StreaksStreakView(Adw.Bin):
 
     # -- rebuilding ---------------------------------------------------------------
 
-    @staticmethod
-    def _clear_listbox(listbox: Gtk.ListBox) -> None:
-        row = listbox.get_row_at_index(0)
-        while row is not None:
-            listbox.remove(row)
-            row = listbox.get_row_at_index(0)
-
-    @staticmethod
-    def _clear_box(box: Gtk.Box) -> None:
-        child = box.get_first_child()
-        while child is not None:
-            nxt = child.get_next_sibling()
-            box.remove(child)
-            child = nxt
-
     def _rebuild(self) -> None:
         if self.state is None or self._streak is None:
             return
@@ -140,7 +126,7 @@ class StreaksStreakView(Adw.Bin):
         self._rebuild_earlier_runs(hist.earlier_runs)
 
     def _rebuild_day_labels(self, day_labels: list[str]) -> None:
-        self._clear_box(self.day_labels_box)
+        clear_children(self.day_labels_box)
         for label in day_labels:
             widget = Gtk.Label(label=label)
             widget.set_xalign(0)
@@ -151,7 +137,7 @@ class StreaksStreakView(Adw.Bin):
 
     def _rebuild_legend(self, legend: list[tuple[str, str | None, str]]) -> None:
         self._legend = legend
-        self._clear_box(self.legend_entries_box)
+        clear_children(self.legend_entries_box)
         for fill, border, label in legend:
             entry = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
             entry.set_valign(Gtk.Align.CENTER)
@@ -180,7 +166,7 @@ class StreaksStreakView(Adw.Bin):
             self.legend_entries_box.append(entry)
 
     def _rebuild_goal_bars(self, goal_bars: list[tuple[str, float, str, bool]]) -> None:
-        self._clear_listbox(self.goal_bars_list)
+        self.goal_bars_list.remove_all()
         for name, ratio, ratio_text, low in goal_bars:
             row = StreaksGoalBarRow()
             row.configure(name, ratio, ratio_text, low)
@@ -189,7 +175,7 @@ class StreaksStreakView(Adw.Bin):
     def _rebuild_earlier_runs(
         self, earlier_runs: list[tuple[str, str, list[engine.Cell], int]]
     ) -> None:
-        self._clear_listbox(self.runs_list)
+        self.runs_list.remove_all()
         self.runs_card.set_visible(bool(earlier_runs))
         for title, meta, cells, idx in earlier_runs:
             row = StreaksRunRow()

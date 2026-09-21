@@ -20,6 +20,7 @@ from gi.repository import Adw, Gio, GLib, Gtk
 
 from streaks import export, models
 from streaks.state import AppState
+from streaks.widgets import confirm_dialog
 
 _ = gettext.gettext
 ngettext = gettext.ngettext
@@ -124,21 +125,18 @@ class StreaksPreferencesDialog(Adw.PreferencesDialog):
     # -- delete all data ------------------------------------------------------------------
 
     def _on_delete_activated(self, *_args) -> None:
-        dialog = Adw.AlertDialog(
+        self.delete_all_dialog = confirm_dialog(
+            self,
             heading=_("Delete all data?"),
             body=_(
                 "Every streak, goal and check-in on this machine will be removed. "
                 "This cannot be undone."
             ),
+            confirm_id="delete",
+            confirm_label=_("Delete"),
+            destructive=True,
+            on_confirm=self._on_delete_response,
         )
-        dialog.add_response("cancel", _("Cancel"))
-        dialog.add_response("delete", _("Delete"))
-        dialog.set_response_appearance("delete", Adw.ResponseAppearance.DESTRUCTIVE)
-        dialog.set_default_response("cancel")
-        dialog.set_close_response("cancel")
-        dialog.connect("response", self._on_delete_response)
-        self.delete_all_dialog = dialog
-        dialog.present(self)
 
     def _on_delete_response(self, _dialog: Adw.AlertDialog, response: str) -> None:
         if response != "delete":
