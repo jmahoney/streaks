@@ -514,6 +514,13 @@ def test_app_preferences_action_presents_dialog_over_active_window(
     app.activate_action("preferences", None)
     process_events()
 
+    dialog = app._preferences_dialog
+    assert isinstance(dialog, StreaksPreferencesDialog)
+    assert dialog.get_visible()
+    assert dialog.get_root() is window
+
+    dialog.force_close()
+    process_events()
     window.destroy()
     app.window = None
 

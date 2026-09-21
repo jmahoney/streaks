@@ -569,12 +569,12 @@ def test_time_hm():
 # ================================================================================================
 
 
-def _streaks(today: date) -> dict[str, StreakData]:
-    return {sd.name: sd for sd in load_all(today)}
+def _streaks() -> dict[str, StreakData]:
+    return {sd.name: sd for sd in load_all()}
 
 
 def test_fixture_75_hard_runs(seeded, today, settings):
-    hard = _streaks(today)["75 Hard"]
+    hard = _streaks()["75 Hard"]
     result = runs(hard, today, settings)
     assert [r.length for r in result] == [28, 34, 51]
 
@@ -603,7 +603,7 @@ def test_fixture_75_hard_runs(seeded, today, settings):
 
 
 def test_fixture_75_hard_history(seeded, today, settings):
-    hard = _streaks(today)["75 Hard"]
+    hard = _streaks()["75 Hard"]
     h = history(hard, today, settings)
     assert h.tiles == [
         ("51", "days running", "accent"),
@@ -623,18 +623,18 @@ def test_fixture_75_hard_history(seeded, today, settings):
 
 
 def test_fixture_75_hard_sidebar_and_card(seeded, today, settings):
-    hard = _streaks(today)["75 Hard"]
+    hard = _streaks()["75 Hard"]
     assert sidebar_meta(hard) == "Daily · 5 goals"
     assert current_run(hard, today, settings).length == 51
 
-    tv = today_view(list(load_all(today)), today, None, settings)
+    tv = today_view(list(load_all()), today, settings)
     card = next(c for c in tv.cards if c.name == "75 Hard")
     assert card.meta == "3 of 5 · day 51"
 
 
 def test_fixture_75_hard_banner(seeded, today, settings):
-    tv = today_view(list(load_all(today)), today, None, settings)
-    banner = next(b for b in tv.banners if b.streak_id == _streaks(today)["75 Hard"].id)
+    tv = today_view(list(load_all()), today, settings)
+    banner = next(b for b in tv.banners if b.streak_id == _streaks()["75 Hard"].id)
     assert banner.title == "Four days without a check-in — 9 to 12 September"
     assert banner.body == (
         "Your 51-day run is still counted as running. It only ends if you tell me a goal "
@@ -643,7 +643,7 @@ def test_fixture_75_hard_banner(seeded, today, settings):
 
 
 def test_fixture_75_hard_catch_up(seeded, today, settings):
-    hard = _streaks(today)["75 Hard"]
+    hard = _streaks()["75 Hard"]
     cu = catch_up(hard, today, settings)
     assert [d for d, _label in cu.days] == [
         date(2026, 9, 9),
@@ -655,7 +655,7 @@ def test_fixture_75_hard_catch_up(seeded, today, settings):
 
 
 def test_fixture_75_hard_catch_up_preview(seeded, today, settings):
-    hard = _streaks(today)["75 Hard"]
+    hard = _streaks()["75 Hard"]
     answers = {
         date(2026, 9, 9): (Answer.KEPT, ()),
         date(2026, 9, 11): (Answer.MISSED, (2,)),
@@ -672,16 +672,16 @@ def test_fixture_75_hard_catch_up_preview(seeded, today, settings):
 
 
 def test_fixture_75_hard_mark_missed_preview(seeded, today, settings):
-    hard = _streaks(today)["75 Hard"]
+    hard = _streaks()["75 Hard"]
     assert mark_missed_preview(hard, today, settings) == "This ends run 3 at 50 days."
 
 
 def test_fixture_no_snoozing(seeded, today, settings):
-    streak = _streaks(today)["No snoozing the alarm"]
+    streak = _streaks()["No snoozing the alarm"]
     assert current_run(streak, today, settings).length == 12
     assert sidebar_meta(streak) == "Mon–Fri · 1 goal"
 
-    tv = today_view(list(load_all(today)), today, None, settings)
+    tv = today_view(list(load_all()), today, settings)
     card = next(c for c in tv.cards if c.name == "No snoozing the alarm")
     assert card.kind == "not_due"
     assert card.meta == "Not today"
@@ -689,29 +689,29 @@ def test_fixture_no_snoozing(seeded, today, settings):
 
 
 def test_fixture_gym(seeded, today, settings):
-    streak = _streaks(today)["Gym, three times a week"]
+    streak = _streaks()["Gym, three times a week"]
     assert current_run(streak, today, settings).length == 9
     assert sidebar_meta(streak) == "3× a week · 2 goals"
 
-    tv = today_view(list(load_all(today)), today, None, settings)
+    tv = today_view(list(load_all()), today, settings)
     card = next(c for c in tv.cards if c.name == "Gym, three times a week")
     assert card.meta == "2 of 3 this week"
     assert card.show_footer is False
 
 
 def test_fixture_clip_fingernails(seeded, today, settings):
-    streak = _streaks(today)["Clip fingernails"]
+    streak = _streaks()["Clip fingernails"]
     assert current_run(streak, today, settings).length == 4
     assert sidebar_meta(streak) == "Monthly · 1 goal"
 
-    tv = today_view(list(load_all(today)), today, None, settings)
+    tv = today_view(list(load_all()), today, settings)
     card = next(c for c in tv.cards if c.name == "Clip fingernails")
     assert card.meta == "Due this month"
     assert card.goals[0].trailing == "17 days left"
 
 
 def test_fixture_couch_to_5k(seeded, today, settings):
-    streak = _streaks(today)["Couch to 5K"]
+    streak = _streaks()["Couch to 5K"]
     assert streak.ended_on == date(2026, 3, 4)
     best = best_run(streak, today, settings)
     assert best.length == 31
@@ -721,7 +721,7 @@ def test_fixture_couch_to_5k(seeded, today, settings):
 def test_fixture_couch_to_5k_history_ended_streak(seeded, today, settings):
     """Phase 5: for an ended streak, the first stat tile reports the best run (not "still
     running"), and the header subtitle says when it ended rather than which run is showing."""
-    streak = _streaks(today)["Couch to 5K"]
+    streak = _streaks()["Couch to 5K"]
     h = history(streak, today, settings)
     assert h.tiles == [
         ("31", "days, best run", "accent"),
@@ -735,7 +735,7 @@ def test_fixture_couch_to_5k_history_ended_streak(seeded, today, settings):
 
 
 def test_fixture_today_view(seeded, today, settings):
-    tv = today_view(list(load_all(today)), today, None, settings)
+    tv = today_view(list(load_all()), today, settings)
     assert tv.title == "Sunday 13 September"
     assert tv.subtitle == "Two check-ins open. Four earlier days are unconfirmed."
     assert tv.open_count == 2
@@ -769,7 +769,7 @@ def test_kept_answer_counts_as_all_goals_done(seeded, today, settings):
     """A day answered "Kept" (e.g. via catch-up) renders as a full cell and counts every goal."""
     from streaks.engine import CHART_FULL, Answer, AnswerData, Status, _cell_for_result, evaluate
 
-    hard = next(s for s in load_all(today) if s.name == "75 Hard")
+    hard = next(s for s in load_all() if s.name == "75 Hard")
     day = date(2026, 9, 10)
     assert not any(a.day == day for a in hard.answers)
     with_answer = dataclasses.replace(

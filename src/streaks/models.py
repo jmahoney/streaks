@@ -380,7 +380,7 @@ def load_streak_data(streak: Streak) -> StreakData:
     return _build_streak_data(streak, goals, checks_by_goal, answers)
 
 
-def load_all(today: date) -> list[StreakData]:
+def load_all() -> list[StreakData]:
     """Load every streak's plain-data snapshot in at most 4 queries.
 
     Running streaks come first (ordered by position), then ended streaks.

@@ -76,7 +76,7 @@ class AppState(GObject.Object):
 
     def reload(self) -> list[StreakData]:
         """Reload every streak from the database and notify subscribers."""
-        self.streaks = models.load_all(self.today())
+        self.streaks = models.load_all()
         self.emit("changed")
         return self.streaks
 

@@ -796,9 +796,7 @@ def _build_card(
 _CARD_KIND_ORDER = {"goals": 0, "not_due": 1, "monthly": 2}
 
 
-def today_view(
-    streaks: list[StreakData], today: date, now: datetime, settings: Settings
-) -> TodayView:
+def today_view(streaks: list[StreakData], today: date, settings: Settings) -> TodayView:
     banners: list[Banner] = []
     cards: list[Card] = []
     open_count = 0

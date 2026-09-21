@@ -124,7 +124,7 @@ class StreaksTodayView(Adw.Bin):
         )
 
         display_day = self._shown_day or today
-        view = engine.today_view(self.state.streaks, display_day, clock.now(), settings)
+        view = engine.today_view(self.state.streaks, display_day, settings)
 
         viewing_past = self._shown_day is not None
         self.back_to_today_button.set_visible(viewing_past)

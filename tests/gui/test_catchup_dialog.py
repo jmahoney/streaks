@@ -7,7 +7,7 @@ brief ("trust the engine for every string and number").
 """
 
 import json
-from datetime import date, datetime, time
+from datetime import date
 
 from streaks import engine
 from streaks.catchup_dialog import StreaksCatchupDialog
@@ -275,9 +275,7 @@ def test_save_writes_answers_and_refreshes_the_app(seeded_state, app, process_ev
     # since ended -- `engine.today_view()`'s banners only ever look at the *current* (open) run,
     # so no catch-up banner reappears for 75 Hard. See the phase report for this discrepancy
     # against the brief, which expected a "One day without a check-in" banner here.
-    tv = engine.today_view(
-        seeded_state.streaks, today, datetime.combine(today, time(10, 0)), settings
-    )
+    tv = engine.today_view(seeded_state.streaks, today, settings)
     assert [b for b in tv.banners if b.streak_id == streak.id] == []
 
     window.destroy()

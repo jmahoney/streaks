@@ -54,8 +54,8 @@ for py_file in src_dir.glob("**/*.py"):
                 if node.module:
                     module_name = node.module.split(".")[0]
                     imports.add(module_name)
-    except Exception:
-        pass
+    except Exception as exc:
+        errors.append(f"FAIL manifest: {py_file}: could not parse ({exc})")
 
 # Filter out stdlib and gi
 stdlib_modules = sys.stdlib_module_names

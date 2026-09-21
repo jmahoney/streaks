@@ -12,7 +12,7 @@ gi.require_version("Adw", "1")
 
 from gi.repository import Adw, Gio, GLib, Gtk
 
-from streaks import clock, engine, models
+from streaks import engine, models
 from streaks.catchup_dialog import StreaksCatchupDialog
 from streaks.empty_view import StreaksEmptyView  # noqa: F401  registers $StreaksEmptyView
 from streaks.models import Streak
@@ -322,9 +322,8 @@ class StreaksWindow(Adw.ApplicationWindow):
         self.sidebar_empty_label.set_visible(False)
 
         today = self.state.today()
-        now = clock.now()
         settings = self.state.settings.to_engine()
-        self._today_view = engine.today_view(streaks, today, now, settings)
+        self._today_view = engine.today_view(streaks, today, settings)
 
         today_row = StreaksSidebarRow()
         today_row.section = None

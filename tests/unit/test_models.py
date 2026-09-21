@@ -250,7 +250,7 @@ def test_load_all_orders_running_then_ended_by_position():
     create_streak("C", COLOURS[2], PeriodKind.DAILY, ["g1"], created_on=date(2026, 1, 1))
     end_streak(s1, date(2026, 2, 1))
 
-    result = load_all(date(2026, 3, 1))
+    result = load_all()
 
     assert [sd.name for sd in result] == ["B", "C", "A"]
 
@@ -276,7 +276,7 @@ def test_load_all_query_count_bounded(monkeypatch):
 
     monkeypatch.setattr(db, "execute_sql", counting_execute_sql)
 
-    load_all(date(2026, 3, 1))
+    load_all()
 
     assert calls["n"] <= 4
 

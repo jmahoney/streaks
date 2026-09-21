@@ -46,6 +46,7 @@ class StreaksStreakView(Adw.Bin):
     best_label = Gtk.Template.Child()
     chart_caption_label = Gtk.Template.Child()
     range_toggle = Gtk.Template.Child()
+    day_labels_box = Gtk.Template.Child()
     heatmap = Gtk.Template.Child()
     legend_box = Gtk.Template.Child()
     legend_entries_box = Gtk.Template.Child()
@@ -126,6 +127,7 @@ class StreaksStreakView(Adw.Bin):
             else:
                 run_toggle.set_label(_("This run"))
 
+        self._rebuild_day_labels(hist.day_labels)
         self.heatmap.set_cells([cell for week in hist.weeks for cell in week])
 
         self._rebuild_legend(hist.legend)
@@ -136,6 +138,16 @@ class StreaksStreakView(Adw.Bin):
 
         self._rebuild_goal_bars(hist.goal_bars)
         self._rebuild_earlier_runs(hist.earlier_runs)
+
+    def _rebuild_day_labels(self, day_labels: list[str]) -> None:
+        self._clear_box(self.day_labels_box)
+        for label in day_labels:
+            widget = Gtk.Label(label=label)
+            widget.set_xalign(0)
+            widget.set_size_request(-1, 13)
+            widget.set_valign(Gtk.Align.CENTER)
+            widget.add_css_class("chart-day-label")
+            self.day_labels_box.append(widget)
 
     def _rebuild_legend(self, legend: list[tuple[str, str | None, str]]) -> None:
         self._legend = legend

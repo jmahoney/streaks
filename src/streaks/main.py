@@ -20,14 +20,16 @@ _ = gettext.gettext
 class StreaksApplication(Adw.Application):
     """Main application class."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, *, version: str = "0.1.0", **kwargs):
         """Initialize the application."""
         kwargs.setdefault("application_id", "com.cheerschopper.Streaks")
         kwargs.setdefault("flags", Gio.ApplicationFlags.DEFAULT_FLAGS)
         super().__init__(**kwargs)
         self.resource_base_path = "/com/cheerschopper/Streaks"
+        self.version = version
         self.window = None
         self._db_error_dialog: Adw.AlertDialog | None = None
+        self._preferences_dialog: Adw.Dialog | None = None
 
         # Create actions
         action = Gio.SimpleAction.new("quit", None)
@@ -100,13 +102,14 @@ class StreaksApplication(Adw.Application):
         from streaks.preferences_dialog import StreaksPreferencesDialog
 
         dialog = StreaksPreferencesDialog(window.state)
+        self._preferences_dialog = dialog
         dialog.present(window)
 
     def _on_about(self, *args):
         """Show the about dialog."""
         about = Adw.AboutDialog(
             application_name="Streaks",
-            version=getattr(self, "_version", "0.1.0"),
+            version=self.version,
             developer_name="Cheers Chopper",
             license_type=Gtk.License.GPL_3_0,
         )
@@ -116,6 +119,5 @@ class StreaksApplication(Adw.Application):
 def main(version):
     """Entry point for the application."""
     load_resources()
-    app = StreaksApplication()
-    app._version = version
+    app = StreaksApplication(version=version)
     return app.run(sys.argv)

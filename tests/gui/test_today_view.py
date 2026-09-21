@@ -4,7 +4,7 @@ from datetime import date, datetime
 
 from gi.repository import GLib
 
-from streaks import clock, engine
+from streaks import engine
 from streaks.models import DayAnswer, GoalCheck, Streak
 from streaks.window import StreaksWindow
 
@@ -13,7 +13,7 @@ def _engine_view(state, day=None):
     """The canonical ``engine.TodayView`` for ``state``, computed the same way the widget does."""
     today = state.today()
     settings = state.settings.to_engine()
-    return engine.today_view(state.streaks, day or today, clock.now(), settings)
+    return engine.today_view(state.streaks, day or today, settings)
 
 
 def _today_view(window):
