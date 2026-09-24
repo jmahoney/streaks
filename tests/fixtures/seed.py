@@ -38,9 +38,10 @@ Expected values, pinned by ``tests/unit/test_engine.py``:
 - Clip fingernails: count 4, sidebar meta "Monthly · 1 goal", today's card reads "Due this
   month" with 17 days left on the goal.
 - Couch to 5K: ended, best run 31 days, sidebar meta "Ended 4 Mar · best 31".
-- Today view: title "Sunday 13 September", two check-ins open (75 Hard and the gym). No
-  snoozing the alarm and Clip fingernails also get cards but stay closed today, and Couch to 5K,
-  being ended, gets no card at all. Four earlier days are unconfirmed.
+- Today view: title "Sunday 13 September", subtitle "2 check-ins open · 4 earlier days
+  unconfirmed" (75 Hard and the gym are open; the four unconfirmed 75 Hard days account for the
+  rest). No snoozing the alarm and Clip fingernails also get cards but stay closed today, and
+  Couch to 5K, being ended, gets no card at all.
 
 Tests assert these values literally; they pin the fixture against drift.
 """

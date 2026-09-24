@@ -164,6 +164,10 @@ progressbar.low > trough > progress {
   color: var(--catchup-missed-fg-color);
 }
 
+.catchup-day:not(.missed) .status {
+  opacity: 0.55;
+}
+
 /* The list, and each row inside it, paints its own (theme) background, which in dark mode is
  * visibly darker than the card around it; the mock keeps the goal rows on the card's own
  * background. */

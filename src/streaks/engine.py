@@ -1306,7 +1306,7 @@ def catch_up_preview(
     end_day = None
     if ends_run:
         missed_days = sorted(d for d, (status, _mids) in answers.items() if status == Answer.MISSED)
-        end_day = missed_days[0] if missed_days else new_run.end
+        end_day = next((d for d in missed_days if d > new_run.end), new_run.end)
 
     strip = _preview_strip(hypothetical, today, settings)
     unanswered_after = [d for d in unconfirmed_days if d not in answers]

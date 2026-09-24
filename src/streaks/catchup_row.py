@@ -76,6 +76,9 @@ class StreaksCatchupRow(Gtk.Box):
             # The checkbutton fills the row and handles its own clicks; leaving the row itself
             # activatable would give a pointer click two paths to toggle the same checkbutton.
             row.set_activatable(False)
+            # ...and shouldn't take keyboard focus either, or Tab would stop on a row that does
+            # nothing on Space/Enter before reaching the checkbutton that actually toggles.
+            row.set_focusable(False)
             self._goal_checks.append((goal.id, check))
 
         self._update_visual()

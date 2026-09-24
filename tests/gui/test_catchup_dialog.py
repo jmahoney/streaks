@@ -180,6 +180,7 @@ def test_goal_row_click_path_toggles_the_check_exactly_once(
     _gid, check = wed_row._goal_checks[0]
     row = check.get_parent()
     assert row.get_activatable() is False
+    assert row.get_focusable() is False
 
     toggles = []
     check.connect("toggled", lambda c: toggles.append(c.get_active()))

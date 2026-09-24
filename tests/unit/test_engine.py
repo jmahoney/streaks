@@ -770,6 +770,29 @@ def test_catch_up_preview_summary_ends_without_a_following_run():
     assert preview.summary == "Run 1 ends on 9 January at 4 days. 4 days unconfirmed."
 
 
+def test_catch_up_preview_summary_ends_day_skips_allow_skip_forgiven_miss():
+    # Monday 5 Jan 2026 created, allow_skip on. 5-11 Jan is one ISO week; allow_skip forgives the
+    # first miss in it, so the 6 Jan miss (first, forgiven) does not end the run, but the 8 Jan
+    # miss (second in the week, un-forgiven) does. The summary must name 8 January, not 6 January.
+    created = date(2026, 1, 5)
+    s = _mk(
+        created,
+        day_checks={date(2026, 1, 5): {0}, date(2026, 1, 7): {0}, date(2026, 1, 9): {0}},
+        n_goals=1,
+        allow_skip=True,
+    )
+    today = date(2026, 1, 10)  # Saturday
+    answers = {
+        date(2026, 1, 6): (Answer.MISSED, ()),
+        date(2026, 1, 8): (Answer.MISSED, ()),
+    }
+    preview = catch_up_preview(s, today, Settings(), answers)
+    assert preview.ends_run is True
+    assert preview.summary == (
+        "Run 1 ends on 8 January at 3 days. Run 2 starts on 9 January at 2 days."
+    )
+
+
 def test_fixture_75_hard_mark_missed_preview(seeded, today, settings):
     hard = _streaks()["75 Hard"]
     assert mark_missed_preview(hard, today, settings) == "This ends run 3 at 50 days."

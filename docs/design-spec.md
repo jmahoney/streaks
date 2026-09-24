@@ -236,8 +236,9 @@ periods elapsed in the run, excluding today) rounded.
      unconfirmed."
   2. One `CatchUpRow` "card" per unconfirmed day (oldest first), gap 12 between cards:
      - **Header** (padding 10 16, bottom border): left, bold 13.5 date "Wednesday 9 September" (`%A %-d %B`) over
-       caption 11.5 status text; right, a flat accent-text link button, visible except on a ticked (kept/partial) day.
-       Status text and link, derived entirely from the day's own ticks:
+       caption 11.5 status text at 55 % opacity (full opacity, red, on a missed/partial day); right, a flat
+       accent-text link button, visible except on a ticked (kept/partial) day. Status text and link, derived
+       entirely from the day's own ticks:
        | Ticks | Status text | Link |
        |---|---|---|
        | none, not marked missed | "Unconfirmed" | "Mark missed" |
@@ -249,10 +250,11 @@ periods elapsed in the run, excluding today) rounded.
      - **Goal list**: a `Gtk.ListBox` of one row per active goal (height 38, padding 0 16, top border), each a
        `Gtk.CheckButton` filling the row (unticked by default; the row itself is not activatable, so a click has one
        toggle path). Ticked goals dim to 60 % opacity.
-     - A day with any tick short of all goals gets class `missed`: the header background/border/text turn red
-       (`#fdf2f2` bg, `#f0d7d9` border, `#a51d2d` text; dark: `#3a2224` / `#5a2f33` / `#ff938a`), and each *unticked*
-       goal row's label also turns that red. A day marked missed via the link (no ticks) gets the same `missed`
-       class on the card, but no goal row is individually flagged (none are ticked).
+     - A day with any tick short of all goals gets class `missed`: the whole card's border turns red
+       (`#f0d7d9`; dark `#5a2f33`), the header background turns red (`#fdf2f2`; dark `#3a2224`), and the header's
+       date/status text turn red (`#a51d2d`; dark `#ff938a`) at full opacity — and each *unticked* goal row's label
+       also turns that red. A day marked missed via the link (no ticks) gets the same `missed` class on the card,
+       but no goal row is individually flagged (none are ticked).
   3. **Result card** (padding 14 16): bold 13 "Result of these answers"; `StripWidget` 9×20 gap 3 of the last 24 due
      days reflecting the pending answers; caption 12, `dim-label` normally, `error` (red) when an answer would end the
      run — sentence(s) from the engine:
@@ -343,9 +345,10 @@ Header title is "Streaks" with the primary menu button only.
 Only these classes; everything else must be a libadwaita style class:
 `colour-dot` (8×8 circle), `today-dot` (square) / `ended-dot`, `streak-blue|green|yellow|red|purple` (a streak's
 colour on dots and swatches — `theme.colour_class(stored_hex)`; never an inline provider, so the dark hues apply),
-`badge` (pill count), `catchup-banner`, `catchup-row.missed`, `catchup-goal-list`, `colour-swatch` (+ `:checked`
-ring), `stat-accent` (`#1a68c7` number), `strike` (strike-through label), `goal-bar.low` (amber),
-`chart-legend-swatch`, `sidebar-footer`. Cards use `card`; section headings use `caption-heading dim-label`.
+`badge` (pill count), `catchup-banner` (+ `.title`), `catchup-day` (+ `.missed`, `.header`, `.date`, `.status`),
+`catchup-goals`, `catchup-goal` (+ `.ticked`, `.missed`), `colour-swatch` (+ `:checked` ring), `stat-accent`
+(`#1a68c7` number), `strike` (strike-through label), `goal-bar.low` (amber), `chart-legend-swatch`, `sidebar-footer`.
+Cards use `card`; section headings use `caption-heading dim-label`.
 Every colour in the stylesheet is a `:root` CSS variable with its dark value in the
 `@media (prefers-color-scheme: dark)` block at the end — add new colours the same way.
 

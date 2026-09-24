@@ -44,7 +44,7 @@ template $StreaksCatchupDialog : Adw.Dialog {
         margin-bottom: 18;
 
         Gtk.Label intro_label {
-          halign: start;
+          halign: fill;
           xalign: 0;
           wrap: true;
           label: _("Unticked goals on a day with any ticks are recorded as missed. Days with no ticks stay unconfirmed.");
@@ -83,7 +83,7 @@ template $StreaksCatchupDialog : Adw.Dialog {
             }
 
             Gtk.Label result_label {
-              halign: start;
+              halign: fill;
               xalign: 0;
               wrap: true;
 
