@@ -109,8 +109,8 @@ class StreaksApplication(Adw.Application):
         about = Adw.AboutDialog(
             application_name="Streaks",
             version=self.version,
-            developer_name="Cheers Chopper",
-            license_type=Gtk.License.GPL_3_0,
+            developer_name="Joe Mahoney",
+            license_type=Gtk.License.MIT_X11,
         )
         about.present(self.window)
 

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: streaks\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-24 19:18+1200\n"
+"POT-Creation-Date: 2026-09-24 22:30+1200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -497,7 +497,7 @@ msgstr ""
 msgid "Mark today as missed?"
 msgstr ""
 
-#: src/streaks/today_view.py:192 src/streaks/catchup_row.py:142
+#: src/streaks/today_view.py:192 src/streaks/catchup_row.py:145
 msgid "Mark missed"
 msgstr ""
 
@@ -690,7 +690,7 @@ msgstr ""
 msgid "Result of these answers"
 msgstr ""
 
-#: src/streaks/catchup_row.py:139
+#: src/streaks/catchup_row.py:142
 msgid "Undo"
 msgstr ""
 
