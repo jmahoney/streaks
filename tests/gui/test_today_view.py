@@ -40,10 +40,7 @@ def test_header_and_another_day_button(seeded_window, process_events):
 
     today_view = _today_view(window)
     assert today_view.title_label.get_label() == "Sunday 13 September"
-    assert (
-        today_view.subtitle_label.get_label()
-        == "Two check-ins open. Four earlier days are unconfirmed."
-    )
+    assert today_view.subtitle_label.get_label() == "2 check-ins open · 4 earlier days unconfirmed"
     assert today_view.another_day_button.get_label() == "Check in for another day"
 
 
@@ -305,4 +302,4 @@ def test_no_quiet_days_variant(seeded_state, seeded_window, process_events):
 
     today_view = _today_view(window)
     assert today_view.banners_box.get_first_child() is None
-    assert today_view.subtitle_label.get_label() == "Two check-ins open."
+    assert today_view.subtitle_label.get_label() == "2 check-ins open"

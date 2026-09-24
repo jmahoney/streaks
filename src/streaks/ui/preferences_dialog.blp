@@ -63,7 +63,7 @@ template $StreaksPreferencesDialog : Adw.PreferencesDialog {
 
       Adw.SwitchRow reminders_row {
         title: _("Reminders");
-        subtitle: _("Per streak, at the time you set");
+        subtitle: _("Set per streak");
       }
 
       Adw.ActionRow day_start_row {
@@ -112,7 +112,7 @@ template $StreaksPreferencesDialog : Adw.PreferencesDialog {
 
       Adw.SwitchRow count_through_row {
         title: _("Keep counting through unconfirmed days");
-        subtitle: _("A run ends only when you mark a goal missed");
+        subtitle: _("Runs end only on a missed goal");
       }
 
       Adw.SwitchRow show_ended_row {
@@ -123,7 +123,7 @@ template $StreaksPreferencesDialog : Adw.PreferencesDialog {
 
     Adw.PreferencesGroup {
       title: _("Data");
-      description: _("Everything stays on this machine. There is no account.");
+      description: _("Data is stored locally.");
 
       Adw.ActionRow export_row {
         title: _("Export everything");

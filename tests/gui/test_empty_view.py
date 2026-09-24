@@ -9,10 +9,7 @@ def test_empty_view_labels(app, process_events):
     process_events()
 
     assert view.title_label.get_label() == "No streaks yet"
-    assert view.body_label.get_label() == (
-        "Pick something you want to do regularly, choose how often, and add as "
-        "many goals as that thing needs."
-    )
+    assert view.body_label.get_label() == "A streak is a set of goals repeated on a schedule."
     assert view.create_button.get_label() == "Create a streak"
     assert view.create_button.has_css_class("suggested-action")
     assert view.create_button.has_css_class("pill")

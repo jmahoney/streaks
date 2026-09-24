@@ -719,18 +719,14 @@ def _banner_strip(results: tuple[PeriodResult, ...]) -> list[Cell]:
 
 def _open_sentence(n: int) -> str:
     if n == 0:
-        return _("No check-ins open.")
-    if n == 1:
-        return _("One check-in open.")
-    return _("%(n)s check-ins open.") % {"n": words.sentence_number_word(n)}
+        return _("No check-ins open")
+    return ngettext("%(n)d check-in open", "%(n)d check-ins open", n) % {"n": n}
 
 
 def _unconfirmed_sentence(n: int) -> str | None:
     if n == 0:
         return None
-    if n == 1:
-        return _("One earlier day is unconfirmed.")
-    return _("%(n)s earlier days are unconfirmed.") % {"n": words.sentence_number_word(n)}
+    return ngettext("%(n)d earlier day unconfirmed", "%(n)d earlier days unconfirmed", n) % {"n": n}
 
 
 def _banner_title(start: date, end: date) -> str:
@@ -905,10 +901,7 @@ def today_view(streaks: list[StreakData], today: date, settings: Settings) -> To
                     Banner(
                         streak_id=streak.id,
                         title=_banner_title(start_d, end_d),
-                        body=_(
-                            "Your %(n)s-day run is still counted as running. It only "
-                            "ends if you tell me a goal was missed."
-                        )
+                        body=_("The %(n)s-day run continues. Unconfirmed days do not end a run.")
                         % {"n": run.length},
                         strip=_banner_strip(run.periods),
                     )
@@ -917,7 +910,7 @@ def today_view(streaks: list[StreakData], today: date, settings: Settings) -> To
     cards.sort(key=lambda c: _CARD_KIND_ORDER.get(c.kind, 99))
 
     title = words.fmt_weekday_day(today)
-    subtitle = " ".join(
+    subtitle = " · ".join(
         s for s in (_open_sentence(open_count), _unconfirmed_sentence(unconfirmed_total)) if s
     )
     return TodayView(

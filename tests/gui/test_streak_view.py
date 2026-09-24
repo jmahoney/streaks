@@ -52,8 +52,7 @@ def test_75_hard_chart(seeded_window, process_events):
     assert view.chart_title_label.get_label() == "Run 3 · since 25 Jul"
     assert view.best_label.get_visible()
     assert view.chart_caption_label.get_label() == (
-        "Darker means more of that day's goals were done. Outlined days are ones you never "
-        "answered for."
+        "Shade shows the share of goals completed. Outlined days are unconfirmed."
     )
     assert view.range_toggle.get_active_name() == "run"
 

@@ -51,7 +51,7 @@ def test_sidebar_rows_from_seed(seeded_window, process_events):
     # GTK quantizes the widget opacity to 8 bits internally, so it doesn't round-trip exactly.
     assert ended_row.get_opacity() == pytest.approx(0.55, abs=0.01)
 
-    assert window.footer_label.get_label() == "Everything stays on this machine."
+    assert window.footer_label.get_label() == "Data is stored locally."
     assert window.footer_label.get_visible()
 
 

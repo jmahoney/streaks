@@ -473,9 +473,9 @@ def test_banner_title_cross_month_range():
 @pytest.mark.parametrize(
     "n,expected",
     [
-        (0, "No check-ins open."),
-        (1, "One check-in open."),
-        (2, "Two check-ins open."),
+        (0, "No check-ins open"),
+        (1, "1 check-in open"),
+        (2, "2 check-ins open"),
     ],
 )
 def test_open_sentence(n, expected):
@@ -486,8 +486,8 @@ def test_open_sentence(n, expected):
     "n,expected",
     [
         (0, None),
-        (1, "One earlier day is unconfirmed."),
-        (4, "Four earlier days are unconfirmed."),
+        (1, "1 earlier day unconfirmed"),
+        (4, "4 earlier days unconfirmed"),
     ],
 )
 def test_unconfirmed_sentence(n, expected):
@@ -631,10 +631,7 @@ def test_fixture_75_hard_banner(seeded, today, settings):
     tv = today_view(list(load_all()), today, settings)
     banner = next(b for b in tv.banners if b.streak_id == _streaks()["75 Hard"].id)
     assert banner.title == "Four days without a check-in — 9 to 12 September"
-    assert banner.body == (
-        "Your 51-day run is still counted as running. It only ends if you tell me a goal "
-        "was missed."
-    )
+    assert banner.body == "The 51-day run continues. Unconfirmed days do not end a run."
 
 
 def test_fixture_75_hard_catch_up(seeded, today, settings):
@@ -732,7 +729,7 @@ def test_fixture_couch_to_5k_history_ended_streak(seeded, today, settings):
 def test_fixture_today_view(seeded, today, settings):
     tv = today_view(list(load_all()), today, settings)
     assert tv.title == "Sunday 13 September"
-    assert tv.subtitle == "Two check-ins open. Four earlier days are unconfirmed."
+    assert tv.subtitle == "2 check-ins open · 4 earlier days unconfirmed"
     assert tv.open_count == 2
     assert [c.name for c in tv.cards] == [
         "75 Hard",

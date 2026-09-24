@@ -38,7 +38,7 @@ def test_row_titles_and_subtitles(seeded_state, seeded_window, process_events):
     process_events()
 
     assert dialog.reminders_row.get_title() == "Reminders"
-    assert dialog.reminders_row.get_subtitle() == "Per streak, at the time you set"
+    assert dialog.reminders_row.get_subtitle() == "Set per streak"
 
     assert dialog.day_start_row.get_title() == "Day starts at"
     assert dialog.day_start_row.get_subtitle() == "Late-night check-ins count for the day before"
@@ -47,7 +47,7 @@ def test_row_titles_and_subtitles(seeded_state, seeded_window, process_events):
     assert dialog.backfill_row.get_subtitle() == "How far back a day can be answered for"
 
     assert dialog.count_through_row.get_title() == "Keep counting through unconfirmed days"
-    assert dialog.count_through_row.get_subtitle() == "A run ends only when you mark a goal missed"
+    assert dialog.count_through_row.get_subtitle() == "Runs end only on a missed goal"
 
     assert dialog.show_ended_row.get_title() == "Show ended runs in the sidebar"
     assert dialog.show_ended_row.get_subtitle() == "Old runs stay readable either way"
@@ -67,7 +67,7 @@ def test_data_group_description(seeded_state, seeded_window, process_events):
     while parent is not None and not hasattr(parent, "get_description"):
         parent = parent.get_parent()
     assert parent is not None
-    assert parent.get_description() == "Everything stays on this machine. There is no account."
+    assert parent.get_description() == "Data is stored locally."
 
 
 # -- show ended ------------------------------------------------------------------------------
