@@ -135,4 +135,4 @@ followed by `AppState.reload()`.
 
 ## License
 
-GPL-3.0-or-later.
+MIT
