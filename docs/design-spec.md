@@ -59,7 +59,7 @@ libadwaita `accent`/`suggested-action`/check/switch picks it up.
 | Check-in card footer | `#fcfcfc` | `#35353a` |
 | Stat tile accent number | `#1a68c7` | `#ffa348` |
 | Goal bar "low" fill | `#e5a50a` | `#c9822c` |
-| Catch-up missed row bg / border / date | `#fdf2f2` / `#f0d7d9` / `#a51d2d` | `#3a2224` / `#5a2f33` / `#ff938a` |
+| Catch-up missed day header bg / border / text | `#fdf2f2` / `#f0d7d9` / `#a51d2d` | `#3a2224` / `#5a2f33` / `#ff938a` |
 
 Chart cell scale in dark (`streaks.theme.DARK_PALETTE`; ratio thresholds unchanged):
 
@@ -123,7 +123,7 @@ Vertical box, padding 8, gap 2:
 4. Section label "ENDED" (only when there are ended streaks and the "Show ended runs in the sidebar" preference is on).
 5. Ended rows at 55 % opacity, dot `#c0bfbc`, no count. Fixture: "Couch to 5K" / "Ended 4 Mar · best 31".
 6. Spacer (vexpand).
-7. Footer caption 11 at 42 % black, padding 0 10 6: "Everything stays on this machine."
+7. Footer caption 11 at 42 % black, padding 0 10 6: "Data is stored locally."
 
 Empty (4f): sidebar content is just a caption at padding 14, 42 % black: "No streaks yet". No Today row, no footer.
 
@@ -138,15 +138,15 @@ Content padding 24 28, vertical gap 18, background `#fafafa`.
 Header bar: `Adw.WindowTitle` title "Today", subtitle "Sunday 13 September" (`%A %-d %B`).
 
 **Header row** (align end, gap 14):
-- Left: title "Sunday 13 September" (bold 22 → `title-2`), subtitle 13 at 52 %: "Two check-ins open. Four earlier days
-  are unconfirmed." (numbers as words; second sentence omitted when 0 unconfirmed; "One check-in open." singular;
-  "No check-ins open." when 0).
+- Left: title "Sunday 13 September" (bold 22 → `title-2`), subtitle 13 at 52 %: "2 check-ins open · 4 earlier days
+  unconfirmed" (digits, joined with " · "; second clause omitted when 0 unconfirmed; "No check-ins open" when 0 open;
+  `ngettext` singular/plural per clause, no trailing period).
 - Right: `Gtk.Button` "Check in for another day" (bordered, bold 12.5).
 
 **Quiet-days banner** (only when the selected/any running streak has unconfirmed days; one banner per streak with quiet
 days, 75 Hard in the fixture): box, bg `#f4f8fe`, border `#bcd4f2`, radius 12, padding 14 16, gap 16.
-- Text: bold 13.5 `#1a5fb4` "Four days without a check-in — 9 to 12 September"; below, 12 at 60 %: "Your 51-day run
-  is still counted as running. It only ends if you tell me a goal was missed."
+- Text: bold 13.5 `#1a5fb4` "Four days without a check-in — 9 to 12 September"; below, 12 at 60 %: "The 51-day run
+  continues. Unconfirmed days do not end a run."
 - Middle: `StripWidget` of the last 24 due days (8×22, gap 3): kept days `#1a68c7`, unconfirmed white w/ `#a9c9ef` border.
 - Right: `Gtk.Button` "Catch up" `suggested-action` → opens Catch-up dialog (§5) for that streak.
 
@@ -199,8 +199,8 @@ Captions: "days running" / "weeks running" / "months running" per period kind.
 
 **Chart card** (padding 16 18):
 - Title row (baseline, gap 12): bold 14 "Run 3 · since 25 July"; tag "BEST" bold 10.5 accent (only if this is the best
-  run); caption 12 at 50 % (expands): "Darker means more of that day's goals were done. Outlined days are ones you never
-  answered for."; right: `Adw.ToggleGroup` {"This run", "Lifetime"} (pill-ish segmented, 11.5).
+  run); caption 12 at 50 % (expands): "Shade shows the share of goals completed. Outlined days are unconfirmed."; right:
+  `Adw.ToggleGroup` {"This run", "Lifetime"} (pill-ish segmented, 11.5).
 - Grid (margin-top 14, gap 6): day-label column 18 wide with labels `M, "", W, "", F, "", ""` (10px at 40 %), then
   weeks as columns (7 cells each, gap 4). "This run" shows the current run from its start (rows Mon–Sun, first column
   padded with `upcoming`-coloured blanks before the start); "Lifetime" shows the last `weeksShown` (30) weeks ending this
@@ -231,30 +231,45 @@ periods elapsed in the run, excluding today) rounded.
 - top `Adw.HeaderBar` (`show-start-title-buttons: false; show-end-title-buttons: false`): start `Gtk.Button` "Cancel";
   title `Adw.WindowTitle` "Catch up" / "75 Hard · 4 days"; end `Gtk.Button` "Save" `suggested-action` (insensitive until
   at least one day is answered).
-- content: box, padding 18, gap 14.
-  1. Caption 12.5 at 58 %: "For each day: kept it, missed something, or leave it unanswered. Only “missed” ends the run."
-  2. `card` list, one `CatchUpRow` per unconfirmed day (oldest first), padding 12 16, bottom border:
-     left: bold 13.5 date "Wednesday 9 September" (`%A %-d %B`), caption 11.5 state text: "Unanswered" (default),
-     "All five goals" (after Kept; "All {n} goals"/"Done" for 1 goal), "Missed — which goals?" (after Missed);
-     right: two linked `Gtk.ToggleButton`s "Kept" / "Missed" (padding 7 13, radius 8). Kept selected → accent bg white
-     bold; Missed selected → `#c01c28` bg white bold.
-     Missed state: row gets class `missed` (bg `#fdf2f2`, border `#f0d7d9`, date text `#a51d2d`) and reveals:
-     - nested white list (border `#f0d7d9`, radius 9) of the streak's goals, each row height 40: 22×22 mark box + name
-       12.5. Kept goals: accent ✓, name at 60 %; missed goals: `#c01c28` ×, name at 85 %. Goals default to kept; the user
-       unticks the ones missed (at least one must be missed — if all ticked, the row's state text says
-       "Untick the goals you missed").
-     - caption 11.5 `#a51d2d`, margin-top 9: "Saving this ends the 48-day run on 11 September and starts run 4 on the
-       12th." (engine sentence).
+- content: `Gtk.ScrolledWindow` (natural-height, no horizontal scrolling) around a box, padding 18, gap 12.
+  1. Caption 12.5 at 58 %: "Unticked goals on a day with any ticks are recorded as missed. Days with no ticks stay
+     unconfirmed."
+  2. One `CatchUpRow` "card" per unconfirmed day (oldest first), gap 12 between cards:
+     - **Header** (padding 10 16, bottom border): left, bold 13.5 date "Wednesday 9 September" (`%A %-d %B`) over
+       caption 11.5 status text; right, a flat accent-text link button, visible except on a ticked (kept/partial) day.
+       Status text and link, derived entirely from the day's own ticks:
+       | Ticks | Status text | Link |
+       |---|---|---|
+       | none, not marked missed | "Unconfirmed" | "Mark missed" |
+       | none, marked missed (link clicked) | "Missed" | "Undo" |
+       | some but not all | "{done} of {n} kept · {missed} missed" | hidden |
+       | all | "All {n} kept" ("Kept" for a 1-goal streak) | hidden |
+       Clicking "Mark missed" answers the day missed with no goals ticked; "Undo" clears that back to unconfirmed.
+       Ticking (or unticking) any goal always clears an explicit "Mark missed".
+     - **Goal list**: a `Gtk.ListBox` of one row per active goal (height 38, padding 0 16, top border), each a
+       `Gtk.CheckButton` filling the row (unticked by default; the row itself is not activatable, so a click has one
+       toggle path). Ticked goals dim to 60 % opacity.
+     - A day with any tick short of all goals gets class `missed`: the header background/border/text turn red
+       (`#fdf2f2` bg, `#f0d7d9` border, `#a51d2d` text; dark: `#3a2224` / `#5a2f33` / `#ff938a`), and each *unticked*
+       goal row's label also turns that red. A day marked missed via the link (no ticks) gets the same `missed`
+       class on the card, but no goal row is individually flagged (none are ticked).
   3. **Result card** (padding 14 16): bold 13 "Result of these answers"; `StripWidget` 9×20 gap 3 of the last 24 due
-     days reflecting the pending answers; caption 12 at 60 %: "Run 3 ends at 48 days — your best run so far. Run 4 is on
-     2 days. Thursday stays hollow — unanswered, and it doesn't break anything." (engine: first sentence when a miss is
-     pending, "— your best run so far" only when true; second when a new run starts; third lists unanswered weekday
-     names; when nothing is missed: "Run 3 stays at 51 days. {Weekday} stays hollow …" / "All four days confirmed.").
+     days reflecting the pending answers; caption 12, `dim-label` normally, `error` (red) when an answer would end the
+     run — sentence(s) from the engine:
+     - Ends the run: "Run {idx} ends on {day} at {n} day(s)." (`_ends_sentence`), plus, when a new run begins the same
+       save, "Run {next idx} starts on {day} at {n} day(s)." for that run.
+     - Otherwise: "Run {idx} continues at {n} day(s)."
+     - Either way, appended when any unconfirmed day is left untouched: "{n} day(s) unconfirmed."
+     (`engine.catch_up_preview`/`_preview_summary`; `ngettext` singular/plural throughout.)
 
-Fixture state for the `catch-up-missed` snapshot: Wed 9 Kept, Thu 10 unanswered, Fri 11 Missed (second workout
-unticked), Sat 12 Kept. Default snapshot: all unanswered.
+Fixture state for the `catch-up-missed` snapshot: 9 Sep — all goals ticked (kept); 10 Sep — untouched (stays
+unconfirmed); 11 Sep — every goal ticked except "45 min second workout" (partial/missed, red); 12 Sep — all goals
+ticked (kept). Result: "Run 3 ends on 11 September at 48 days. Run 4 starts on 12 September at 2 days. 1 day
+unconfirmed." Default (`catch-up`) snapshot: nothing ticked on any day; result "Run 3 continues at 51 days. 4 days
+unconfirmed."
 
-Save: writes one `DayAnswer` per answered day in one transaction, closes, refreshes Today + history.
+Save: writes one `DayAnswer` per answered day (derived from ticks, per the table above) in one transaction, closes,
+refreshes Today + history.
 
 ## 6. New streak dialog (4d) — also used for Edit
 
@@ -292,17 +307,17 @@ Edit: updates name/colour/period/reminder/allow_skip; goals removed get `removed
 `Adw.PreferencesDialog` (content-width 660), one `Adw.PreferencesPage`:
 
 - Group "Check-ins":
-  - `Adw.SwitchRow` "Reminders", subtitle "Per streak, at the time you set" — GSettings `reminders` (default true).
+  - `Adw.SwitchRow` "Reminders", subtitle "Set per streak" — GSettings `reminders` (default true).
   - `Adw.ActionRow` "Day starts at", subtitle "Late-night check-ins count for the day before", suffix "04:00 ›" (time
     popover) — GSettings `day-start-minutes` (default 240).
   - `Adw.SpinRow` "Backfill window", subtitle "How far back a day can be answered for", value shown as "2 days" —
     GSettings `backfill-days` (default 2, range 0–14).
 - Group "Runs":
-  - `Adw.SwitchRow` "Keep counting through unconfirmed days", subtitle "A run ends only when you mark a goal missed" —
+  - `Adw.SwitchRow` "Keep counting through unconfirmed days", subtitle "Runs end only on a missed goal" —
     `count-through-unconfirmed` (default true). When off, an unconfirmed day older than the backfill window ends the run.
   - `Adw.SwitchRow` "Show ended runs in the sidebar", subtitle "Old runs stay readable either way" — `show-ended`
     (default true).
-- Group "Data", description "Everything stays on this machine. There is no account.":
+- Group "Data", description "Data is stored locally.":
   - `Adw.ActionRow` "Export everything", activatable, suffix `go-next-symbolic` → `Gtk.FileDialog.save` default name
     `streaks-export-{YYYY-MM-DD}.json` → `export.dump()` JSON of all tables.
   - `Adw.ActionRow` "Delete all data" (title class `error`), activatable → `Adw.AlertDialog` "Delete all data?" body
@@ -318,8 +333,7 @@ Sidebar: caption "No streaks yet" (see §2). Content: centred vertical box (gap 
 - `EmptyGridWidget`: 7 columns × 4 rows of 14×14 cells, radius 4, gap 5, all `#e9e9e7` except the last (bottom-right)
   `#cfe2f8` (`#2c2c30` / `#7a4d18` in dark).
 - Title bold 19 "No streaks yet" (margin-top 8) → `title-2`.
-- Body 13.5/1.6 at 55 %, max width 420, centred: "Pick something you want to do regularly, choose how often, and add as
-  many goals as that thing needs."
+- Body 13.5/1.6 at 55 %, max width 420, centred: "A streak is a set of goals repeated on a schedule."
 - `Gtk.Button` "Create a streak" `suggested-action` + `pill`, margin-top 4 → `win.new-streak`.
 
 Header title is "Streaks" with the primary menu button only.

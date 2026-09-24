@@ -233,18 +233,13 @@ SCREENS: dict[str, Screen] = {
     "streak-lifetime": Screen(
         name="streak-lifetime", width=1160, height=760, build=_build_streak_lifetime
     ),
-    # The dialog now scrolls (Gtk.ScrolledWindow) so it no longer overflows an ordinary window,
-    # but its full natural content is taller (~1271/1288px at width 560) than this offscreen
-    # render pipeline can capture undistorted: `render_widget()` paints the toplevel at its real
-    # allocation, which xvfb (`scripts/lib/headless.sh`, "-screen 0 1600x1000x24") clamps to
-    # 1000px, then *stretches* that clamped render to fill whatever height is requested here --
-    # verified by measuring a goal row's rendered height (a fixed 38px): exactly 38px at
-    # height=1000, but a distorted ~49px at height=1288. So 1000 is the tallest height this
-    # pipeline can render without distortion; the goldens still crop the bottom of the content
-    # (see task-2 fix-round-1 report) until something raises the xvfb screen height.
-    "catch-up": Screen(name="catch-up", width=560, height=1000, build=_build_catch_up),
+    # The dialog scrolls (Gtk.ScrolledWindow) so it no longer overflows an ordinary window; these
+    # heights are its full natural content height at width 560 (measured via `widget.measure()`),
+    # which `scripts/lib/headless.sh`'s 1600x1400 xvfb screen is tall enough to render without
+    # clamping or stretching.
+    "catch-up": Screen(name="catch-up", width=560, height=1271, build=_build_catch_up),
     "catch-up-missed": Screen(
-        name="catch-up-missed", width=560, height=1000, build=_build_catch_up_missed
+        name="catch-up-missed", width=560, height=1288, build=_build_catch_up_missed
     ),
     "preferences": Screen(name="preferences", width=660, height=680, build=_build_preferences),
 }

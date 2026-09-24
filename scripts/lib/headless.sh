@@ -25,7 +25,7 @@ headless_setup() {
     fi
     export GDK_BACKEND=x11
     unset WAYLAND_DISPLAY
-    HEADLESS_RUNNER=(xvfb-run -a -s "-screen 0 1600x1000x24 -dpi 96")
-    HEADLESS_RUNNER_STR="xvfb-run -a -s '-screen 0 1600x1000x24 -dpi 96' "
+    HEADLESS_RUNNER=(xvfb-run -a -s "-screen 0 1600x1400x24 -dpi 96")
+    HEADLESS_RUNNER_STR="xvfb-run -a -s '-screen 0 1600x1400x24 -dpi 96' "
   fi
 }
