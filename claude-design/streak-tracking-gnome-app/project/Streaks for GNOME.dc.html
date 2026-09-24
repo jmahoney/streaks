@@ -53,14 +53,14 @@
         <div style="flex:1"><div style="font:13.5px Cantarell,sans-serif;color:rgba(255,255,255,.9099999999999999)">Couch to 5K</div><div style="font:11px Cantarell,sans-serif;color:rgba(255,255,255,.54)">Ended 4 Mar · best 31</div></div>
       </div>
       <div style="flex:1"></div>
-      <div style="font:11px Cantarell,sans-serif;color:rgba(255,255,255,.48);padding:0 10px 6px">Everything stays on this machine.</div>
+      <div style="font:11px Cantarell,sans-serif;color:rgba(255,255,255,.48);padding:0 10px 6px">Data is stored locally.</div>
     </div>
 
     <div style="flex:1;background:#1e1e20;padding:24px 28px;display:flex;flex-direction:column;gap:18px;overflow:hidden">
       <div style="display:flex;align-items:flex-end;gap:14px">
         <div style="flex:1">
           <div style="font:700 22px Cantarell,sans-serif;color:rgba(255,255,255,.94)">Sunday 13 September</div>
-          <div style="font:13px Cantarell,sans-serif;color:rgba(255,255,255,.5800000000000001)">Two check-ins open. Four earlier days are unconfirmed.</div>
+          <div style="font:13px Cantarell,sans-serif;color:rgba(255,255,255,.5800000000000001)">2 check-ins open · 4 earlier days unconfirmed</div>
         </div>
         <div style="padding:8px 14px;border-radius:8px;border:1px solid rgba(255,255,255,.189);background:#35353a;font:700 12.5px Cantarell,sans-serif;color:rgba(255,255,255,.8600000000000001)">Check in for another day</div>
       </div>
@@ -68,7 +68,7 @@
       <div style="display:flex;align-items:center;gap:16px;background:#332a1c;border:1px solid #5e4a2b;border-radius:12px;padding:14px 16px">
         <div style="flex:1">
           <div style="font:700 13.5px Cantarell,sans-serif;color:#ffbe6f;margin-bottom:3px">Four days without a check-in — 9 to 12 September</div>
-          <div style="font:12px Cantarell,sans-serif;color:rgba(255,255,255,.6599999999999999)">Your 47-day run is still counted as running. It only ends if you tell me a goal was missed.</div>
+          <div style="font:12px Cantarell,sans-serif;color:rgba(255,255,255,.6599999999999999)">The 47-day run continues. Unconfirmed days do not end a run.</div>
         </div>
         <div style="display:flex;gap:3px">
           <sc-for list="{{ dSplitBefore }}" as="c" hint-placeholder-count="24"><div title="{{ c.title }}" style="width:8px;height:22px;border-radius:2px;box-sizing:border-box;background:{{ c.bg }};border:1px solid {{ c.bd }}"></div></sc-for>
@@ -185,7 +185,7 @@
       <div style="background:#303034;border:1px solid rgba(255,255,255,.108);border-radius:12px;padding:16px 18px">
         <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:2px">
           <div style="font:700 14px Cantarell,sans-serif;color:rgba(255,255,255,.9099999999999999)">Run 3 · since 25 July</div><div style="font:10.5px Cantarell,sans-serif;color:#ffa348;font-weight:700">BEST</div>
-          <div style="flex:1;font:12px Cantarell,sans-serif;color:rgba(255,255,255,.56)">Darker means more of that day's goals were done. Outlined days are ones you never answered for.</div>
+          <div style="flex:1;font:12px Cantarell,sans-serif;color:rgba(255,255,255,.56)">Shade shows the share of goals completed. Outlined days are unconfirmed.</div>
           <div style="display:flex;gap:3px;background:#3a3a3f;border-radius:8px;padding:3px">
             <div style="padding:5px 12px;border-radius:6px;background:#303034;box-shadow:0 1px 2px rgba(255,255,255,.135);font:700 11.5px Cantarell,sans-serif;color:rgba(255,255,255,.9099999999999999)">This run</div>
             <div style="padding:5px 12px;border-radius:6px;font:11.5px Cantarell,sans-serif;color:rgba(255,255,255,.71)">Lifetime</div>
@@ -255,59 +255,35 @@
   </div>
 </div></div>
 
-<div class="dv-opt" id="5c"><div class="dv-olabel"><a class="dv-oid" href="#5c">5c</a>Catch-up dialog — one row per quiet day</div>
+<div class="dv-opt" id="5c"><div class="dv-olabel"><a class="dv-oid" href="#5c">5c</a>Catch-up dialog — tick completed goals</div>
 <div class="dv-card" style="width:560px">
   <div style="height:50px;display:flex;align-items:center;padding:0 12px;background:#1e1e20;border-bottom:1px solid #3a3a3f">
     <div style="padding:6px 12px;border-radius:7px;border:1px solid rgba(255,255,255,.162);background:#35353a;font:12.5px Cantarell,sans-serif;color:rgba(255,255,255,.8400000000000001)">Cancel</div>
     <div style="flex:1;text-align:center"><div style="font:700 14px Cantarell,sans-serif;color:rgba(255,255,255,.9099999999999999)">Catch up</div><div style="font:11px Cantarell,sans-serif;color:rgba(255,255,255,.56)">75 Hard · 4 days</div></div>
     <div style="padding:6px 13px;border-radius:7px;background:#ffa348;font:700 12.5px Cantarell,sans-serif;color:#2a1c09">Save</div>
   </div>
-  <div style="background:#1e1e20;padding:18px;display:flex;flex-direction:column;gap:14px">
-    <div style="font:12.5px Cantarell,sans-serif;color:rgba(255,255,255,.6399999999999999);padding:0 2px">For each day: kept it, missed something, or leave it unanswered. Only “missed” ends the run.</div>
-    <div style="background:#303034;border:1px solid rgba(255,255,255,.108);border-radius:12px;overflow:hidden">
-      <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.081)">
-        <div style="flex:1"><div style="font:700 13.5px Cantarell,sans-serif;color:rgba(255,255,255,.9099999999999999)">Tuesday 9 September</div><div style="font:11.5px Cantarell,sans-serif;color:rgba(255,255,255,.56)">All five goals</div></div>
-        <div style="display:flex;gap:7px">
-          <div style="padding:7px 13px;border-radius:8px;background:#ffa348;font:700 12px Cantarell,sans-serif;color:#2a1c09">Kept</div>
-          <div style="padding:7px 13px;border-radius:8px;border:1px solid rgba(255,255,255,.189);background:#35353a;font:12px Cantarell,sans-serif;color:rgba(255,255,255,.76)">Missed</div>
+  <div style="background:#1e1e20;padding:18px;display:flex;flex-direction:column;gap:12px">
+    <div style="font:12.5px/1.5 Cantarell,sans-serif;color:rgba(255,255,255,.6399999999999999);padding:0 2px">Unticked goals on a day with any ticks are recorded as missed. Days with no ticks stay unconfirmed.</div>
+    <sc-for list="{{ dcuDays }}" as="d" hint-placeholder-count="4">
+      <div style="background:#303034;border:1px solid {{ d.bd }};border-radius:12px;overflow:hidden">
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 16px;background:{{ d.headBg }};border-bottom:1px solid rgba(255,255,255,.095)">
+          <div style="flex:1"><div style="font:700 13.5px Cantarell,sans-serif;color:{{ d.titleFg }}">{{ d.date }}</div><div style="font:11.5px Cantarell,sans-serif;color:{{ d.statusFg }}">{{ d.status }}</div></div>
+          <sc-if value="{{ d.showAction }}" hint-placeholder-val="{{ false }}"><div onClick="{{ d.onAction }}" style="font:12.5px Cantarell,sans-serif;color:{{ d.actionFg }};cursor:pointer">{{ d.action }}</div></sc-if>
         </div>
-      </div>
-      <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.081)">
-        <div style="flex:1"><div style="font:700 13.5px Cantarell,sans-serif;color:rgba(255,255,255,.9099999999999999)">Wednesday 10 September</div><div style="font:11.5px Cantarell,sans-serif;color:rgba(255,255,255,.56)">Unanswered</div></div>
-        <div style="display:flex;gap:7px">
-          <div style="padding:7px 13px;border-radius:8px;border:1px solid rgba(255,255,255,.189);background:#35353a;font:12px Cantarell,sans-serif;color:rgba(255,255,255,.76)">Kept</div>
-          <div style="padding:7px 13px;border-radius:8px;border:1px solid rgba(255,255,255,.189);background:#35353a;font:12px Cantarell,sans-serif;color:rgba(255,255,255,.76)">Missed</div>
-        </div>
-      </div>
-      <div style="padding:12px 16px 14px;background:#3a2224;border-bottom:1px solid #5a2f33">
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
-          <div style="flex:1"><div style="font:700 13.5px Cantarell,sans-serif;color:#ff938a">Thursday 11 September</div><div style="font:11.5px Cantarell,sans-serif;color:rgba(255,255,255,.6100000000000001)">Missed — which goals?</div></div>
-          <div style="display:flex;gap:7px">
-            <div style="padding:7px 13px;border-radius:8px;border:1px solid rgba(255,255,255,.189);background:#35353a;font:12px Cantarell,sans-serif;color:rgba(255,255,255,.76)">Kept</div>
-            <div style="padding:7px 13px;border-radius:8px;background:#c01c28;font:700 12px Cantarell,sans-serif;color:#fff">Missed</div>
+        <sc-for list="{{ d.goals }}" as="g" hint-placeholder-count="5">
+          <div onClick="{{ g.toggle }}" style="display:flex;align-items:center;gap:12px;padding:0 16px;height:38px;border-top:1px solid rgba(255,255,255,.068);cursor:pointer">
+            <div style="width:22px;height:22px;border-radius:6px;box-sizing:border-box;background:{{ g.bg }};border:1px solid {{ g.bd }};display:flex;align-items:center;justify-content:center;color:{{ g.mk }};font-size:13px;font-weight:700">{{ g.mark }}</div>
+            <div style="flex:1;font:13px Cantarell,sans-serif;color:{{ g.fg }}">{{ g.name }}</div>
           </div>
-        </div>
-        <div style="background:#303034;border:1px solid #5a2f33;border-radius:9px;overflow:hidden">
-          <sc-for list="{{ dMissedGoals }}" as="g" hint-placeholder-count="5">
-            <div style="display:flex;align-items:center;gap:10px;padding:0 13px;height:40px;border-bottom:1px solid rgba(255,255,255,.081)"><div style="width:22px;height:22px;border-radius:6px;background:{{ g.bg }};display:flex;align-items:center;justify-content:center;color:{{ g.mk }};font-size:13px;font-weight:700">{{ g.mark }}</div><div style="flex:1;font:12.5px Cantarell,sans-serif;color:{{ g.fg }}">{{ g.name }}</div></div>
-          </sc-for>
-        </div>
-        <div style="font:11.5px Cantarell,sans-serif;color:#ff938a;margin-top:9px">Saving this ends the 47-day run on 11 September and starts run 4 on the 12th.</div>
+        </sc-for>
       </div>
-      <div style="display:flex;align-items:center;gap:12px;padding:12px 16px">
-        <div style="flex:1"><div style="font:700 13.5px Cantarell,sans-serif;color:rgba(255,255,255,.9099999999999999)">Friday 12 September</div><div style="font:11.5px Cantarell,sans-serif;color:rgba(255,255,255,.56)">All five goals</div></div>
-        <div style="display:flex;gap:7px">
-          <div style="padding:7px 13px;border-radius:8px;background:#ffa348;font:700 12px Cantarell,sans-serif;color:#2a1c09">Kept</div>
-          <div style="padding:7px 13px;border-radius:8px;border:1px solid rgba(255,255,255,.189);background:#35353a;font:12px Cantarell,sans-serif;color:rgba(255,255,255,.76)">Missed</div>
-        </div>
-      </div>
-    </div>
+    </sc-for>
     <div style="background:#303034;border:1px solid rgba(255,255,255,.108);border-radius:12px;padding:14px 16px">
       <div style="font:700 13px Cantarell,sans-serif;color:rgba(255,255,255,.9099999999999999);margin-bottom:9px">Result of these answers</div>
       <div style="display:flex;gap:3px;margin-bottom:10px">
-        <sc-for list="{{ dSplitAfter }}" as="c" hint-placeholder-count="24"><div title="{{ c.title }}" style="width:9px;height:20px;border-radius:2px;box-sizing:border-box;background:{{ c.bg }};border:1px solid {{ c.bd }}"></div></sc-for>
+        <sc-for list="{{ dcuStrip }}" as="c" hint-placeholder-count="24"><div title="{{ c.title }}" style="width:9px;height:20px;border-radius:2px;box-sizing:border-box;background:{{ c.bg }};border:1px solid {{ c.bd }}"></div></sc-for>
       </div>
-      <div style="font:12px Cantarell,sans-serif;color:rgba(255,255,255,.6599999999999999)">Run 3 ends at 47 days — your best run so far. Run 4 is on 2 days. Wednesday stays hollow — unanswered, and it doesn't break anything.</div>
+      <div style="font:12px/1.5 Cantarell,sans-serif;color:{{ dcuResultFg }}">{{ dcuResult }}</div>
     </div>
   </div>
 </div></div>
@@ -365,7 +341,7 @@
     <div>
       <div style="font:700 11px Cantarell,sans-serif;color:rgba(255,255,255,.51);letter-spacing:.05em;padding:0 4px 7px">CHECK-INS</div>
       <div style="background:#303034;border:1px solid rgba(255,255,255,.108);border-radius:12px;overflow:hidden">
-        <div style="display:flex;align-items:center;gap:14px;padding:13px 16px;border-bottom:1px solid rgba(255,255,255,.081)"><div style="flex:1"><div style="font:13.5px Cantarell,sans-serif;color:rgba(255,255,255,.94)">Reminders</div><div style="font:11.5px Cantarell,sans-serif;color:rgba(255,255,255,.56)">Per streak, at the time you set</div></div><div style="width:42px;height:24px;border-radius:12px;background:#ffa348;display:flex;align-items:center;padding:2px;justify-content:flex-end"><div style="width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.4)"></div></div></div>
+        <div style="display:flex;align-items:center;gap:14px;padding:13px 16px;border-bottom:1px solid rgba(255,255,255,.081)"><div style="flex:1"><div style="font:13.5px Cantarell,sans-serif;color:rgba(255,255,255,.94)">Reminders</div><div style="font:11.5px Cantarell,sans-serif;color:rgba(255,255,255,.56)">Set per streak</div></div><div style="width:42px;height:24px;border-radius:12px;background:#ffa348;display:flex;align-items:center;padding:2px;justify-content:flex-end"><div style="width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.4)"></div></div></div>
         <div style="display:flex;align-items:center;gap:14px;padding:13px 16px;border-bottom:1px solid rgba(255,255,255,.081)"><div style="flex:1"><div style="font:13.5px Cantarell,sans-serif;color:rgba(255,255,255,.94)">Day starts at</div><div style="font:11.5px Cantarell,sans-serif;color:rgba(255,255,255,.56)">Late-night check-ins count for the day before</div></div><div style="font:12.5px Cantarell,sans-serif;color:rgba(255,255,255,.6599999999999999)">04:00 ›</div></div>
         <div style="display:flex;align-items:center;gap:14px;padding:13px 16px"><div style="flex:1"><div style="font:13.5px Cantarell,sans-serif;color:rgba(255,255,255,.94)">Backfill window</div><div style="font:11.5px Cantarell,sans-serif;color:rgba(255,255,255,.56)">How far back a day can be answered for</div></div><div style="font:12.5px Cantarell,sans-serif;color:rgba(255,255,255,.6599999999999999)">2 days ›</div></div>
       </div>
@@ -373,7 +349,7 @@
     <div>
       <div style="font:700 11px Cantarell,sans-serif;color:rgba(255,255,255,.51);letter-spacing:.05em;padding:0 4px 7px">RUNS</div>
       <div style="background:#303034;border:1px solid rgba(255,255,255,.108);border-radius:12px;overflow:hidden">
-        <div style="display:flex;align-items:center;gap:14px;padding:13px 16px;border-bottom:1px solid rgba(255,255,255,.081)"><div style="flex:1"><div style="font:13.5px Cantarell,sans-serif;color:rgba(255,255,255,.94)">Keep counting through unconfirmed days</div><div style="font:11.5px Cantarell,sans-serif;color:rgba(255,255,255,.56)">A run ends only when you mark a goal missed</div></div><div style="width:42px;height:24px;border-radius:12px;background:#ffa348;display:flex;align-items:center;padding:2px;justify-content:flex-end"><div style="width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.4)"></div></div></div>
+        <div style="display:flex;align-items:center;gap:14px;padding:13px 16px;border-bottom:1px solid rgba(255,255,255,.081)"><div style="flex:1"><div style="font:13.5px Cantarell,sans-serif;color:rgba(255,255,255,.94)">Keep counting through unconfirmed days</div><div style="font:11.5px Cantarell,sans-serif;color:rgba(255,255,255,.56)">Runs end only on a missed goal</div></div><div style="width:42px;height:24px;border-radius:12px;background:#ffa348;display:flex;align-items:center;padding:2px;justify-content:flex-end"><div style="width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.4)"></div></div></div>
         <div style="display:flex;align-items:center;gap:14px;padding:13px 16px"><div style="flex:1"><div style="font:13.5px Cantarell,sans-serif;color:rgba(255,255,255,.94)">Show ended runs in the sidebar</div><div style="font:11.5px Cantarell,sans-serif;color:rgba(255,255,255,.56)">Old runs stay readable either way</div></div><div style="width:42px;height:24px;border-radius:12px;background:#ffa348;display:flex;align-items:center;padding:2px;justify-content:flex-end"><div style="width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.4)"></div></div></div>
       </div>
     </div>
@@ -383,7 +359,7 @@
         <div style="display:flex;align-items:center;gap:14px;padding:13px 16px;border-bottom:1px solid rgba(255,255,255,.081)"><div style="flex:1;font:13.5px Cantarell,sans-serif;color:rgba(255,255,255,.94)">Export everything</div><div style="font:12.5px Cantarell,sans-serif;color:rgba(255,255,255,.6599999999999999)">›</div></div>
         <div style="display:flex;align-items:center;gap:14px;padding:13px 16px"><div style="flex:1;font:13.5px Cantarell,sans-serif;color:#c01c28">Delete all data</div><div style="font:12.5px Cantarell,sans-serif;color:rgba(255,255,255,.46)">›</div></div>
       </div>
-      <div style="font:11.5px Cantarell,sans-serif;color:rgba(255,255,255,.51);padding:7px 4px 0">Everything stays on this machine. There is no account.</div>
+      <div style="font:11.5px Cantarell,sans-serif;color:rgba(255,255,255,.51);padding:7px 4px 0">Data is stored locally.</div>
     </div>
   </div>
 </div></div>
@@ -412,7 +388,7 @@
         <sc-for list="{{ dEmptyCells }}" as="c" hint-placeholder-count="28"><div style="width:14px;height:14px;border-radius:4px;background:{{ c.bg }}"></div></sc-for>
       </div>
       <div style="font:700 19px Cantarell,sans-serif;color:rgba(255,255,255,.9099999999999999);margin-top:8px">No streaks yet</div>
-      <div style="font:13.5px/1.6 Cantarell,sans-serif;color:rgba(255,255,255,.6100000000000001);max-width:420px">Pick something you want to do regularly, choose how often, and add as many goals as that thing needs.</div>
+      <div style="font:13.5px/1.6 Cantarell,sans-serif;color:rgba(255,255,255,.6100000000000001);max-width:420px">A streak is a set of goals repeated on a schedule.</div>
       <div style="padding:10px 18px;border-radius:8px;background:#ffa348;font:700 13px Cantarell,sans-serif;color:#2a1c09;margin-top:4px">Create a streak</div>
     </div>
   </div>
@@ -466,14 +442,14 @@
         <div style="flex:1"><div style="font:13.5px Cantarell,sans-serif;color:rgba(0,0,0,.85)">Couch to 5K</div><div style="font:11px Cantarell,sans-serif;color:rgba(0,0,0,.48)">Ended 4 Mar · best 31</div></div>
       </div>
       <div style="flex:1"></div>
-      <div style="font:11px Cantarell,sans-serif;color:rgba(0,0,0,.42);padding:0 10px 6px">Everything stays on this machine.</div>
+      <div style="font:11px Cantarell,sans-serif;color:rgba(0,0,0,.42);padding:0 10px 6px">Data is stored locally.</div>
     </div>
 
     <div style="flex:1;background:#fafafa;padding:24px 28px;display:flex;flex-direction:column;gap:18px;overflow:hidden">
       <div style="display:flex;align-items:flex-end;gap:14px">
         <div style="flex:1">
           <div style="font:700 22px Cantarell,sans-serif;color:rgba(0,0,0,.88)">Sunday 13 September</div>
-          <div style="font:13px Cantarell,sans-serif;color:rgba(0,0,0,.52)">Two check-ins open. Four earlier days are unconfirmed.</div>
+          <div style="font:13px Cantarell,sans-serif;color:rgba(0,0,0,.52)">2 check-ins open · 4 earlier days unconfirmed</div>
         </div>
         <div style="padding:8px 14px;border-radius:8px;border:1px solid rgba(0,0,0,.14);background:#fcfcfc;font:700 12.5px Cantarell,sans-serif;color:rgba(0,0,0,.8)">Check in for another day</div>
       </div>
@@ -481,7 +457,7 @@
       <div style="display:flex;align-items:center;gap:16px;background:#f4f8fe;border:1px solid #bcd4f2;border-radius:12px;padding:14px 16px">
         <div style="flex:1">
           <div style="font:700 13.5px Cantarell,sans-serif;color:#1a5fb4;margin-bottom:3px">Four days without a check-in — 9 to 12 September</div>
-          <div style="font:12px Cantarell,sans-serif;color:rgba(0,0,0,.6)">Your 47-day run is still counted as running. It only ends if you tell me a goal was missed.</div>
+          <div style="font:12px Cantarell,sans-serif;color:rgba(0,0,0,.6)">The 47-day run continues. Unconfirmed days do not end a run.</div>
         </div>
         <div style="display:flex;gap:3px">
           <sc-for list="{{ splitBefore }}" as="c" hint-placeholder-count="24"><div title="{{ c.title }}" style="width:8px;height:22px;border-radius:2px;box-sizing:border-box;background:{{ c.bg }};border:1px solid {{ c.bd }}"></div></sc-for>
@@ -598,7 +574,7 @@
       <div style="background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:12px;padding:16px 18px">
         <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:2px">
           <div style="font:700 14px Cantarell,sans-serif;color:rgba(0,0,0,.85)">Run 3 · since 25 July</div><div style="font:10.5px Cantarell,sans-serif;color:#1a68c7;font-weight:700">BEST</div>
-          <div style="flex:1;font:12px Cantarell,sans-serif;color:rgba(0,0,0,.5)">Darker means more of that day's goals were done. Outlined days are ones you never answered for.</div>
+          <div style="flex:1;font:12px Cantarell,sans-serif;color:rgba(0,0,0,.5)">Shade shows the share of goals completed. Outlined days are unconfirmed.</div>
           <div style="display:flex;gap:3px;background:#ebeae8;border-radius:8px;padding:3px">
             <div style="padding:5px 12px;border-radius:6px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.1);font:700 11.5px Cantarell,sans-serif;color:rgba(0,0,0,.85)">This run</div>
             <div style="padding:5px 12px;border-radius:6px;font:11.5px Cantarell,sans-serif;color:rgba(0,0,0,.65)">Lifetime</div>
@@ -668,59 +644,35 @@
   </div>
 </div></div>
 
-<div class="dv-opt" id="4c"><div class="dv-olabel"><a class="dv-oid" href="#4c">4c</a>Catch-up dialog — one row per quiet day</div>
+<div class="dv-opt" id="4c"><div class="dv-olabel"><a class="dv-oid" href="#4c">4c</a>Catch-up dialog — tick completed goals</div>
 <div class="dv-card" style="width:560px">
   <div style="height:50px;display:flex;align-items:center;padding:0 12px;background:#fafafa;border-bottom:1px solid #e1dedb">
     <div style="padding:6px 12px;border-radius:7px;border:1px solid rgba(0,0,0,.12);background:#fcfcfc;font:12.5px Cantarell,sans-serif;color:rgba(0,0,0,.78)">Cancel</div>
     <div style="flex:1;text-align:center"><div style="font:700 14px Cantarell,sans-serif;color:rgba(0,0,0,.85)">Catch up</div><div style="font:11px Cantarell,sans-serif;color:rgba(0,0,0,.5)">75 Hard · 4 days</div></div>
     <div style="padding:6px 13px;border-radius:7px;background:#3584e4;font:700 12.5px Cantarell,sans-serif;color:#fff">Save</div>
   </div>
-  <div style="background:#fafafa;padding:18px;display:flex;flex-direction:column;gap:14px">
-    <div style="font:12.5px Cantarell,sans-serif;color:rgba(0,0,0,.58);padding:0 2px">For each day: kept it, missed something, or leave it unanswered. Only “missed” ends the run.</div>
-    <div style="background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:12px;overflow:hidden">
-      <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid rgba(0,0,0,.06)">
-        <div style="flex:1"><div style="font:700 13.5px Cantarell,sans-serif;color:rgba(0,0,0,.85)">Tuesday 9 September</div><div style="font:11.5px Cantarell,sans-serif;color:rgba(0,0,0,.5)">All five goals</div></div>
-        <div style="display:flex;gap:7px">
-          <div style="padding:7px 13px;border-radius:8px;background:#3584e4;font:700 12px Cantarell,sans-serif;color:#fff">Kept</div>
-          <div style="padding:7px 13px;border-radius:8px;border:1px solid rgba(0,0,0,.14);background:#fcfcfc;font:12px Cantarell,sans-serif;color:rgba(0,0,0,.7)">Missed</div>
+  <div style="background:#fafafa;padding:18px;display:flex;flex-direction:column;gap:12px">
+    <div style="font:12.5px/1.5 Cantarell,sans-serif;color:rgba(0,0,0,.58);padding:0 2px">Unticked goals on a day with any ticks are recorded as missed. Days with no ticks stay unconfirmed.</div>
+    <sc-for list="{{ cuDays }}" as="d" hint-placeholder-count="4">
+      <div style="background:#fff;border:1px solid {{ d.bd }};border-radius:12px;overflow:hidden">
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 16px;background:{{ d.headBg }};border-bottom:1px solid rgba(0,0,0,.07)">
+          <div style="flex:1"><div style="font:700 13.5px Cantarell,sans-serif;color:{{ d.titleFg }}">{{ d.date }}</div><div style="font:11.5px Cantarell,sans-serif;color:{{ d.statusFg }}">{{ d.status }}</div></div>
+          <sc-if value="{{ d.showAction }}" hint-placeholder-val="{{ false }}"><div onClick="{{ d.onAction }}" style="font:12.5px Cantarell,sans-serif;color:{{ d.actionFg }};cursor:pointer">{{ d.action }}</div></sc-if>
         </div>
-      </div>
-      <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid rgba(0,0,0,.06)">
-        <div style="flex:1"><div style="font:700 13.5px Cantarell,sans-serif;color:rgba(0,0,0,.85)">Wednesday 10 September</div><div style="font:11.5px Cantarell,sans-serif;color:rgba(0,0,0,.5)">Unanswered</div></div>
-        <div style="display:flex;gap:7px">
-          <div style="padding:7px 13px;border-radius:8px;border:1px solid rgba(0,0,0,.14);background:#fcfcfc;font:12px Cantarell,sans-serif;color:rgba(0,0,0,.7)">Kept</div>
-          <div style="padding:7px 13px;border-radius:8px;border:1px solid rgba(0,0,0,.14);background:#fcfcfc;font:12px Cantarell,sans-serif;color:rgba(0,0,0,.7)">Missed</div>
-        </div>
-      </div>
-      <div style="padding:12px 16px 14px;background:#fdf2f2;border-bottom:1px solid #f0d7d9">
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
-          <div style="flex:1"><div style="font:700 13.5px Cantarell,sans-serif;color:#a51d2d">Thursday 11 September</div><div style="font:11.5px Cantarell,sans-serif;color:rgba(0,0,0,.55)">Missed — which goals?</div></div>
-          <div style="display:flex;gap:7px">
-            <div style="padding:7px 13px;border-radius:8px;border:1px solid rgba(0,0,0,.14);background:#fcfcfc;font:12px Cantarell,sans-serif;color:rgba(0,0,0,.7)">Kept</div>
-            <div style="padding:7px 13px;border-radius:8px;background:#c01c28;font:700 12px Cantarell,sans-serif;color:#fff">Missed</div>
+        <sc-for list="{{ d.goals }}" as="g" hint-placeholder-count="5">
+          <div onClick="{{ g.toggle }}" style="display:flex;align-items:center;gap:12px;padding:0 16px;height:38px;border-top:1px solid rgba(0,0,0,.05);cursor:pointer">
+            <div style="width:22px;height:22px;border-radius:6px;box-sizing:border-box;background:{{ g.bg }};border:1px solid {{ g.bd }};display:flex;align-items:center;justify-content:center;color:{{ g.mk }};font-size:13px;font-weight:700">{{ g.mark }}</div>
+            <div style="flex:1;font:13px Cantarell,sans-serif;color:{{ g.fg }}">{{ g.name }}</div>
           </div>
-        </div>
-        <div style="background:#fff;border:1px solid #f0d7d9;border-radius:9px;overflow:hidden">
-          <sc-for list="{{ missedGoals }}" as="g" hint-placeholder-count="5">
-            <div style="display:flex;align-items:center;gap:10px;padding:0 13px;height:40px;border-bottom:1px solid rgba(0,0,0,.06)"><div style="width:22px;height:22px;border-radius:6px;background:{{ g.bg }};display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:700">{{ g.mark }}</div><div style="flex:1;font:12.5px Cantarell,sans-serif;color:{{ g.fg }}">{{ g.name }}</div></div>
-          </sc-for>
-        </div>
-        <div style="font:11.5px Cantarell,sans-serif;color:#a51d2d;margin-top:9px">Saving this ends the 47-day run on 11 September and starts run 4 on the 12th.</div>
+        </sc-for>
       </div>
-      <div style="display:flex;align-items:center;gap:12px;padding:12px 16px">
-        <div style="flex:1"><div style="font:700 13.5px Cantarell,sans-serif;color:rgba(0,0,0,.85)">Friday 12 September</div><div style="font:11.5px Cantarell,sans-serif;color:rgba(0,0,0,.5)">All five goals</div></div>
-        <div style="display:flex;gap:7px">
-          <div style="padding:7px 13px;border-radius:8px;background:#3584e4;font:700 12px Cantarell,sans-serif;color:#fff">Kept</div>
-          <div style="padding:7px 13px;border-radius:8px;border:1px solid rgba(0,0,0,.14);background:#fcfcfc;font:12px Cantarell,sans-serif;color:rgba(0,0,0,.7)">Missed</div>
-        </div>
-      </div>
-    </div>
+    </sc-for>
     <div style="background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:12px;padding:14px 16px">
       <div style="font:700 13px Cantarell,sans-serif;color:rgba(0,0,0,.85);margin-bottom:9px">Result of these answers</div>
       <div style="display:flex;gap:3px;margin-bottom:10px">
-        <sc-for list="{{ splitAfter }}" as="c" hint-placeholder-count="24"><div title="{{ c.title }}" style="width:9px;height:20px;border-radius:2px;box-sizing:border-box;background:{{ c.bg }};border:1px solid {{ c.bd }}"></div></sc-for>
+        <sc-for list="{{ cuStrip }}" as="c" hint-placeholder-count="24"><div title="{{ c.title }}" style="width:9px;height:20px;border-radius:2px;box-sizing:border-box;background:{{ c.bg }};border:1px solid {{ c.bd }}"></div></sc-for>
       </div>
-      <div style="font:12px Cantarell,sans-serif;color:rgba(0,0,0,.6)">Run 3 ends at 47 days — your best run so far. Run 4 is on 2 days. Wednesday stays hollow — unanswered, and it doesn't break anything.</div>
+      <div style="font:12px/1.5 Cantarell,sans-serif;color:{{ cuResultFg }}">{{ cuResult }}</div>
     </div>
   </div>
 </div></div>
@@ -778,7 +730,7 @@
     <div>
       <div style="font:700 11px Cantarell,sans-serif;color:rgba(0,0,0,.45);letter-spacing:.05em;padding:0 4px 7px">CHECK-INS</div>
       <div style="background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:12px;overflow:hidden">
-        <div style="display:flex;align-items:center;gap:14px;padding:13px 16px;border-bottom:1px solid rgba(0,0,0,.06)"><div style="flex:1"><div style="font:13.5px Cantarell,sans-serif;color:rgba(0,0,0,.88)">Reminders</div><div style="font:11.5px Cantarell,sans-serif;color:rgba(0,0,0,.5)">Per streak, at the time you set</div></div><div style="width:42px;height:24px;border-radius:12px;background:#3584e4;display:flex;align-items:center;padding:2px;justify-content:flex-end"><div style="width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.25)"></div></div></div>
+        <div style="display:flex;align-items:center;gap:14px;padding:13px 16px;border-bottom:1px solid rgba(0,0,0,.06)"><div style="flex:1"><div style="font:13.5px Cantarell,sans-serif;color:rgba(0,0,0,.88)">Reminders</div><div style="font:11.5px Cantarell,sans-serif;color:rgba(0,0,0,.5)">Set per streak</div></div><div style="width:42px;height:24px;border-radius:12px;background:#3584e4;display:flex;align-items:center;padding:2px;justify-content:flex-end"><div style="width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.25)"></div></div></div>
         <div style="display:flex;align-items:center;gap:14px;padding:13px 16px;border-bottom:1px solid rgba(0,0,0,.06)"><div style="flex:1"><div style="font:13.5px Cantarell,sans-serif;color:rgba(0,0,0,.88)">Day starts at</div><div style="font:11.5px Cantarell,sans-serif;color:rgba(0,0,0,.5)">Late-night check-ins count for the day before</div></div><div style="font:12.5px Cantarell,sans-serif;color:rgba(0,0,0,.6)">04:00 ›</div></div>
         <div style="display:flex;align-items:center;gap:14px;padding:13px 16px"><div style="flex:1"><div style="font:13.5px Cantarell,sans-serif;color:rgba(0,0,0,.88)">Backfill window</div><div style="font:11.5px Cantarell,sans-serif;color:rgba(0,0,0,.5)">How far back a day can be answered for</div></div><div style="font:12.5px Cantarell,sans-serif;color:rgba(0,0,0,.6)">2 days ›</div></div>
       </div>
@@ -786,7 +738,7 @@
     <div>
       <div style="font:700 11px Cantarell,sans-serif;color:rgba(0,0,0,.45);letter-spacing:.05em;padding:0 4px 7px">RUNS</div>
       <div style="background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:12px;overflow:hidden">
-        <div style="display:flex;align-items:center;gap:14px;padding:13px 16px;border-bottom:1px solid rgba(0,0,0,.06)"><div style="flex:1"><div style="font:13.5px Cantarell,sans-serif;color:rgba(0,0,0,.88)">Keep counting through unconfirmed days</div><div style="font:11.5px Cantarell,sans-serif;color:rgba(0,0,0,.5)">A run ends only when you mark a goal missed</div></div><div style="width:42px;height:24px;border-radius:12px;background:#3584e4;display:flex;align-items:center;padding:2px;justify-content:flex-end"><div style="width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.25)"></div></div></div>
+        <div style="display:flex;align-items:center;gap:14px;padding:13px 16px;border-bottom:1px solid rgba(0,0,0,.06)"><div style="flex:1"><div style="font:13.5px Cantarell,sans-serif;color:rgba(0,0,0,.88)">Keep counting through unconfirmed days</div><div style="font:11.5px Cantarell,sans-serif;color:rgba(0,0,0,.5)">Runs end only on a missed goal</div></div><div style="width:42px;height:24px;border-radius:12px;background:#3584e4;display:flex;align-items:center;padding:2px;justify-content:flex-end"><div style="width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.25)"></div></div></div>
         <div style="display:flex;align-items:center;gap:14px;padding:13px 16px"><div style="flex:1"><div style="font:13.5px Cantarell,sans-serif;color:rgba(0,0,0,.88)">Show ended runs in the sidebar</div><div style="font:11.5px Cantarell,sans-serif;color:rgba(0,0,0,.5)">Old runs stay readable either way</div></div><div style="width:42px;height:24px;border-radius:12px;background:#3584e4;display:flex;align-items:center;padding:2px;justify-content:flex-end"><div style="width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.25)"></div></div></div>
       </div>
     </div>
@@ -796,7 +748,7 @@
         <div style="display:flex;align-items:center;gap:14px;padding:13px 16px;border-bottom:1px solid rgba(0,0,0,.06)"><div style="flex:1;font:13.5px Cantarell,sans-serif;color:rgba(0,0,0,.88)">Export everything</div><div style="font:12.5px Cantarell,sans-serif;color:rgba(0,0,0,.6)">›</div></div>
         <div style="display:flex;align-items:center;gap:14px;padding:13px 16px"><div style="flex:1;font:13.5px Cantarell,sans-serif;color:#c01c28">Delete all data</div><div style="font:12.5px Cantarell,sans-serif;color:rgba(0,0,0,.4)">›</div></div>
       </div>
-      <div style="font:11.5px Cantarell,sans-serif;color:rgba(0,0,0,.45);padding:7px 4px 0">Everything stays on this machine. There is no account.</div>
+      <div style="font:11.5px Cantarell,sans-serif;color:rgba(0,0,0,.45);padding:7px 4px 0">Data is stored locally.</div>
     </div>
   </div>
 </div></div>
@@ -825,7 +777,7 @@
         <sc-for list="{{ emptyCells }}" as="c" hint-placeholder-count="28"><div style="width:14px;height:14px;border-radius:4px;background:{{ c.bg }}"></div></sc-for>
       </div>
       <div style="font:700 19px Cantarell,sans-serif;color:rgba(0,0,0,.85);margin-top:8px">No streaks yet</div>
-      <div style="font:13.5px/1.6 Cantarell,sans-serif;color:rgba(0,0,0,.55);max-width:420px">Pick something you want to do regularly, choose how often, and add as many goals as that thing needs.</div>
+      <div style="font:13.5px/1.6 Cantarell,sans-serif;color:rgba(0,0,0,.55);max-width:420px">A streak is a set of goals repeated on a schedule.</div>
       <div style="padding:10px 18px;border-radius:8px;background:#3584e4;font:700 13px Cantarell,sans-serif;color:#fff;margin-top:4px">Create a streak</div>
     </div>
   </div>
@@ -838,6 +790,56 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;weeksShown&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:30,&quot;tsType&quot;:&quot;number&quot;,&quot;min&quot;:8,&quot;max&quot;:52,&quot;section&quot;:&quot;Chart&quot;},&quot;cellSize&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:13,&quot;tsType&quot;:&quot;number&quot;,&quot;min&quot;:8,&quot;max&quot;:18,&quot;step&quot;:1,&quot;unit&quot;:&quot;px&quot;,&quot;section&quot;:&quot;Chart&quot;}}">
 class Component extends DCLogic {
+
+  state = { cuTicks: [[1,1,1,1,1],[0,0,0,0,0],[1,1,0,1,1],[1,1,1,1,1]], cuMissed: [false,false,false,false] };
+
+  cuToggle(d, g){ this.setState(s => { const t = s.cuTicks.map(r => r.slice()); t[d][g] = t[d][g] ? 0 : 1; const m = s.cuMissed.slice(); m[d] = false; return { cuTicks: t, cuMissed: m }; }); }
+  cuMark(d, v){ this.setState(s => { const m = s.cuMissed.slice(); m[d] = v; return { cuMissed: m }; }); }
+
+  cuVals(dark){
+    const goals = ['Progress photo', '45 min outdoors', '45 min second workout', 'Read 10 pages', 'Stick to the diet'];
+    const dates = ['Tuesday 9 September', 'Wednesday 10 September', 'Thursday 11 September', 'Friday 12 September'];
+    const short = ['9 September', '10 September', '11 September', '12 September', '13 September'];
+    const acc = dark ? '#ffa348' : '#3584e4', accInk = dark ? '#2a1c09' : '#fff', red = dark ? '#ff938a' : '#a51d2d';
+    const ink = dark ? 'rgba(255,255,255,.9)' : 'rgba(0,0,0,.85)', sub = dark ? 'rgba(255,255,255,.62)' : 'rgba(0,0,0,.5)';
+    const link = dark ? '#ffbe6f' : '#1c71d8', box = dark ? '#5c5c63' : '#c0bfbc', card = dark ? '#303034' : '#fff';
+    const states = [];
+    const days = dates.map((date, d) => {
+      const t = this.state.cuTicks[d], n = t.reduce((a, b) => a + b, 0), marked = this.state.cuMissed[d];
+      const st = n === 5 ? 'kept' : n > 0 ? 'partial' : marked ? 'missed' : 'open';
+      states.push(st);
+      const bad = st === 'partial' || st === 'missed';
+      return {
+        date,
+        status: st === 'kept' ? 'All 5 kept' : st === 'partial' ? n + ' of 5 kept · ' + (5 - n) + ' missed' : st === 'missed' ? 'Missed' : 'Unconfirmed',
+        titleFg: bad ? red : ink, statusFg: bad ? red : sub,
+        bd: bad ? (dark ? '#5a2f33' : '#f0d7d9') : (dark ? 'rgba(255,255,255,.1)' : 'rgba(0,0,0,.08)'),
+        headBg: bad ? (dark ? '#3a2224' : '#fdf2f2') : card,
+        showAction: st === 'open' || st === 'missed',
+        action: st === 'missed' ? 'Undo' : 'Mark missed',
+        actionFg: link,
+        onAction: () => this.cuMark(d, st !== 'missed'),
+        goals: goals.map((name, g) => ({
+          name, toggle: () => this.cuToggle(d, g),
+          mark: t[g] ? '✓' : '',
+          bg: t[g] ? acc : card, bd: t[g] ? acc : box, mk: accInk,
+          fg: t[g] ? (dark ? 'rgba(255,255,255,.62)' : 'rgba(0,0,0,.6)') : (bad && st === 'partial' ? red : ink)
+        }))
+      };
+    });
+    const k = states.findIndex(s => s === 'partial' || s === 'missed');
+    const strip = [];
+    for (let i = 0; i < 20; i++) strip.push({ bg: acc, bd: 'transparent', title: 'kept' });
+    states.forEach(s => strip.push(s === 'kept' ? { bg: acc, bd: 'transparent', title: 'kept' }
+      : s === 'open' ? { bg: 'transparent', bd: dark ? '#6b5230' : '#a9c9ef', title: 'unconfirmed' }
+      : { bg: dark ? '#8e4a50' : '#f3c0c4', bd: 'transparent', title: 'missed' }));
+    const open = states.filter(s => s === 'open').length;
+    const openTxt = open ? ' ' + open + (open === 1 ? ' day' : ' days') + ' unconfirmed.' : '';
+    const result = k < 0
+      ? 'Run 3 continues at 51 days.' + openTxt
+      : 'Run 3 ends on ' + short[k] + ' at ' + (45 + k) + ' days. Run 4 starts on ' + short[k + 1] + ' at ' + (4 - k) + (4 - k === 1 ? ' day.' : ' days.') + openTxt;
+    return { days, strip, result, fg: k < 0 ? sub : red };
+  }
   rnd(i){ const x = Math.sin(i * 12.9898 + 78.233) * 43758.5453; return x - Math.floor(x); }
 
   scale(r, dark){
@@ -926,6 +928,7 @@ class Component extends DCLogic {
       fg: g.kept ? 'rgba(0,0,0,.6)' : 'rgba(0,0,0,.85)'
     }));
     const streaks = this.defs();
+    const cuL = this.cuVals(false), cuD = this.cuVals(true);
     const darkHues = ['#ffa348', '#8ff0a4', '#dc8add', '#f9f06b'];
     const darkStreaks = streaks.map((s, i) => Object.assign({}, s, { colour: darkHues[i] }));
     return {
@@ -950,6 +953,8 @@ class Component extends DCLogic {
         { name: 'Stick to the diet', pct: '92%', bg: '#1a68c7', ratio: '12/13' }
       ],
       emptyCells,
+      cuDays: cuL.days, cuStrip: cuL.strip, cuResult: cuL.result, cuResultFg: cuL.fg,
+      dcuDays: cuD.days, dcuStrip: cuD.strip, dcuResult: cuD.result, dcuResultFg: cuD.fg,
       dEmptyCells: emptyCells.map((c, i) => ({ bg: i === 27 ? '#7a4d18' : '#2c2c30' })),
       dStreaks: darkStreaks,
       dStreaksRest: darkStreaks.slice(1),
