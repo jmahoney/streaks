@@ -55,7 +55,6 @@ class StreaksCatchupRow(Gtk.Box):
         self._marked_missed = False
 
         self.action_button.connect("clicked", self._on_action_clicked)
-        self.goals_list.connect("row-activated", self._on_goal_row_activated)
 
     # -- configuration -------------------------------------------------------------
 
@@ -74,6 +73,9 @@ class StreaksCatchupRow(Gtk.Box):
             row = check.get_parent()  # the list-supplied wrapper row around the checkbutton
             row.add_css_class("catchup-goal")
             row.set_size_request(-1, _GOAL_ROW_HEIGHT)
+            # The checkbutton fills the row and handles its own clicks; leaving the row itself
+            # activatable would give a pointer click two paths to toggle the same checkbutton.
+            row.set_activatable(False)
             self._goal_checks.append((goal.id, check))
 
         self._update_visual()
@@ -99,10 +101,6 @@ class StreaksCatchupRow(Gtk.Box):
         self.state_label.set_label(text)
 
     # -- interactions ---------------------------------------------------------------
-
-    def _on_goal_row_activated(self, _listbox: Gtk.ListBox, row: Gtk.ListBoxRow) -> None:
-        check = row.get_child()
-        check.set_active(not check.get_active())
 
     def _on_goal_toggled(self, _check: Gtk.CheckButton) -> None:
         # Ticking (or unticking) any goal clears an explicit "Mark missed".

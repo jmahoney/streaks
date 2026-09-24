@@ -2,15 +2,12 @@ using Gtk 4.0;
 
 template $StreaksCatchupRow : Gtk.Box {
   orientation: vertical;
+  overflow: hidden;
 
   styles ["card", "catchup-day"]
 
   Gtk.Box header {
     orientation: horizontal;
-    margin-top: 10;
-    margin-bottom: 10;
-    margin-start: 16;
-    margin-end: 16;
     spacing: 12;
 
     styles ["header"]
@@ -45,8 +42,12 @@ template $StreaksCatchupRow : Gtk.Box {
     }
   }
 
+  Gtk.Separator {}
+
   Gtk.ListBox goals_list {
     selection-mode: none;
-    activate-on-single-click: true;
+    show-separators: true;
+
+    styles ["catchup-goals"]
   }
 }

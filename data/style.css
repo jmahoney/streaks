@@ -151,6 +151,10 @@ progressbar.low > trough > progress {
   border-color: var(--catchup-missed-border-color);
 }
 
+.catchup-day .header {
+  padding: 10px 16px;
+}
+
 .catchup-day.missed .header {
   background-color: var(--catchup-missed-bg-color);
 }
@@ -158,6 +162,25 @@ progressbar.low > trough > progress {
 .catchup-day.missed .date,
 .catchup-day.missed .status {
   color: var(--catchup-missed-fg-color);
+}
+
+/* The list, and each row inside it, paints its own (theme) background, which in dark mode is
+ * visibly darker than the card around it; the mock keeps the goal rows on the card's own
+ * background. */
+.catchup-goals,
+.catchup-goals row {
+  background-color: transparent;
+  background-image: none;
+}
+
+.catchup-goal {
+  padding: 0 16px;
+  background-color: transparent;
+  background-image: none;
+}
+
+.catchup-goal checkbutton check {
+  margin-right: 12px;
 }
 
 .catchup-goal.ticked label {

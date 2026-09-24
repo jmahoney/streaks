@@ -29,63 +29,69 @@ template $StreaksCatchupDialog : Adw.Dialog {
       }
     }
 
-    content: Gtk.Box {
-      orientation: vertical;
-      valign: start;
-      spacing: 12;
-      margin-start: 18;
-      margin-end: 18;
-      margin-top: 18;
-      margin-bottom: 18;
+    content: Gtk.ScrolledWindow {
+      hscrollbar-policy: never;
+      propagate-natural-height: true;
+      vexpand: true;
 
-      Gtk.Label intro_label {
-        halign: start;
-        xalign: 0;
-        wrap: true;
-        label: _("Unticked goals on a day with any ticks are recorded as missed. Days with no ticks stay unconfirmed.");
-
-        styles ["caption", "dim-label"]
-      }
-
-      Gtk.Box days_box {
+      child: Gtk.Box {
         orientation: vertical;
+        valign: start;
         spacing: 12;
-      }
+        margin-start: 18;
+        margin-end: 18;
+        margin-top: 18;
+        margin-bottom: 18;
 
-      Gtk.Box {
-        orientation: vertical;
+        Gtk.Label intro_label {
+          halign: start;
+          xalign: 0;
+          wrap: true;
+          label: _("Unticked goals on a day with any ticks are recorded as missed. Days with no ticks stay unconfirmed.");
 
-        styles ["card"]
+          styles ["caption", "dim-label"]
+        }
+
+        Gtk.Box days_box {
+          orientation: vertical;
+          spacing: 12;
+        }
 
         Gtk.Box {
           orientation: vertical;
-          spacing: 10;
-          margin-top: 14;
-          margin-bottom: 14;
-          margin-start: 16;
-          margin-end: 16;
 
-          Gtk.Label result_title {
-            halign: start;
-            xalign: 0;
-            label: _("Result of these answers");
+          styles ["card"]
 
-            styles ["heading"]
-          }
+          Gtk.Box {
+            orientation: vertical;
+            spacing: 10;
+            margin-top: 14;
+            margin-bottom: 14;
+            margin-start: 16;
+            margin-end: 16;
 
-          $StripWidget result_strip {
-            halign: start;
-          }
+            Gtk.Label result_title {
+              halign: start;
+              xalign: 0;
+              label: _("Result of these answers");
 
-          Gtk.Label result_label {
-            halign: start;
-            xalign: 0;
-            wrap: true;
+              styles ["heading"]
+            }
 
-            styles ["caption"]
+            $StripWidget result_strip {
+              halign: start;
+            }
+
+            Gtk.Label result_label {
+              halign: start;
+              xalign: 0;
+              wrap: true;
+
+              styles ["caption"]
+            }
           }
         }
-      }
+      };
     };
   };
 }

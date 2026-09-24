@@ -107,6 +107,12 @@ def test_ticking_all_goals_keeps_the_day(seeded_state, seeded_window, process_ev
     assert not wed_row.action_button.get_visible()
     assert dialog.save_button.get_sensitive()
 
+    # Every goal row is ticked (dimmed), and none is flagged missed on a fully-kept day.
+    for _gid, check in wed_row._goal_checks:
+        row = check.get_parent()
+        assert "ticked" in row.get_css_classes()
+        assert "missed" not in row.get_css_classes()
+
     expected_preview = engine.catch_up_preview(
         _hard_streak_data(seeded_state),
         seeded_state.today(),
@@ -144,9 +150,49 @@ def test_ticking_some_goals_records_the_rest_missed(seeded_state, seeded_window,
     assert not fri_row.action_button.get_visible()
     assert dialog.save_button.get_sensitive()
 
-    # The unticked goal row is flagged missed; the ticked ones are not.
-    ticked_ids = {gid for gid, check in fri_row._goal_checks if check.get_active()}
-    assert goal2_id not in ticked_ids
+    # The unticked goal row is flagged missed (and dropped from ticked); the ticked ones are
+    # flagged ticked (and not missed).
+    for i, (gid, check) in enumerate(fri_row._goal_checks):
+        row = check.get_parent()
+        if i == 2:
+            assert gid == goal2_id
+            assert not check.get_active()
+            assert "missed" in row.get_css_classes()
+            assert "ticked" not in row.get_css_classes()
+        else:
+            assert check.get_active()
+            assert "ticked" in row.get_css_classes()
+            assert "missed" not in row.get_css_classes()
+
+
+def test_goal_row_click_path_toggles_the_check_exactly_once(
+    seeded_state, seeded_window, process_events
+):
+    """The checkbutton fills its (non-activatable) row, so a real click only has one path to
+    toggle it: the checkbutton's own click/keyboard "activate" signal. `row.activate()` -- the
+    other path a double-toggle bug would go through -- must be a no-op."""
+    window = seeded_window
+
+    dialog = _open_dialog(seeded_state, window)
+    process_events()
+
+    wed_row = _row_by_day(dialog, WED)
+    _gid, check = wed_row._goal_checks[0]
+    row = check.get_parent()
+    assert row.get_activatable() is False
+
+    toggles = []
+    check.connect("toggled", lambda c: toggles.append(c.get_active()))
+
+    row.activate()
+    process_events()
+    assert not check.get_active()
+    assert toggles == []
+
+    check.emit("activate")
+    process_events()
+    assert check.get_active() is True
+    assert toggles == [True]
 
 
 def test_mark_missed_link_answers_missed_with_no_ticks(seeded_state, seeded_window, process_events):
