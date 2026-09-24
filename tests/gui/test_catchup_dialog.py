@@ -38,6 +38,10 @@ def _row_by_day(dialog, day):
     return next(r for r in dialog._rows if r.day == day)
 
 
+def _tick(row, index, active):
+    row._goal_checks[index][1].set_active(active)
+
+
 def _settings(state):
     return state.settings.to_engine()
 
@@ -50,8 +54,8 @@ def test_initial_state(seeded_state, seeded_window, process_events):
 
     assert dialog.dialog_title.get_subtitle() == "75 Hard · 4 days"
     assert dialog.intro_label.get_label() == (
-        "For each day: kept it, missed something, or leave it unanswered. Only "
-        "“missed” ends the run."
+        "Unticked goals on a day with any ticks are recorded as missed. Days with no ticks "
+        "stay unconfirmed."
     )
 
     assert [r.day for r in dialog._rows] == [WED, THU, FRI, SAT]
@@ -63,10 +67,12 @@ def test_initial_state(seeded_state, seeded_window, process_events):
     ]
     for row, expected in zip(dialog._rows, expected_dates, strict=True):
         assert row.date_label.get_label() == expected
-        assert row.state_label.get_label() == "Unanswered"
-        assert not row.kept_button.get_active()
-        assert not row.missed_button.get_active()
-        assert not row.goals_revealer.get_reveal_child()
+        assert row.state_label.get_label() == "Unconfirmed"
+        assert len(row._goal_checks) == 5
+        assert all(not check.get_active() for _gid, check in row._goal_checks)
+        assert "missed" not in row.get_css_classes()
+        assert row.action_button.get_visible()
+        assert row.action_button.get_label() == "Mark missed"
 
     assert not dialog.save_button.get_sensitive()
 
@@ -79,24 +85,26 @@ def test_initial_state(seeded_state, seeded_window, process_events):
         _hard_streak_data(seeded_state), seeded_state.today(), _settings(seeded_state), {}
     )
     assert dialog.result_label.get_label() == expected_preview.summary
-    assert (
-        dialog.result_label.get_label()
-        == "Run 3 stays at 51 days. Wednesday, Thursday, Friday, Saturday stay hollow — "
-        "unanswered, and they don't break anything."
-    )
+    assert dialog.result_label.get_label() == "Run 3 continues at 51 days. 4 days unconfirmed."
+    assert "dim-label" in dialog.result_label.get_css_classes()
+    assert "error" not in dialog.result_label.get_css_classes()
 
 
-def test_kept_on_wednesday(seeded_state, seeded_window, process_events):
+def test_ticking_all_goals_keeps_the_day(seeded_state, seeded_window, process_events):
     window = seeded_window
 
     dialog = _open_dialog(seeded_state, window)
     process_events()
 
     wed_row = _row_by_day(dialog, WED)
-    wed_row.kept_button.set_active(True)
+    for i in range(5):
+        _tick(wed_row, i, True)
     process_events()
 
-    assert wed_row.state_label.get_label() == "All five goals"
+    assert wed_row.current_answer() == (Answer.KEPT, ())
+    assert wed_row.state_label.get_label() == "All 5 kept"
+    assert "missed" not in wed_row.get_css_classes()
+    assert not wed_row.action_button.get_visible()
     assert dialog.save_button.get_sensitive()
 
     expected_preview = engine.catch_up_preview(
@@ -113,36 +121,98 @@ def test_kept_on_wednesday(seeded_state, seeded_window, process_events):
     assert dialog.result_strip._cells[-5].border is None
 
 
-def test_missed_on_friday_requires_unticking_a_goal(seeded_state, seeded_window, process_events):
+def test_ticking_some_goals_records_the_rest_missed(seeded_state, seeded_window, process_events):
+    window = seeded_window
+
+    dialog = _open_dialog(seeded_state, window)
+    process_events()
+
+    goal_ids = _goal_ids(seeded_state)
+    goal2_id = goal_ids[2]
+    goal = Goal.get_by_id(goal2_id)
+    assert goal.name == "45 min second workout"
+
+    fri_row = _row_by_day(dialog, FRI)
+    for i in range(5):
+        if i != 2:
+            _tick(fri_row, i, True)
+    process_events()
+
+    assert fri_row.current_answer() == (Answer.MISSED, (goal2_id,))
+    assert "missed" in fri_row.get_css_classes()
+    assert fri_row.state_label.get_label() == "4 of 5 kept · 1 missed"
+    assert not fri_row.action_button.get_visible()
+    assert dialog.save_button.get_sensitive()
+
+    # The unticked goal row is flagged missed; the ticked ones are not.
+    ticked_ids = {gid for gid, check in fri_row._goal_checks if check.get_active()}
+    assert goal2_id not in ticked_ids
+
+
+def test_mark_missed_link_answers_missed_with_no_ticks(seeded_state, seeded_window, process_events):
     window = seeded_window
 
     dialog = _open_dialog(seeded_state, window)
     process_events()
 
     fri_row = _row_by_day(dialog, FRI)
-    fri_row.missed_button.set_active(True)
+    assert fri_row.action_button.get_label() == "Mark missed"
+    fri_row.action_button.emit("clicked")
     process_events()
 
+    assert fri_row.current_answer() == (Answer.MISSED, ())
     assert "missed" in fri_row.get_css_classes()
-    assert fri_row.goals_revealer.get_reveal_child()
-    assert len(fri_row._goal_checks) == 5
-    assert all(check.get_active() for _gid, check in fri_row._goal_checks)
-    assert fri_row.state_label.get_label() == "Untick the goals you missed"
+    assert fri_row.state_label.get_label() == "Missed"
+    assert fri_row.action_button.get_label() == "Undo"
+    assert fri_row.action_button.get_visible()
+    assert dialog.save_button.get_sensitive()
+
+
+def test_undo_reverts_marked_missed_to_unconfirmed(seeded_state, seeded_window, process_events):
+    window = seeded_window
+
+    dialog = _open_dialog(seeded_state, window)
+    process_events()
+
+    fri_row = _row_by_day(dialog, FRI)
+    fri_row.action_button.emit("clicked")
+    process_events()
+    assert fri_row.current_answer() == (Answer.MISSED, ())
+
+    fri_row.action_button.emit("clicked")
+    process_events()
+
+    assert fri_row.current_answer() is None
+    assert fri_row.state_label.get_label() == "Unconfirmed"
+    assert "missed" not in fri_row.get_css_classes()
+    assert fri_row.action_button.get_label() == "Mark missed"
     assert not dialog.save_button.get_sensitive()
 
-    # Untick "45 min second workout" (goal index 2 for 75 Hard).
-    goal_id, check = fri_row._goal_checks[2]
-    goal = Goal.get_by_id(goal_id)
-    assert goal.name == "45 min second workout"
-    check.set_active(False)
+
+def test_ticking_a_goal_after_mark_missed_clears_the_mark(
+    seeded_state, seeded_window, process_events
+):
+    window = seeded_window
+
+    dialog = _open_dialog(seeded_state, window)
     process_events()
 
-    assert fri_row.state_label.get_label() == "Missed — which goals?"
-    assert dialog.save_button.get_sensitive()
-    assert fri_row.warning_label.get_visible()
-    assert fri_row.warning_label.get_label() == (
-        "Saving this ends the 48-day run on 11 September and starts run 4 on the 12th."
+    fri_row = _row_by_day(dialog, FRI)
+    fri_row.action_button.emit("clicked")
+    process_events()
+    assert fri_row.current_answer() == (Answer.MISSED, ())
+
+    _tick(fri_row, 0, True)
+    process_events()
+
+    # One goal ticked, marked-missed cleared: this is now a partial day (1 of 5 kept), not the
+    # explicit all-missed answer.
+    assert fri_row.current_answer() == (
+        Answer.MISSED,
+        tuple(gid for gid, _ in fri_row._goal_checks[1:]),
     )
+    assert fri_row.state_label.get_label() == "1 of 5 kept · 4 missed"
+    assert fri_row.action_button.get_visible() is False
 
 
 def test_combined_answers_summary_matches_engine(seeded_state, seeded_window, process_events):
@@ -154,11 +224,16 @@ def test_combined_answers_summary_matches_engine(seeded_state, seeded_window, pr
     goal_ids = _goal_ids(seeded_state)
     goal2_id = goal_ids[2]
 
-    _row_by_day(dialog, WED).kept_button.set_active(True)
+    wed_row = _row_by_day(dialog, WED)
+    for i in range(5):
+        _tick(wed_row, i, True)
     fri_row = _row_by_day(dialog, FRI)
-    fri_row.missed_button.set_active(True)
-    next(check for gid, check in fri_row._goal_checks if gid == goal2_id).set_active(False)
-    _row_by_day(dialog, SAT).kept_button.set_active(True)
+    for i in range(5):
+        if i != 2:
+            _tick(fri_row, i, True)
+    sat_row = _row_by_day(dialog, SAT)
+    for i in range(5):
+        _tick(sat_row, i, True)
     process_events()
 
     expected_preview = engine.catch_up_preview(
@@ -173,13 +248,15 @@ def test_combined_answers_summary_matches_engine(seeded_state, seeded_window, pr
     )
     assert dialog.result_label.get_label() == expected_preview.summary
     assert dialog.result_label.get_label() == (
-        "Run 3 ends at 48 days — your best run so far. Run 4 is on 2 days. Thursday stays "
-        "hollow — unanswered, and it doesn't break anything."
+        "Run 3 ends on 11 September at 48 days. Run 4 starts on 12 September at 2 days. "
+        "1 day unconfirmed."
     )
+    assert "error" in dialog.result_label.get_css_classes()
+    assert "dim-label" not in dialog.result_label.get_css_classes()
     assert dialog.save_button.get_sensitive()
 
 
-def test_clicking_active_kept_again_reverts_to_unanswered(
+def test_clicking_all_ticks_off_again_reverts_to_unconfirmed(
     seeded_state, seeded_window, process_events
 ):
     window = seeded_window
@@ -188,15 +265,17 @@ def test_clicking_active_kept_again_reverts_to_unanswered(
     process_events()
 
     wed_row = _row_by_day(dialog, WED)
-    wed_row.kept_button.set_active(True)
+    for i in range(5):
+        _tick(wed_row, i, True)
     process_events()
-    assert wed_row.state_label.get_label() == "All five goals"
+    assert wed_row.state_label.get_label() == "All 5 kept"
 
-    wed_row.kept_button.set_active(False)
+    for i in range(5):
+        _tick(wed_row, i, False)
     process_events()
 
-    assert wed_row.state_label.get_label() == "Unanswered"
-    assert not wed_row.kept_button.get_active()
+    assert wed_row.state_label.get_label() == "Unconfirmed"
+    assert wed_row.current_answer() is None
     assert not dialog.save_button.get_sensitive()
 
 
@@ -209,11 +288,16 @@ def test_save_writes_answers_and_refreshes_the_app(seeded_state, seeded_window, 
     goal_ids = _goal_ids(seeded_state)
     goal2_id = goal_ids[2]
 
-    _row_by_day(dialog, WED).kept_button.set_active(True)
+    wed_row = _row_by_day(dialog, WED)
+    for i in range(5):
+        _tick(wed_row, i, True)
     fri_row = _row_by_day(dialog, FRI)
-    fri_row.missed_button.set_active(True)
-    next(check for gid, check in fri_row._goal_checks if gid == goal2_id).set_active(False)
-    _row_by_day(dialog, SAT).kept_button.set_active(True)
+    for i in range(5):
+        if i != 2:
+            _tick(fri_row, i, True)
+    sat_row = _row_by_day(dialog, SAT)
+    for i in range(5):
+        _tick(sat_row, i, True)
     process_events()
 
     assert dialog.save_button.get_sensitive()
@@ -261,7 +345,9 @@ def test_cancel_writes_nothing(seeded_state, seeded_window, process_events):
     dialog = _open_dialog(seeded_state, window)
     process_events()
 
-    _row_by_day(dialog, WED).kept_button.set_active(True)
+    wed_row = _row_by_day(dialog, WED)
+    for i in range(5):
+        _tick(wed_row, i, True)
     process_events()
 
     closed = []

@@ -158,14 +158,18 @@ def _build_catch_up_missed(ctx: BuildContext) -> Gtk.Widget:
     process_events()
 
     rows = {row.day: row for row in dialog._rows}
-    rows[date(2026, 9, 9)].kept_button.set_active(True)
+    # 9 September: every goal ticked -> kept. 10 September is left untouched (stays unconfirmed).
+    for _gid, check in rows[date(2026, 9, 9)]._goal_checks:
+        check.set_active(True)
 
+    # 11 September: every goal ticked except "45 min second workout" (index 2) -> partial/missed.
     fri_row = rows[date(2026, 9, 11)]
-    fri_row.missed_button.set_active(True)
-    _, goal2_check = fri_row._goal_checks[2]  # "45 min second workout"
-    goal2_check.set_active(False)
+    for i, (_gid, check) in enumerate(fri_row._goal_checks):
+        check.set_active(i != 2)
 
-    rows[date(2026, 9, 12)].kept_button.set_active(True)
+    # 12 September: every goal ticked -> kept.
+    for _gid, check in rows[date(2026, 9, 12)]._goal_checks:
+        check.set_active(True)
     process_events()
 
     return _detach_dialog_content(dialog)

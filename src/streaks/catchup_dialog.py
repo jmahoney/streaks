@@ -1,9 +1,10 @@
-"""Catch-up dialog (design-spec §5): answer every unconfirmed day for one streak at once.
+"""Catch-up dialog (design-spec §5): tick completed goals for every unconfirmed day at once.
 
-Every string, colour and sensitivity rule comes from ``engine.catch_up``/
-``engine.catch_up_preview``; ``Save`` writes through ``models.answer_day``. Build it with
-``StreaksCatchupDialog(state, streak_id)`` and ``present(window)`` it, same as
-``StreaksStreakDialog``.
+Each unconfirmed day is its own card; the user ticks the goals they completed and the day's
+answer follows from those ticks (see ``StreaksCatchupRow``). Every caption, colour and sensitivity
+rule comes from ``engine.catch_up``/``engine.catch_up_preview``; ``Save`` writes through
+``models.answer_day``. Build it with ``StreaksCatchupDialog(state, streak_id)`` and
+``present(window)`` it, same as ``StreaksStreakDialog``.
 """
 
 from __future__ import annotations
@@ -43,7 +44,7 @@ class StreaksCatchupDialog(Adw.Dialog):
     save_button = Gtk.Template.Child()
     dialog_title = Gtk.Template.Child()
     intro_label = Gtk.Template.Child()
-    days_list = Gtk.Template.Child()
+    days_box = Gtk.Template.Child()
     result_title = Gtk.Template.Child()
     result_strip = Gtk.Template.Child()
     result_label = Gtk.Template.Child()
@@ -82,7 +83,7 @@ class StreaksCatchupDialog(Adw.Dialog):
             row = StreaksCatchupRow()
             row.configure(cu_day.day, active_goals)
             row.connect("answer-changed", self._on_row_changed)
-            self.days_list.append(row)
+            self.days_box.append(row)
             self._rows.append(row)
 
     # -- recomputation ---------------------------------------------------------------
@@ -104,16 +105,17 @@ class StreaksCatchupDialog(Adw.Dialog):
         preview = engine.catch_up_preview(self._streak, today, settings, answers)
         for row in self._rows:
             row.set_state_text(preview.row_state.get(row.day, ""))
-            row.set_warning(preview.row_warning.get(row.day))
 
         self.result_strip.set_cells(preview.strip)
         self.result_label.set_label(preview.summary)
+        if preview.ends_run:
+            self.result_label.remove_css_class("dim-label")
+            self.result_label.add_css_class("error")
+        else:
+            self.result_label.remove_css_class("error")
+            self.result_label.add_css_class("dim-label")
 
-        any_answered = bool(answers)
-        missed_rows_ok = all(
-            bool(missed_ids) for status, missed_ids in answers.values() if status == Answer.MISSED
-        )
-        self.save_button.set_sensitive(any_answered and missed_rows_ok)
+        self.save_button.set_sensitive(bool(answers))
 
     # -- save/cancel ---------------------------------------------------------------
 

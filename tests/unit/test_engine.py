@@ -26,6 +26,7 @@ from streaks.engine import (
     CHART_UNCONFIRMED_BORDER,
     CHART_UPCOMING,
     CHART_ZERO,
+    WEEKDAYS_MON_TO_FRI,
     Answer,
     AnswerData,
     CheckData,
@@ -646,21 +647,127 @@ def test_fixture_75_hard_catch_up(seeded, today, settings):
     assert cu.subtitle == "75 Hard · 4 days"
 
 
-def test_fixture_75_hard_catch_up_preview(seeded, today, settings):
+def test_fixture_75_hard_catch_up_preview_row_states(seeded, today, settings):
     hard = _streaks()["75 Hard"]
+    second_workout = next(g.id for g in hard.goals if g.name == "45 min second workout")
     answers = {
         date(2026, 9, 9): (Answer.KEPT, ()),
-        date(2026, 9, 11): (Answer.MISSED, (2,)),
+        date(2026, 9, 11): (Answer.MISSED, (second_workout,)),
         date(2026, 9, 12): (Answer.KEPT, ()),
     }
     preview = catch_up_preview(hard, today, settings, answers)
-    assert preview.row_warning[date(2026, 9, 11)] == (
-        "Saving this ends the 48-day run on 11 September and starts run 4 on the 12th."
-    )
+    assert preview.row_state == {
+        date(2026, 9, 9): "All 5 kept",
+        date(2026, 9, 10): "Unconfirmed",
+        date(2026, 9, 11): "4 of 5 kept · 1 missed",
+        date(2026, 9, 12): "All 5 kept",
+    }
+    assert preview.ends_run is True
+
+
+def test_fixture_75_hard_catch_up_preview_summary_ends_with_following(seeded, today, settings):
+    # 11 September partial (one goal missed) ends the run; 10 September is left unanswered.
+    # Note: the design mock's own arithmetic guessed 47/4 days for this fixture, but the engine
+    # (authoritative per its run-length rules) computes 48/2 — trust the engine here.
+    hard = _streaks()["75 Hard"]
+    second_workout = next(g.id for g in hard.goals if g.name == "45 min second workout")
+    answers = {
+        date(2026, 9, 9): (Answer.KEPT, ()),
+        date(2026, 9, 11): (Answer.MISSED, (second_workout,)),
+        date(2026, 9, 12): (Answer.KEPT, ()),
+    }
+    preview = catch_up_preview(hard, today, settings, answers)
     assert preview.summary == (
-        "Run 3 ends at 48 days — your best run so far. Run 4 is on 2 days. Thursday stays "
-        "hollow — unanswered, and it doesn't break anything."
+        "Run 3 ends on 11 September at 48 days. Run 4 starts on 12 September at 2 days. "
+        "1 day unconfirmed."
     )
+
+
+def test_fixture_75_hard_catch_up_preview_summary_ends_two_unconfirmed_left(
+    seeded, today, settings
+):
+    hard = _streaks()["75 Hard"]
+    second_workout = next(g.id for g in hard.goals if g.name == "45 min second workout")
+    answers = {date(2026, 9, 11): (Answer.MISSED, (second_workout,))}
+    preview = catch_up_preview(hard, today, settings, answers)
+    assert preview.summary == (
+        "Run 3 ends on 11 September at 48 days. Run 4 starts on 12 September at 2 days. "
+        "3 days unconfirmed."
+    )
+
+
+def test_fixture_75_hard_catch_up_preview_summary_ends_no_unconfirmed_left(seeded, today, settings):
+    hard = _streaks()["75 Hard"]
+    second_workout = next(g.id for g in hard.goals if g.name == "45 min second workout")
+    answers = {
+        date(2026, 9, 9): (Answer.KEPT, ()),
+        date(2026, 9, 10): (Answer.KEPT, ()),
+        date(2026, 9, 11): (Answer.MISSED, (second_workout,)),
+        date(2026, 9, 12): (Answer.KEPT, ()),
+    }
+    preview = catch_up_preview(hard, today, settings, answers)
+    assert (
+        preview.summary
+        == "Run 3 ends on 11 September at 48 days. Run 4 starts on 12 September at 2 days."
+    )
+
+
+def test_fixture_75_hard_catch_up_preview_summary_continues(seeded, today, settings):
+    hard = _streaks()["75 Hard"]
+    answers = {date(2026, 9, 9): (Answer.KEPT, ()), date(2026, 9, 12): (Answer.KEPT, ())}
+    preview = catch_up_preview(hard, today, settings, answers)
+    assert preview.ends_run is False
+    assert preview.summary == "Run 3 continues at 51 days. 2 days unconfirmed."
+
+
+def test_fixture_75_hard_catch_up_preview_summary_continues_none_unconfirmed_left(
+    seeded, today, settings
+):
+    hard = _streaks()["75 Hard"]
+    answers = {date(2026, 9, d): (Answer.KEPT, ()) for d in (9, 10, 11, 12)}
+    preview = catch_up_preview(hard, today, settings, answers)
+    assert preview.ends_run is False
+    assert preview.summary == "Run 3 continues at 51 days."
+
+
+def test_catch_up_preview_row_state_variants():
+    s = _mk(date(2026, 1, 1), n_goals=2)
+    today = date(2026, 1, 5)
+    answers = {
+        date(2026, 1, 1): (Answer.KEPT, ()),
+        date(2026, 1, 2): (Answer.MISSED, (2,)),
+        date(2026, 1, 3): (Answer.MISSED, ()),
+    }
+    preview = catch_up_preview(s, today, Settings(), answers)
+    assert preview.row_state == {
+        date(2026, 1, 1): "All 2 kept",
+        date(2026, 1, 2): "1 of 2 kept · 1 missed",
+        date(2026, 1, 3): "Missed",
+        date(2026, 1, 4): "Unconfirmed",
+    }
+
+
+def test_catch_up_preview_row_state_one_goal_streak_says_kept():
+    s = _mk(date(2026, 1, 1), n_goals=1)
+    preview = catch_up_preview(
+        s, date(2026, 1, 3), Settings(), {date(2026, 1, 1): (Answer.KEPT, ())}
+    )
+    assert preview.row_state[date(2026, 1, 1)] == "Kept"
+
+
+def test_catch_up_preview_summary_ends_without_a_following_run():
+    # Weekdays-only streak, today a Saturday it isn't due: marking the last unconfirmed weekday
+    # missed leaves no due period afterwards, so there's no following run to report.
+    s = _mk(
+        date(2026, 1, 5),  # Monday
+        n_goals=1,
+        period_kind=PeriodKind.WEEKDAYS,
+        weekdays_mask=WEEKDAYS_MON_TO_FRI,
+    )
+    today = date(2026, 1, 10)  # Saturday, not due
+    preview = catch_up_preview(s, today, Settings(), {date(2026, 1, 9): (Answer.MISSED, ())})
+    assert preview.ends_run is True
+    assert preview.summary == "Run 1 ends on 9 January at 4 days. 4 days unconfirmed."
 
 
 def test_fixture_75_hard_mark_missed_preview(seeded, today, settings):

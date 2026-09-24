@@ -1,8 +1,8 @@
 /* Streaks custom styles: classes not covered by a libadwaita style class (colour-dot, today-dot,
- * badge, catchup-banner(+.title), catchup-row(.missed), catchup-goal-list, colour-swatch,
- * stat-accent, streak-blue/green/yellow/red/purple, ended-dot, strike, goal-bar.low,
- * chart-legend-swatch, chart-day-label, sidebar-footer, sidebar-empty, checkin-card(+.footer),
- * goal-row, caption-heading dim-label).
+ * badge, catchup-banner(+.title), catchup-day(.missed)(+.header, .date, .status), catchup-goal
+ * (.ticked, .missed), colour-swatch, stat-accent, streak-blue/green/yellow/red/purple, ended-dot,
+ * strike, goal-bar.low, chart-legend-swatch, chart-day-label, sidebar-footer, sidebar-empty,
+ * checkin-card(+.footer), goal-row, caption-heading dim-label).
  *
  * Every colour is a CSS variable declared on :root and overridden once in the
  * prefers-color-scheme: dark block at the end, so no widget needs to know which scheme is
@@ -147,18 +147,25 @@ progressbar.low > trough > progress {
   opacity: 0.4;
 }
 
-.catchup-row.missed {
-  background-color: var(--catchup-missed-bg-color);
+.catchup-day.missed {
   border-color: var(--catchup-missed-border-color);
 }
 
-.catchup-row.missed .date {
+.catchup-day.missed .header {
+  background-color: var(--catchup-missed-bg-color);
+}
+
+.catchup-day.missed .date,
+.catchup-day.missed .status {
   color: var(--catchup-missed-fg-color);
 }
 
-.catchup-goal-list {
-  border-radius: 9px;
-  border: 1px solid var(--catchup-missed-border-color);
+.catchup-goal.ticked label {
+  opacity: 0.6;
+}
+
+.catchup-day.missed .catchup-goal.missed label {
+  color: var(--catchup-missed-fg-color);
 }
 
 /* Dark scheme. Blue at small sizes goes muddy on the #1e1e20 ground, so dark runs on amber:

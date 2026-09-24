@@ -1,81 +1,52 @@
 using Gtk 4.0;
 
-template $StreaksCatchupRow : Gtk.ListBoxRow {
-  styles ["catchup-row"]
+template $StreaksCatchupRow : Gtk.Box {
+  orientation: vertical;
 
-  child: Gtk.Box {
-    orientation: vertical;
+  styles ["card", "catchup-day"]
+
+  Gtk.Box header {
+    orientation: horizontal;
+    margin-top: 10;
+    margin-bottom: 10;
     margin-start: 16;
     margin-end: 16;
-    margin-top: 12;
-    margin-bottom: 12;
-    spacing: 10;
+    spacing: 12;
+
+    styles ["header"]
 
     Gtk.Box {
-      orientation: horizontal;
-      spacing: 12;
+      orientation: vertical;
+      hexpand: true;
+      valign: center;
+      spacing: 2;
 
-      Gtk.Box {
-        orientation: vertical;
-        hexpand: true;
-        valign: center;
-        spacing: 2;
+      Gtk.Label date_label {
+        halign: start;
+        xalign: 0;
+        ellipsize: end;
 
-        Gtk.Label date_label {
-          halign: start;
-          xalign: 0;
-          ellipsize: end;
-
-          styles ["heading", "date"]
-        }
-
-        Gtk.Label state_label {
-          halign: start;
-          xalign: 0;
-
-          styles ["caption", "dim-label"]
-        }
+        styles ["heading", "date"]
       }
 
-      Gtk.Box {
-        orientation: horizontal;
-        valign: center;
+      Gtk.Label state_label {
+        halign: start;
+        xalign: 0;
 
-        styles ["linked"]
-
-        Gtk.ToggleButton kept_button {
-          label: _("Kept");
-        }
-
-        Gtk.ToggleButton missed_button {
-          label: _("Missed");
-        }
+        styles ["caption", "status"]
       }
     }
 
-    Gtk.Revealer goals_revealer {
-      reveal-child: false;
-      transition-type: slide_down;
+    Gtk.Button action_button {
+      valign: center;
+      visible: false;
 
-      child: Gtk.Box {
-        orientation: vertical;
-        spacing: 9;
-
-        Gtk.ListBox goals_list {
-          selection-mode: none;
-
-          styles ["catchup-goal-list"]
-        }
-
-        Gtk.Label warning_label {
-          halign: start;
-          xalign: 0;
-          wrap: true;
-          visible: false;
-
-          styles ["caption", "error"]
-        }
-      };
+      styles ["flat", "accent"]
     }
-  };
+  }
+
+  Gtk.ListBox goals_list {
+    selection-mode: none;
+    activate-on-single-click: true;
+  }
 }

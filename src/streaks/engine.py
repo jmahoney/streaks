@@ -265,7 +265,7 @@ class CatchUp:
 @dataclass(frozen=True)
 class Preview:
     row_state: dict[date, str]  # status caption per unconfirmed day, keyed by day
-    row_warning: dict[date, str]
+    ends_run: bool  # whether the pending answers would end the current run
     strip: list[Cell]
     summary: str
 
@@ -1187,46 +1187,29 @@ def _preview_row_states(
     answers: dict[date, tuple[Answer, tuple[int, ...]]],
     n_goals_total: int,
 ) -> dict[date, str]:
-    """The status caption shown for each unconfirmed catch-up row."""
+    """The status caption shown for each unconfirmed catch-up row, derived from its ticks: all
+    goals ticked is kept, some ticked is partial (the rest recorded missed), none ticked is
+    missed once the day is explicitly marked so, or unconfirmed otherwise."""
     row_state: dict[date, str] = {}
     for d in unconfirmed_days:
         if d not in answers:
-            row_state[d] = _("Unanswered")
+            row_state[d] = _("Unconfirmed")
             continue
         status, missed_ids = answers[d]
         if status == Answer.KEPT:
             row_state[d] = (
-                _("Done")
-                if n_goals_total == 1
-                else _("All %(word)s goals") % {"word": words.number_word(n_goals_total)}
+                _("Kept") if n_goals_total == 1 else _("All %(n)d kept") % {"n": n_goals_total}
             )
-        elif not missed_ids:
-            row_state[d] = _("Untick the goals you missed")
+        elif missed_ids:
+            done = n_goals_total - len(missed_ids)
+            row_state[d] = _("%(done)d of %(n)d kept · %(missed)d missed") % {
+                "done": done,
+                "n": n_goals_total,
+                "missed": len(missed_ids),
+            }
         else:
-            row_state[d] = _("Missed — which goals?")
+            row_state[d] = _("Missed")
     return row_state
-
-
-def _preview_warnings(
-    answers: dict[date, tuple[Answer, tuple[int, ...]]],
-    new_run: Run | None,
-    following: Run | None,
-) -> dict[date, str]:
-    """The per-row warning for answers that would end the run, keyed by day."""
-    warnings: dict[date, str] = {}
-    if new_run is not None and new_run.end is not None:
-        for d, (status, _mids) in answers.items():
-            if status == Answer.MISSED:
-                warnings[d] = _(
-                    "Saving this ends the %(len)d-day run on %(day)s and starts run "
-                    "%(idx)d on the %(ord)s."
-                ) % {
-                    "len": new_run.length,
-                    "day": words.fmt_day(d),
-                    "idx": new_run.index + 1,
-                    "ord": words.ordinal_day(following.start) if following else "",
-                }
-    return warnings
 
 
 def _preview_strip(hypothetical: StreakData, today: date, settings: Settings) -> list[Cell]:
@@ -1235,50 +1218,65 @@ def _preview_strip(hypothetical: StreakData, today: date, settings: Settings) ->
     return [_cell_for_result(pr) for pr in strip_results[-STRIP_LENGTH:]]
 
 
-def _hollow_sentence(days: list[date]) -> str:
-    names = ", ".join(words.WEEKDAY_NAMES_FULL[d.weekday()] for d in days)
-    return ngettext(
-        "%(days)s stays hollow — unanswered, and it doesn't break anything.",
-        "%(days)s stay hollow — unanswered, and they don't break anything.",
-        len(days),
-    ) % {"days": names}
+def _ends_sentence(new_run: Run, following: Run | None, end_day: date) -> str:
+    """The sentence(s) describing a run that the pending answers would end."""
+    parts = [
+        ngettext(
+            "Run %(idx)d ends on %(day)s at %(len)d day.",
+            "Run %(idx)d ends on %(day)s at %(len)d days.",
+            new_run.length,
+        )
+        % {"idx": new_run.index, "day": words.fmt_day(end_day), "len": new_run.length}
+    ]
+    if following is not None:
+        parts.append(
+            ngettext(
+                "Run %(idx)d starts on %(day)s at %(len)d day.",
+                "Run %(idx)d starts on %(day)s at %(len)d days.",
+                following.length,
+            )
+            % {
+                "idx": following.index,
+                "day": words.fmt_day(following.start),
+                "len": following.length,
+            }
+        )
+    return " ".join(parts)
 
 
 def _preview_summary(
-    old_run: Run | None,
     new_run: Run | None,
     following: Run | None,
+    ends_run: bool,
+    end_day: date | None,
     unanswered_after: list[date],
-    n_unconfirmed: int,
 ) -> str:
-    """The sentence describing what saving the current answers would do to the run."""
-    if new_run is not None and new_run.end is not None:
+    """The sentence(s) describing what saving the current answers would do to the run, followed
+    by how many catch-up days would remain unconfirmed."""
+    if ends_run and new_run is not None and end_day is not None:
+        parts = [_ends_sentence(new_run, following, end_day)]
+    else:
+        idx = new_run.index if new_run else 0
+        length = new_run.length if new_run else 0
         parts = [
-            _("Run %(idx)d ends at %(len)d days%(best)s.")
-            % {
-                "idx": new_run.index,
-                "len": new_run.length,
-                "best": _(" — your best run so far") if new_run.is_best else "",
-            }
-        ]
-        if following is not None:
-            parts.append(
-                _("Run %(idx)d is on %(n)d days.") % {"idx": following.index, "n": following.length}
+            ngettext(
+                "Run %(idx)d continues at %(len)d day.",
+                "Run %(idx)d continues at %(len)d days.",
+                length,
             )
-        if unanswered_after:
-            parts.append(_hollow_sentence(unanswered_after))
-        return " ".join(parts)
+            % {"idx": idx, "len": length}
+        ]
 
-    idx = new_run.index if new_run else (old_run.index if old_run else 0)
-    length = new_run.length if new_run else (old_run.length if old_run else 0)
     if unanswered_after:
-        return " ".join(
-            [
-                _("Run %(idx)d stays at %(len)d days.") % {"idx": idx, "len": length},
-                _hollow_sentence(unanswered_after),
-            ]
+        parts.append(
+            ngettext(
+                "%(n)d day unconfirmed.",
+                "%(n)d days unconfirmed.",
+                len(unanswered_after),
+            )
+            % {"n": len(unanswered_after)}
         )
-    return _("All %(word)s days confirmed.") % {"word": words.number_word(n_unconfirmed)}
+    return " ".join(parts)
 
 
 def catch_up_preview(
@@ -1287,9 +1285,8 @@ def catch_up_preview(
     settings: Settings,
     answers: dict[date, tuple[Answer, tuple[int, ...]]],
 ) -> Preview:
-    """What the catch-up dialog should show for the days answered so far: a status and optional
-    warning per row, an updated strip, and a summary sentence of what saving would do to the
-    run."""
+    """What the catch-up dialog should show for the days answered so far: a status per row, an
+    updated strip, whether saving would end the run, and a summary sentence."""
     cu = catch_up(streak, today, settings)
     unconfirmed_days = [d.day for d in cu.days]
     n_goals_total = sum(1 for g in streak.goals if g.removed_on is None)
@@ -1305,12 +1302,17 @@ def catch_up_preview(
         else None
     )
 
-    warnings = _preview_warnings(answers, new_run, following)
+    ends_run = new_run is not None and new_run.end is not None
+    end_day = None
+    if ends_run:
+        missed_days = sorted(d for d, (status, _mids) in answers.items() if status == Answer.MISSED)
+        end_day = missed_days[0] if missed_days else new_run.end
+
     strip = _preview_strip(hypothetical, today, settings)
     unanswered_after = [d for d in unconfirmed_days if d not in answers]
-    summary = _preview_summary(old_run, new_run, following, unanswered_after, len(unconfirmed_days))
+    summary = _preview_summary(new_run, following, ends_run, end_day, unanswered_after)
 
-    return Preview(row_state=row_state, row_warning=warnings, strip=strip, summary=summary)
+    return Preview(row_state=row_state, ends_run=ends_run, strip=strip, summary=summary)
 
 
 def mark_missed_preview(streak: StreakData, today: date, settings: Settings) -> str:

@@ -32,7 +32,7 @@ template $StreaksCatchupDialog : Adw.Dialog {
     content: Gtk.Box {
       orientation: vertical;
       valign: start;
-      spacing: 14;
+      spacing: 12;
       margin-start: 18;
       margin-end: 18;
       margin-top: 18;
@@ -42,15 +42,14 @@ template $StreaksCatchupDialog : Adw.Dialog {
         halign: start;
         xalign: 0;
         wrap: true;
-        label: _("For each day: kept it, missed something, or leave it unanswered. Only “missed” ends the run.");
+        label: _("Unticked goals on a day with any ticks are recorded as missed. Days with no ticks stay unconfirmed.");
 
         styles ["caption", "dim-label"]
       }
 
-      Gtk.ListBox days_list {
-        selection-mode: none;
-
-        styles ["card"]
+      Gtk.Box days_box {
+        orientation: vertical;
+        spacing: 12;
       }
 
       Gtk.Box {
@@ -83,7 +82,7 @@ template $StreaksCatchupDialog : Adw.Dialog {
             xalign: 0;
             wrap: true;
 
-            styles ["caption", "dim-label"]
+            styles ["caption"]
           }
         }
       }
