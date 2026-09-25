@@ -13,6 +13,9 @@ from gi.repository import GObject, Gtk
 from streaks import theme
 from streaks.engine import Card
 from streaks.goal_row import StreaksGoalRow  # noqa: F401  registers $StreaksGoalRow
+from streaks.single_goal_row import (
+    StreaksSingleGoalRow,  # noqa: F401  registers $StreaksSingleGoalRow
+)
 
 _ = gettext.gettext
 
@@ -33,6 +36,7 @@ class StreaksCheckinCard(Gtk.Box):
         "mark-missed": (GObject.SignalFlags.RUN_FIRST, None, (int,)),
     }
 
+    multi_box = Gtk.Template.Child()
     dot = Gtk.Template.Child()
     name_label = Gtk.Template.Child()
     meta_label = Gtk.Template.Child()
@@ -42,6 +46,7 @@ class StreaksCheckinCard(Gtk.Box):
     progress = Gtk.Template.Child()
     progress_label = Gtk.Template.Child()
     missed_button = Gtk.Template.Child()
+    single_list = Gtk.Template.Child()
 
     streak_id = GObject.Property(type=int, default=0)
 
@@ -49,25 +54,39 @@ class StreaksCheckinCard(Gtk.Box):
         """Initialize the card."""
         super().__init__(**kwargs)
         self.goals_list.connect("row-activated", self._on_row_activated)
+        self.single_list.connect("row-activated", self._on_row_activated)
         self.missed_button.connect("clicked", self._on_missed_clicked)
 
-    def _on_row_activated(self, _listbox: Gtk.ListBox, row: StreaksGoalRow) -> None:
+    def _on_row_activated(self, _listbox: Gtk.ListBox, row: Gtk.ListBoxRow) -> None:
         row.check.set_active(not row.check.get_active())
 
     def _on_missed_clicked(self, _button: Gtk.Button) -> None:
         self.emit("mark-missed", self.streak_id)
 
-    def _on_goal_toggle_requested(self, row: StreaksGoalRow) -> None:
+    def _on_goal_toggle_requested(self, row: StreaksGoalRow | StreaksSingleGoalRow) -> None:
         self.emit("goal-toggled", row.goal_id)
 
     def configure(self, card: Card) -> None:
         """Populate the card from an ``engine.Card``."""
         self.streak_id = card.streak_id
+        self.multi_box.set_visible(not card.single)
+        self.single_list.set_visible(card.single)
+
+        # The (possibly hidden) multi-layout header still carries the card's name/colour, since
+        # callers identify a card by its `name_label` regardless of layout.
         for css_class in theme.colour_classes():
             self.dot.remove_css_class(css_class)
         self.dot.add_css_class(theme.colour_class(card.colour))
         self.name_label.set_label(card.name)
         self.meta_label.set_label(card.meta)
+
+        if card.single:
+            self.single_list.remove_all()
+            row = StreaksSingleGoalRow()
+            row.configure(card)
+            row.connect("toggle-requested", self._on_goal_toggle_requested)
+            self.single_list.append(row)
+            return
 
         self.goals_list.remove_all()
         for goal in card.goals:

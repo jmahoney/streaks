@@ -7,88 +7,98 @@ template $StreaksCheckinCard : Gtk.Box {
 
   styles ["card", "checkin-card"]
 
-  Gtk.Box {
-    orientation: horizontal;
-    spacing: 10;
-    margin-start: 16;
-    margin-end: 16;
-    margin-top: 12;
-    margin-bottom: 12;
+  Gtk.Box multi_box {
+    orientation: vertical;
 
-    Gtk.Box dot {
-      width-request: 8;
-      height-request: 8;
-      valign: center;
-      halign: center;
+    Gtk.Box {
+      orientation: horizontal;
+      spacing: 10;
+      margin-start: 16;
+      margin-end: 16;
+      margin-top: 12;
+      margin-bottom: 12;
 
-      styles ["colour-dot"]
+      Gtk.Box dot {
+        width-request: 8;
+        height-request: 8;
+        valign: center;
+        halign: center;
+
+        styles ["colour-dot"]
+      }
+
+      Gtk.Label name_label {
+        hexpand: true;
+        halign: start;
+        xalign: 0;
+        ellipsize: end;
+
+        styles ["heading"]
+      }
+
+      Gtk.Label meta_label {
+        halign: end;
+        valign: center;
+        ellipsize: end;
+
+        styles ["caption", "dim-label"]
+      }
     }
 
-    Gtk.Label name_label {
-      hexpand: true;
+    Gtk.Separator {}
+
+    Gtk.ListBox goals_list {
+      selection-mode: none;
+      activate-on-single-click: true;
+    }
+
+    Gtk.Label body_label {
       halign: start;
       xalign: 0;
-      ellipsize: end;
-
-      styles ["heading"]
-    }
-
-    Gtk.Label meta_label {
-      halign: end;
-      valign: center;
-      ellipsize: end;
+      wrap: true;
+      margin-start: 16;
+      margin-end: 16;
+      margin-top: 12;
+      margin-bottom: 12;
+      visible: false;
 
       styles ["caption", "dim-label"]
     }
+
+    Gtk.Box footer {
+      orientation: horizontal;
+      spacing: 10;
+      margin-start: 16;
+      margin-end: 16;
+      margin-top: 11;
+      margin-bottom: 11;
+      visible: false;
+
+      styles ["footer"]
+
+      Gtk.ProgressBar progress {
+        hexpand: true;
+        valign: center;
+      }
+
+      Gtk.Label progress_label {
+        valign: center;
+
+        styles ["caption", "dim-label"]
+      }
+
+      Gtk.Button missed_button {
+        label: _("Mark day missed");
+        valign: center;
+
+        styles ["flat", "accent"]
+      }
+    }
   }
 
-  Gtk.Separator {}
-
-  Gtk.ListBox goals_list {
+  Gtk.ListBox single_list {
     selection-mode: none;
     activate-on-single-click: true;
-  }
-
-  Gtk.Label body_label {
-    halign: start;
-    xalign: 0;
-    wrap: true;
-    margin-start: 16;
-    margin-end: 16;
-    margin-top: 12;
-    margin-bottom: 12;
     visible: false;
-
-    styles ["caption", "dim-label"]
-  }
-
-  Gtk.Box footer {
-    orientation: horizontal;
-    spacing: 10;
-    margin-start: 16;
-    margin-end: 16;
-    margin-top: 11;
-    margin-bottom: 11;
-    visible: false;
-
-    styles ["footer"]
-
-    Gtk.ProgressBar progress {
-      hexpand: true;
-      valign: center;
-    }
-
-    Gtk.Label progress_label {
-      valign: center;
-
-      styles ["caption", "dim-label"]
-    }
-
-    Gtk.Button missed_button {
-      label: _("Mark day missed");
-      valign: center;
-
-      styles ["flat", "accent"]
-    }
   }
 }

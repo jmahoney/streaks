@@ -134,9 +134,41 @@ def test_clip_fingernails_card(seeded_window, process_events):
 
     today_view = _today_view(window)
     card = _card_by_name(today_view, "Clip fingernails")
-    assert card.meta_label.get_label() == "Monthly · 17 days left"
-    row = _goal_row_by_name(card, "Clip fingernails")
+    assert not card.multi_box.get_visible()
+    assert card.single_list.get_visible()
+
+    row = listbox_rows(card.single_list)[0]
     assert row.name_label.get_label() == "Clip fingernails"
+    assert row.subtitle_label.get_label() == "Monthly · 17 days left"
+    assert not row.check.get_active()
+
+
+def test_single_goal_row_toggle_writes_check(seeded_window, process_events):
+    window = seeded_window
+
+    today_view = _today_view(window)
+    card = _card_by_name(today_view, "Clip fingernails")
+    row = listbox_rows(card.single_list)[0]
+
+    row.activate()
+    process_events()
+
+    check = GoalCheck.get_or_none(GoalCheck.goal == row.goal_id, GoalCheck.day == date(2026, 9, 13))
+    assert check is not None
+
+    card = _card_by_name(today_view, "Clip fingernails")
+    row = listbox_rows(card.single_list)[0]
+    assert row.subtitle_label.get_label().startswith("Monthly · done ")
+    assert row.check.get_active()
+    assert "strike" in row.name_label.get_css_classes()
+
+    row.activate()
+    process_events()
+
+    assert (
+        GoalCheck.get_or_none(GoalCheck.goal == row.goal_id, GoalCheck.day == date(2026, 9, 13))
+        is None
+    )
 
 
 def _sidebar_today_badge(window):

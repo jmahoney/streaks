@@ -18,6 +18,7 @@ src/streaks/today_view.py
 src/streaks/catchup_banner.py
 src/streaks/checkin_card.py
 src/streaks/goal_row.py
+src/streaks/single_goal_row.py
 src/streaks/words.py
 src/streaks/ui/window.blp
 src/streaks/ui/sidebar_row.blp
@@ -26,6 +27,7 @@ src/streaks/ui/today_view.blp
 src/streaks/ui/catchup_banner.blp
 src/streaks/ui/checkin_card.blp
 src/streaks/ui/goal_row.blp
+src/streaks/ui/single_goal_row.blp
 src/streaks/ui/streak_dialog.blp
 src/streaks/streak_dialog.py
 src/streaks/ui/goal_edit_row.blp

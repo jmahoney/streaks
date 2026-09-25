@@ -17,6 +17,7 @@
     <file>streaks/ui/catchup_banner.ui</file>
     <file>streaks/ui/checkin_card.ui</file>
     <file>streaks/ui/goal_row.ui</file>
+    <file>streaks/ui/single_goal_row.ui</file>
     <file alias="gtk/help-overlay.ui">streaks/ui/shortcuts.ui</file>
     <file alias="style.css">../data/style.css</file>
   </gresource>
