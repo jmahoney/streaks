@@ -53,6 +53,7 @@ __all__ = [
     "database_path",
     "init_db",
     "DatabaseInitError",
+    "SCHEMA_VERSION",
     "create_streak",
     "update_streak",
     "toggle_goal_check",
@@ -67,6 +68,10 @@ __all__ = [
 ]
 
 COLOURS = ("#3584e4", "#2ec27e", "#e5a50a", "#e01b24", "#9141ac")
+
+# v2 adds the single-goal name invariant: a streak with exactly one active goal always names
+# that goal after the streak (see `create_streak`/`update_streak`/`_sync_single_goal_names`).
+SCHEMA_VERSION = 2
 
 db = SqliteDatabase(None)
 
@@ -167,11 +172,25 @@ def init_db(path: str | None = None) -> SqliteDatabase:
         db.init(path, pragmas={"foreign_keys": 1, "journal_mode": "wal"})
         db.connect(reuse_if_open=True)
         db.create_tables(MODELS)
-        if db.pragma("user_version") == 0:
-            db.pragma("user_version", 1)
+        if db.pragma("user_version") < SCHEMA_VERSION:
+            _sync_single_goal_names()
+            db.pragma("user_version", SCHEMA_VERSION)
     except (OSError, PeeweeException) as exc:
         raise DatabaseInitError(path, str(exc)) from exc
     return db
+
+
+def _sync_single_goal_names() -> None:
+    """Bring a database up to the single-goal name invariant: for every streak with exactly one
+    active goal, rename that goal to match the streak's name."""
+    with db.atomic():
+        for streak in Streak.select():
+            active_goals = list(
+                Goal.select().where(Goal.streak == streak, Goal.removed_on.is_null())
+            )
+            if len(active_goals) == 1 and active_goals[0].name != streak.name:
+                active_goals[0].name = streak.name
+                active_goals[0].save()
 
 
 def create_streak(
@@ -186,13 +205,18 @@ def create_streak(
     allow_skip: bool = False,
     created_on: date,
 ) -> Streak:
-    """Create a streak with its goals in one transaction."""
+    """Create a streak with its goals in one transaction.
+
+    A one-goal streak stores its goal under the streak's name.
+    """
     name = name.strip()
     if not name:
         raise ValueError("name must not be empty")
     goal_names = [g.strip() for g in goals if g.strip()]
     if not goal_names:
         raise ValueError("at least one goal is required")
+    if len(goal_names) == 1:
+        goal_names = [name]
     if colour not in COLOURS:
         raise ValueError(f"invalid colour: {colour}")
     with db.atomic():
@@ -227,7 +251,10 @@ def update_streak(
     goals: list[tuple[int | None, str]],
     today: date,
 ) -> Streak:
-    """Update a streak's fields and reconcile its goal list."""
+    """Update a streak's fields and reconcile its goal list.
+
+    A one-goal streak stores its goal under the streak's name.
+    """
     name = name.strip()
     if not name:
         raise ValueError("name must not be empty")
@@ -236,6 +263,8 @@ def update_streak(
     goal_entries = [(gid, gname.strip()) for gid, gname in goals if gname.strip()]
     if not goal_entries:
         raise ValueError("at least one goal is required")
+    if len(goal_entries) == 1:
+        goal_entries = [(goal_entries[0][0], name)]
     with db.atomic():
         streak.name = name
         streak.colour = colour

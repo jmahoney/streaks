@@ -134,7 +134,7 @@ def test_clip_fingernails_card(seeded_window, process_events):
 
     today_view = _today_view(window)
     card = _card_by_name(today_view, "Clip fingernails")
-    row = _goal_row_by_name(card, "Clip them")
+    row = _goal_row_by_name(card, "Clip fingernails")
     assert row.time_label.get_label() == "17 days left"
 
 

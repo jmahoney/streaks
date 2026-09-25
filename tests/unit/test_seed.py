@@ -108,3 +108,10 @@ def test_seed_goal_names_in_order(seeded):
         .order_by(Goal.position)
     ]
     assert gym_goals == ["45 min session", "Log the weights"]
+
+
+def test_seed_single_goal_streaks_take_streak_name(seeded):
+    for name in ("No snoozing the alarm", "Clip fingernails", "Couch to 5K"):
+        streak = seeded[name]
+        (goal,) = Goal.select().where(Goal.streak == streak)
+        assert goal.name == name

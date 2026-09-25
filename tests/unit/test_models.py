@@ -14,6 +14,7 @@ from peewee import IntegrityError
 from streaks.engine import Answer, PeriodKind
 from streaks.models import (
     COLOURS,
+    SCHEMA_VERSION,
     DatabaseInitError,
     DayAnswer,
     Goal,
@@ -123,6 +124,53 @@ def test_update_streak_rejects_empty_name_or_goals():
             goals=[(None, "  ")],
             today=date(2026, 1, 2),
         )
+
+
+def test_create_streak_single_goal_takes_streak_name(today):
+    streak = create_streak("Floss", COLOURS[0], PeriodKind.DAILY, ["floss "], created_on=today)
+    assert [g.name for g in streak.goals] == ["Floss"]
+
+
+def test_update_streak_single_goal_takes_streak_name(today):
+    streak = create_streak(
+        "Grooming", COLOURS[0], PeriodKind.MONTHLY, ["Clip", "Haircut"], created_on=today
+    )
+    clip = next(g for g in streak.goals if g.name == "Clip")
+    update_streak(
+        streak,
+        name="Clip fingernails",
+        colour=COLOURS[0],
+        period_kind=PeriodKind.MONTHLY,
+        weekdays_mask=31,
+        times_per_week=3,
+        reminder_time=None,
+        allow_skip=False,
+        goals=[(clip.id, "Clip")],
+        today=today,
+    )
+    clip = Goal.get_by_id(clip.id)
+    assert clip.name == "Clip fingernails" and clip.removed_on is None
+
+
+def test_update_streak_single_new_goal_takes_streak_name(today):
+    """Replacing every goal with one brand-new one still applies the single-goal invariant."""
+    streak = create_streak("A", COLOURS[0], PeriodKind.DAILY, ["g1"], created_on=today)
+    old_goal = Goal.get(Goal.streak == streak)
+    update_streak(
+        streak,
+        name="B",
+        colour=COLOURS[0],
+        period_kind=PeriodKind.DAILY,
+        weekdays_mask=31,
+        times_per_week=3,
+        reminder_time=None,
+        allow_skip=False,
+        goals=[(None, "new goal")],
+        today=today,
+    )
+    new_goal = Goal.get(Goal.streak == streak, Goal.removed_on.is_null())
+    assert new_goal.name == "B"
+    assert Goal.get_by_id(old_goal.id).removed_on == today
 
 
 def test_toggle_goal_check_creates_then_removes():
@@ -363,6 +411,64 @@ def test_init_db_raises_database_init_error_for_corrupt_database_file(tmp_path):
         # `init_db()` rebinds the module-level `db` to `corrupt` before it fails on
         # `create_tables()` — restore the in-memory database the autouse `in_memory_db` fixture
         # set up, so this test doesn't leak a broken connection into whichever test runs next.
+        if not db.is_closed():
+            db.close()
+        db.init(":memory:", pragmas={"foreign_keys": 1})
+        db.connect()
+        db.create_tables(MODELS)
+
+
+def test_init_db_syncs_single_goal_names(tmp_path):
+    """A pre-v2 database file with a single-goal streak whose goal name drifted from the
+    streak's gets synced on open, and ``user_version`` advances to ``SCHEMA_VERSION``."""
+    from streaks.models import MODELS, db
+
+    path = str(tmp_path / "s.db")
+    try:
+        init_db(path)
+        streak = create_streak(
+            "Clip fingernails", COLOURS[2], PeriodKind.MONTHLY, ["x"], created_on=date(2026, 6, 1)
+        )
+        Goal.update(name="Clip them").where(Goal.streak == streak).execute()
+        db.pragma("user_version", 1)
+        db.close()
+
+        init_db(path)
+
+        assert Goal.get(Goal.streak == streak).name == "Clip fingernails"
+        assert db.pragma("user_version") == SCHEMA_VERSION
+    finally:
+        if not db.is_closed():
+            db.close()
+        db.init(":memory:", pragmas={"foreign_keys": 1})
+        db.connect()
+        db.create_tables(MODELS)
+
+
+def test_init_db_leaves_multi_goal_names(tmp_path):
+    """The v2 migration sync only touches single-goal streaks; multi-goal streaks keep their
+    goal names untouched."""
+    from streaks.models import MODELS, db
+
+    path = str(tmp_path / "s.db")
+    try:
+        init_db(path)
+        streak = create_streak(
+            "Grooming",
+            COLOURS[0],
+            PeriodKind.MONTHLY,
+            ["Clip", "Haircut"],
+            created_on=date(2026, 6, 1),
+        )
+        db.pragma("user_version", 1)
+        db.close()
+
+        init_db(path)
+
+        names = {g.name for g in Goal.select().where(Goal.streak == streak)}
+        assert names == {"Clip", "Haircut"}
+        assert db.pragma("user_version") == SCHEMA_VERSION
+    finally:
         if not db.is_closed():
             db.close()
         db.init(":memory:", pragmas={"foreign_keys": 1})

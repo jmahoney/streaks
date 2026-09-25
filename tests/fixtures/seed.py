@@ -31,12 +31,12 @@ Expected values, pinned by ``tests/unit/test_engine.py``:
   8/9, 9/9; sidebar meta "Daily · 5 goals" at count 51; the banner reads "Four days without a
   check-in — 9 to 12 September"; catch-up lists Wednesday 9 through Saturday 12 September;
   marking today missed would end run 3 at 50 days.
-- No snoozing the alarm: count 12, sidebar meta "Mon–Fri · 1 goal", today's card is "Not today"
-  with the next check-in on Monday 14 September, since the streak is due only on weekdays.
+- No snoozing the alarm: count 12, sidebar meta "Mon–Fri", today's card is "Not today" with the
+  next check-in on Monday 14 September, since the streak is due only on weekdays.
 - Gym, three times a week: count 9, sidebar meta "3× a week · 2 goals", today's card reads "2 of
   3 this week".
-- Clip fingernails: count 4, sidebar meta "Monthly · 1 goal", today's card reads "Due this
-  month" with 17 days left on the goal.
+- Clip fingernails: count 4, sidebar meta "Monthly", today's card is one row, subtitle
+  "Monthly · 17 days left".
 - Couch to 5K: ended, best run 31 days, sidebar meta "Ended 4 Mar · best 31".
 - Today view: title "Sunday 13 September", subtitle "2 check-ins open · 4 earlier days
   unconfirmed" (75 Hard and the gym are open; the four unconfirmed 75 Hard days account for the
@@ -192,7 +192,7 @@ def _seed_clip_fingernails() -> Streak:
         "Clip fingernails",
         "#e5a50a",
         PeriodKind.MONTHLY,
-        ["Clip them"],
+        ["Clip fingernails"],
         created_on=date(2026, 6, 1),
     )
     (goal,) = _goals(streak)
