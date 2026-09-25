@@ -134,8 +134,9 @@ def test_clip_fingernails_card(seeded_window, process_events):
 
     today_view = _today_view(window)
     card = _card_by_name(today_view, "Clip fingernails")
+    assert card.meta_label.get_label() == "Monthly · 17 days left"
     row = _goal_row_by_name(card, "Clip fingernails")
-    assert row.time_label.get_label() == "17 days left"
+    assert row.name_label.get_label() == "Clip fingernails"
 
 
 def _sidebar_today_badge(window):

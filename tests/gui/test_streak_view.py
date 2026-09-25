@@ -205,7 +205,7 @@ def test_ended_streak_history(seeded_window, process_events):
     assert view.chart_title_label.get_label() == "Run 1 · 2 Feb – 4 Mar"
     assert not view.catch_up_link.get_visible()
 
-    assert window.content_title.get_subtitle() == "Daily · 1 goal · ended 4 Mar"
+    assert window.content_title.get_subtitle() == "Daily · ended 4 Mar"
 
     # An ended streak's page is read-only: no "Check in" button, and the ⋯ menu offers only
     # Delete….

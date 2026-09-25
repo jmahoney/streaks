@@ -34,7 +34,7 @@ def test_sidebar_rows_from_seed(seeded_window, process_events):
     assert hard_row.colour == "#3584e4"
 
     no_snoozing_row = rows[2]
-    assert no_snoozing_row.meta_label.get_label() == "Mon–Fri · 1 goal"
+    assert no_snoozing_row.meta_label.get_label() == "Mon–Fri"
     assert no_snoozing_row.count_label.get_label() == "12"
 
     gym_row = rows[3]
@@ -42,7 +42,7 @@ def test_sidebar_rows_from_seed(seeded_window, process_events):
     assert gym_row.count_label.get_label() == "9"
 
     clip_row = rows[4]
-    assert clip_row.meta_label.get_label() == "Monthly · 1 goal"
+    assert clip_row.meta_label.get_label() == "Monthly"
     assert clip_row.count_label.get_label() == "4"
 
     ended_row = rows[5]

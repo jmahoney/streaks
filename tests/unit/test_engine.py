@@ -55,6 +55,7 @@ from streaks.engine import (
     mark_missed_preview,
     next_due_day,
     period_for,
+    period_label,
     runs,
     sidebar_ended_meta,
     sidebar_meta,
@@ -358,14 +359,20 @@ def test_current_run_none_for_ended_streak():
 # ----------------------------------------------------------------------------------------------
 
 
+def test_sidebar_meta_daily_single_goal():
+    # A single-goal streak's meta is just the period label, with no goal count.
+    s = _mk(date(2026, 1, 1), n_goals=1)
+    assert sidebar_meta(s) == "Daily"
+
+
 def test_sidebar_meta_daily():
     s = _mk(date(2026, 1, 1), n_goals=5)
     assert sidebar_meta(s) == "Daily · 5 goals"
 
 
-def test_sidebar_meta_weekdays_contiguous_range():
+def test_sidebar_meta_weekdays_contiguous_range_single_goal():
     s = _mk(date(2026, 1, 1), n_goals=1, period_kind=PeriodKind.WEEKDAYS, weekdays_mask=0b0011111)
-    assert sidebar_meta(s) == "Mon–Fri · 1 goal"
+    assert sidebar_meta(s) == "Mon–Fri"
 
 
 def test_sidebar_meta_weekdays_non_contiguous():
@@ -379,14 +386,111 @@ def test_sidebar_meta_n_per_week():
     assert sidebar_meta(s) == "3× a week · 2 goals"
 
 
-def test_sidebar_meta_monthly():
+def test_sidebar_meta_monthly_single_goal():
     s = _mk(date(2026, 1, 1), n_goals=1, period_kind=PeriodKind.MONTHLY)
-    assert sidebar_meta(s) == "Monthly · 1 goal"
+    assert sidebar_meta(s) == "Monthly"
 
 
 def test_sidebar_ended_meta():
     s = _mk(date(2026, 1, 1), n_goals=1, ended_on=date(2026, 3, 4))
     assert sidebar_ended_meta(s, 31) == "Ended 4 Mar · best 31"
+
+
+def test_period_label_variants():
+    daily = _mk(date(2026, 1, 1), n_goals=1)
+    weekdays = _mk(
+        date(2026, 1, 1), n_goals=1, period_kind=PeriodKind.WEEKDAYS, weekdays_mask=0b0011111
+    )
+    n_per_week = _mk(
+        date(2026, 1, 1), n_goals=1, period_kind=PeriodKind.N_PER_WEEK, times_per_week=3
+    )
+    monthly = _mk(date(2026, 1, 1), n_goals=1, period_kind=PeriodKind.MONTHLY)
+    assert period_label(daily) == "Daily"
+    assert period_label(weekdays) == "Mon–Fri"
+    assert period_label(n_per_week) == "3× a week"
+    assert period_label(monthly) == "Monthly"
+
+
+# ----------------------------------------------------------------------------------------------
+# Single-goal check-in cards.
+# ----------------------------------------------------------------------------------------------
+
+
+def test_single_card_daily_unticked():
+    s = _mk(date(2026, 1, 1), n_goals=1)
+    today = date(2026, 1, 5)
+    card = today_view([s], today, Settings()).cards[0]
+    assert card.single is True
+    assert card.kind == "goals"
+    assert card.meta == "Daily · day 5"
+    assert len(card.goals) == 1
+    assert card.goals[0].name == "T"
+    assert card.show_footer is False
+
+
+def test_single_card_daily_ticked_shows_done_time():
+    today = date(2026, 1, 5)
+    s = _mk(date(2026, 1, 1), n_goals=1)
+    s = dataclasses.replace(
+        s, checks=(CheckData(goal_id=1, day=today, done_at=datetime(2026, 1, 5, 7, 12)),)
+    )
+    card = today_view([s], today, Settings()).cards[0]
+    assert card.meta == "Daily · done 07:12"
+    assert card.goals[0].done_at == datetime(2026, 1, 5, 7, 12)
+
+
+def test_single_card_monthly_days_left():
+    s = _mk(date(2026, 1, 1), n_goals=1, period_kind=PeriodKind.MONTHLY)
+    today = date(2026, 1, 14)  # January has 31 days: 17 left.
+    card = today_view([s], today, Settings()).cards[0]
+    assert card.single is True
+    assert card.kind == "monthly"
+    assert card.meta == "Monthly · 17 days left"
+
+
+def test_single_card_monthly_already_done_this_month():
+    s = _mk(
+        date(2026, 1, 1),
+        n_goals=1,
+        period_kind=PeriodKind.MONTHLY,
+        day_checks={date(2026, 1, 3): {0}},
+    )
+    today = date(2026, 1, 14)
+    card = today_view([s], today, Settings()).cards[0]
+    assert card.meta == "Monthly · done this month"
+
+
+def test_single_card_n_per_week():
+    s = _mk(
+        date(2026, 1, 1),
+        n_goals=1,
+        period_kind=PeriodKind.N_PER_WEEK,
+        times_per_week=3,
+        day_checks={date(2026, 1, 1): {0}},
+    )
+    today = date(2026, 1, 3)
+    card = today_view([s], today, Settings()).cards[0]
+    assert card.meta == "3× a week · 1 of 3 this week"
+
+
+def test_single_goal_not_due_keeps_not_today_card():
+    s = _mk(
+        date(2026, 1, 5),  # Monday
+        n_goals=1,
+        period_kind=PeriodKind.WEEKDAYS,
+        weekdays_mask=WEEKDAYS_MON_TO_FRI,
+    )
+    today = date(2026, 1, 11)  # Sunday, not due
+    card = today_view([s], today, Settings()).cards[0]
+    assert card.kind == "not_due"
+    assert card.single is False
+    assert card.meta == "Not today"
+
+
+def test_history_header_subtitle_single_goal_monthly():
+    s = _mk(date(2026, 1, 1), n_goals=1, period_kind=PeriodKind.MONTHLY)
+    h = history(s, date(2026, 3, 15), Settings())
+    assert h.header_subtitle == "Monthly · run 1"
 
 
 # ----------------------------------------------------------------------------------------------
@@ -801,7 +905,7 @@ def test_fixture_75_hard_mark_missed_preview(seeded, today, settings):
 def test_fixture_no_snoozing(seeded, today, settings):
     streak = _streaks()["No snoozing the alarm"]
     assert current_run(streak, today, settings).length == 12
-    assert sidebar_meta(streak) == "Mon–Fri · 1 goal"
+    assert sidebar_meta(streak) == "Mon–Fri"
 
     tv = today_view(list(load_all()), today, settings)
     card = next(c for c in tv.cards if c.name == "No snoozing the alarm")
@@ -824,12 +928,14 @@ def test_fixture_gym(seeded, today, settings):
 def test_fixture_clip_fingernails(seeded, today, settings):
     streak = _streaks()["Clip fingernails"]
     assert current_run(streak, today, settings).length == 4
-    assert sidebar_meta(streak) == "Monthly · 1 goal"
+    assert sidebar_meta(streak) == "Monthly"
 
     tv = today_view(list(load_all()), today, settings)
     card = next(c for c in tv.cards if c.name == "Clip fingernails")
-    assert card.meta == "Due this month"
-    assert card.goals[0].trailing == "17 days left"
+    assert card.single is True
+    assert card.meta == "Monthly · 17 days left"
+    assert len(card.goals) == 1
+    assert card.goals[0].name == "Clip fingernails"
 
 
 def test_fixture_couch_to_5k(seeded, today, settings):
@@ -851,7 +957,7 @@ def test_fixture_couch_to_5k_history_ended_streak(seeded, today, settings):
         Tile("31", "confirmed kept", "strong"),
         Tile("100%", "goals hit", "strong"),
     ]
-    assert h.header_subtitle == "Daily · 1 goal · ended 4 Mar"
+    assert h.header_subtitle == "Daily · ended 4 Mar"
     assert h.chart_title == "Run 1 · 2 Feb – 4 Mar"
     assert h.catch_up_link is None
 

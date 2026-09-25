@@ -177,6 +177,7 @@ class Card:
     progress_text: str | None
     show_footer: bool
     body: str | None
+    single: bool = False  # a one-goal streak's check-in card (design-spec §3 "Single-goal card")
 
 
 @dataclass(frozen=True)
@@ -636,22 +637,27 @@ def _goal_word(n: int) -> str:
     return ngettext("%(n)d goal", "%(n)d goals", n) % {"n": n}
 
 
-def sidebar_meta(streak: StreakData) -> str:
-    n = sum(1 for g in streak.goals if g.removed_on is None)
-    goal_word = _goal_word(n)
+def period_label(streak: StreakData) -> str:
+    """The streak's period, alone: "Daily", a weekday label, "{N}× a week" or "Monthly"."""
     if streak.period_kind == PeriodKind.DAILY:
-        return _("Daily · %(goals)s") % {"goals": goal_word}
+        return _("Daily")
     if streak.period_kind == PeriodKind.WEEKDAYS:
-        label = _weekday_label(streak.weekdays_mask)
-        return _("%(days)s · %(goals)s") % {"days": label, "goals": goal_word}
+        return _weekday_label(streak.weekdays_mask)
     if streak.period_kind == PeriodKind.N_PER_WEEK:
-        return _("%(n)d× a week · %(goals)s") % {
-            "n": streak.times_per_week,
-            "goals": goal_word,
-        }
+        return _("%(n)d× a week") % {"n": streak.times_per_week}
     if streak.period_kind == PeriodKind.MONTHLY:
-        return _("Monthly · %(goals)s") % {"goals": goal_word}
+        return _("Monthly")
     raise ValueError(f"unknown period kind: {streak.period_kind}")
+
+
+def sidebar_meta(streak: StreakData) -> str:
+    """The sidebar row's caption: the period label alone for a single-goal streak, else the
+    period label plus a goal count."""
+    n = sum(1 for g in streak.goals if g.removed_on is None)
+    label = period_label(streak)
+    if n == 1:
+        return label
+    return _("%(period)s · %(goals)s") % {"period": label, "goals": _goal_word(n)}
 
 
 def sidebar_ended_meta(streak: StreakData, best: int) -> str:
@@ -782,6 +788,57 @@ def _is_open_today(streak: StreakData, today: date) -> bool:
     return any(g.id not in checked_today for g in goals)
 
 
+def _single_status(
+    streak: StreakData,
+    today: date,
+    settings: Settings,
+    pr: PeriodResult | None,
+    period: Period | None,
+    done_at: datetime | None,
+) -> str:
+    """The status half of a single-goal card's subtitle (design-spec §3 "Single-goal card")."""
+    if done_at is not None:
+        return _("done %(time)s") % {"time": words.time_hm(done_at)}
+    if streak.period_kind == PeriodKind.MONTHLY:
+        if pr and pr.total and pr.done >= pr.total:
+            return _("done this month")
+        n = (period.end - today).days if period else 0
+        return ngettext("%(n)d day left", "%(n)d days left", n) % {"n": n}
+    if streak.period_kind == PeriodKind.N_PER_WEEK:
+        done = pr.done if pr else 0
+        return _("%(done)d of %(n)d this week") % {"done": done, "n": streak.times_per_week}
+    run = current_run(streak, today, settings)
+    return _("day %(k)d") % {"k": run.length if run else 1}
+
+
+def _single_card(
+    streak: StreakData,
+    today: date,
+    settings: Settings,
+    pr: PeriodResult | None,
+    period: Period | None,
+    goal: GoalData,
+    done_at: datetime | None,
+) -> Card:
+    """The one-row check-in card for a streak with exactly one active goal (design-spec §3)."""
+    status = _single_status(streak, today, settings, pr, period, done_at)
+    meta = _("%(period)s · %(status)s") % {"period": period_label(streak), "status": status}
+    kind = "monthly" if streak.period_kind == PeriodKind.MONTHLY else "goals"
+    return Card(
+        streak_id=streak.id,
+        name=streak.name,
+        colour=streak.colour,
+        meta=meta,
+        kind=kind,
+        goals=[CardGoal(goal_id=goal.id, name=streak.name, done_at=done_at, trailing=None)],
+        progress=None,
+        progress_text=None,
+        show_footer=False,
+        body=None,
+        single=True,
+    )
+
+
 def _build_card(
     streak: StreakData, today: date, settings: Settings, results: list[PeriodResult]
 ) -> Card:
@@ -813,6 +870,10 @@ def _build_card(
     checks_today = {c.goal_id: c.done_at for c in streak.checks if c.day == today}
     done = pr.done if pr else 0
     total = pr.total if pr else len(goals)
+
+    if len(goals) == 1:
+        goal = goals[0]
+        return _single_card(streak, today, settings, pr, period, goal, checks_today.get(goal.id))
 
     if streak.period_kind == PeriodKind.MONTHLY:
         meta = _("Done this month") if total and done >= total else _("Due this month")
