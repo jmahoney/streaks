@@ -275,7 +275,7 @@ def update_streak(
         streak.allow_skip = allow_skip
         streak.save()
 
-        existing_ids = {g.id for g in streak.goals}
+        existing_ids = {g.id for g in streak.goals if g.removed_on is None}
         kept_ids = {gid for gid, _ in goal_entries if gid is not None}
         removed_ids = existing_ids - kept_ids
         if removed_ids:

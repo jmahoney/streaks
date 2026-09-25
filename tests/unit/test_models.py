@@ -96,6 +96,45 @@ def test_update_streak_renames_and_reconciles_goals():
     assert [g.name for g in remaining if g.removed_on is None] == ["g1 renamed", "g3"]
 
 
+def test_update_streak_leaves_already_removed_goals_alone():
+    """A removed goal isn't in a later save's `existing_ids`, so its `removed_on` stays put
+    instead of jumping to the new save's date."""
+    streak = create_streak(
+        "A", COLOURS[0], PeriodKind.DAILY, ["g1", "g2"], created_on=date(2026, 1, 1)
+    )
+    g1, g2 = list(Goal.select().where(Goal.streak == streak).order_by(Goal.position))
+
+    d1 = date(2026, 2, 1)
+    update_streak(
+        streak,
+        name="A",
+        colour=COLOURS[0],
+        period_kind=PeriodKind.DAILY,
+        weekdays_mask=31,
+        times_per_week=3,
+        reminder_time=None,
+        allow_skip=False,
+        goals=[(g1.id, "g1")],
+        today=d1,
+    )
+    assert Goal.get_by_id(g2.id).removed_on == d1
+
+    d2 = date(2026, 3, 1)
+    update_streak(
+        streak,
+        name="A renamed",
+        colour=COLOURS[0],
+        period_kind=PeriodKind.DAILY,
+        weekdays_mask=31,
+        times_per_week=3,
+        reminder_time=None,
+        allow_skip=False,
+        goals=[(g1.id, "g1 renamed")],
+        today=d2,
+    )
+    assert Goal.get_by_id(g2.id).removed_on == d1
+
+
 def test_update_streak_rejects_empty_name_or_goals():
     streak = create_streak("A", COLOURS[0], PeriodKind.DAILY, ["g1"], created_on=date(2026, 1, 1))
     with pytest.raises(ValueError):
