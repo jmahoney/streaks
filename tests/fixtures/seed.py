@@ -155,7 +155,7 @@ def _seed_no_snoozing() -> Streak:
         "No snoozing the alarm",
         "#2ec27e",
         PeriodKind.WEEKDAYS,
-        ["Up at first alarm"],
+        ["No snoozing the alarm"],
         weekdays_mask=0b0011111,
         created_on=date(2026, 8, 27),
     )
@@ -206,7 +206,7 @@ def _seed_couch_to_5k() -> Streak:
         "Couch to 5K",
         "#e01b24",
         PeriodKind.DAILY,
-        ["Run"],
+        ["Couch to 5K"],
         created_on=date(2026, 2, 2),
     )
     (goal,) = _goals(streak)

@@ -25,17 +25,18 @@ from streaks.state import AppState
 
 _ = gettext.gettext
 
-# Shown as the Goals group description once a streak has more than one goal: earlier periods'
-# already-recorded shade shouldn't retroactively reflect goals that didn't exist yet.
-_EDIT_GOALS_DESCRIPTION = _(
-    "New goals apply from the current period. Earlier periods keep their recorded shade."
-)
+
+def _edit_goals_description() -> str:
+    """The Goals group description once a streak has more than one goal: new goals count from
+    the current period on, so a period already recorded keeps that shade."""
+    return _("New goals apply from the current period. Earlier periods keep their recorded shade.")
 
 
 @Gtk.Template(resource_path="/com/cheerschopper/Streaks/streaks/ui/streak_dialog.ui")
 class StreaksStreakDialog(Adw.Dialog):
     """The New/Edit streak dialog. ``for_new()``/``for_edit()`` are the constructors; both
-    leave the dialog in single mode unless the streak being edited has more than one goal."""
+    start in single mode, switching to multi only for a streak that already has more than one
+    goal."""
 
     __gtype_name__ = "StreaksStreakDialog"
 
@@ -185,9 +186,7 @@ class StreaksStreakDialog(Adw.Dialog):
             self.reminder_switch.set_active(False)
         self._update_reminder_label()
 
-        for row in list(self._goal_rows):
-            self.goals_list.remove(row)
-        self._goal_rows.clear()
+        self._clear_goal_rows()
 
         active_goals = sorted(
             (g for g in streak_data.goals if g.removed_on is None), key=lambda g: g.position
@@ -198,7 +197,7 @@ class StreaksStreakDialog(Adw.Dialog):
         else:
             for goal in active_goals:
                 self._add_goal_row_widget(text=goal.name, goal_id=goal.id)
-            self.goals_group.set_description(_EDIT_GOALS_DESCRIPTION)
+            self.goals_group.set_description(_edit_goals_description())
             self._set_multi(True)
 
         self.delete_group.set_visible(True)
@@ -257,19 +256,23 @@ class StreaksStreakDialog(Adw.Dialog):
         self.name_row.set_title(_("Streak name") if multi else _("Name"))
         self.more_goals_button.set_visible(not multi)
         self.goals_group.set_visible(multi)
-        # The hint only makes sense while creating a streak: an existing one may already have
-        # been expanded to multi goals in an earlier edit.
+        # The hint applies to new streaks; editing an existing one may already have expanded it
+        # to multi goals in an earlier save.
         self.more_goals_hint.set_visible(self._editing_id is None)
         self._update_save_sensitive()
+
+    def _clear_goal_rows(self) -> None:
+        """Remove every goal row widget and forget it, ready to rebuild the list from scratch."""
+        for row in list(self._goal_rows):
+            self.goals_list.remove(row)
+        self._goal_rows.clear()
 
     def _on_more_goals_clicked(self, _button: Gtk.Button) -> None:
         self._expand_to_multi()
 
     def _expand_to_multi(self) -> None:
         text = self.name_row.get_text().strip()
-        for row in list(self._goal_rows):
-            self.goals_list.remove(row)
-        self._goal_rows.clear()
+        self._clear_goal_rows()
 
         # Editing keeps the single goal's id so its history survives; a new streak's goal 1 is a
         # new goal, same as goal 2.
@@ -278,7 +281,7 @@ class StreaksStreakDialog(Adw.Dialog):
         self.name_row.set_text("")
 
         if self._editing_id is not None:
-            description = _EDIT_GOALS_DESCRIPTION
+            description = _edit_goals_description()
         elif text:
             description = _("“%(text)s” moved from the name field to goal 1.") % {"text": text}
         else:
@@ -291,9 +294,7 @@ class StreaksStreakDialog(Adw.Dialog):
     def _collapse_to_single(self, row: StreaksGoalEditRow) -> None:
         text = row.entry.get_text()
         self._single_goal_id = row.goal_id
-        for r in list(self._goal_rows):
-            self.goals_list.remove(r)
-        self._goal_rows.clear()
+        self._clear_goal_rows()
         self.name_row.set_text(text)
         self._set_multi(False)
 

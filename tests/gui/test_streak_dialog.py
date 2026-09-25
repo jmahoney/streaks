@@ -424,6 +424,7 @@ def test_delete_row_opens_confirmation(seeded_state, seeded_window, process_even
     process_events()
 
     assert window.delete_streak_dialog is not None
+    assert window.get_visible_dialog() is window.delete_streak_dialog
 
 
 def test_reorder_goal_row_via_drop_handler(fresh_state, fresh_window, process_events):
@@ -458,6 +459,18 @@ def test_reorder_goal_row_via_drop_handler(fresh_state, fresh_window, process_ev
     process_events()
     assert moved is True
     assert [r.entry.get_text() for r in _goal_rows(dialog)] == ["C", "A", "B"]
+
+    # Placeholders track position, not the row that originally held it.
+    assert [r.entry.get_placeholder_text() for r in _goal_rows(dialog)] == [
+        "Goal 1",
+        "Goal 2",
+        "Goal 3",
+    ]
+
+    # Removing a row still leaves the remaining placeholders numbered by position.
+    _goal_rows(dialog)[0].remove_button.emit("clicked")
+    process_events()
+    assert [r.entry.get_placeholder_text() for r in _goal_rows(dialog)] == ["Goal 1", "Goal 2"]
 
 
 def test_reorder_goal_row_keyboard_fallback(fresh_state, fresh_window, process_events):

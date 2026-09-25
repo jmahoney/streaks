@@ -22,7 +22,8 @@ _ = gettext.gettext
 
 @Gtk.Template(resource_path="/com/cheerschopper/Streaks/streaks/ui/checkin_card.ui")
 class StreaksCheckinCard(Gtk.Box):
-    """One streak's check-in card: header, goal rows, and an optional progress footer.
+    """One streak's check-in card: header, goal rows, and an optional progress footer. A
+    single-goal streak instead renders as one row (``single_list``), with no header or footer.
 
     ``configure()`` places already-computed strings and numbers from an ``engine.Card``.
     Interactions bubble up as signals for the owning view to act on, writing to the database via
