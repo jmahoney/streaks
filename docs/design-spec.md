@@ -160,7 +160,7 @@ column that currently has fewer rows (fixture: 75 Hard left; Gym, No snoozing, C
   caption "3 of 5", flat link-styled button "Mark day missed" (12.5, `#1c71d8`). Footer only for daily/weekday cards
   with >1 goal; single-goal cards have no footer.
 
-**Single-goal card** (a streak with exactly one active goal, when due): one row, padding 12 16, gap 12. A 24×24 check box (`selection-mode`), then a vertical box: [8×8 colour dot, gap 8, name bold 14 (`heading`)] over a subtitle caption 11.5 at 50 % (margin-top 2). There's no header separator and no footer. Subtitle `"{period} · {status}"`, where status is `"done {HH:MM}"` when ticked today, otherwise daily/weekdays `"day {k}"`, n_per_week `"{done} of {N} this week"`, monthly `"{n} days left"` (`"done this month"` once the month is done). When ticked, the name gets `strike` + `dim-label`. Activating the row toggles the check. A weekday streak that isn't due today keeps the "Not today" card.
+**Single-goal card** (a streak with exactly one active goal, when due): one row, padding 12 16, gap 12. A 24×24 check box (`selection-mode`), then a vertical box: [8×8 colour dot, gap 8, name bold 14 (`heading`)] over a subtitle caption 11.5 at 50 % (margin-top 2). There's no header separator and no footer. Subtitle `"{period} · {status}"`, where status is `"done {HH:MM}"` when ticked today, otherwise daily/weekdays `"day {k}"`, n_per_week `"{done} of {N} this week"`, monthly `"{n} days left"` (`"done this month"` once the month is done). When ticked, the name gets `strike` + `dim-label`. Activating the row toggles the check. A weekday streak that isn't due today keeps the "Not today" card. A goal removed mid-period still counts for that period, so a streak collapsed to one goal shows its multi card until the period ends.
 
 Fixture cards:
 - **75 Hard** — meta "3 of 5 · day 51"; goals: Progress photo ✓ 07:12, 45 min outdoors ✓ 07:55, 45 min second workout ☐,
@@ -288,7 +288,7 @@ Content padding 18, gap 18 (use `Adw.PreferencesPage` + `Adw.PreferencesGroup`s)
 
    **Single mode** (default for New; Edit of a 1-goal streak): name_row title "Name"; Goals group hidden. Save needs a non-empty name. The name is both the streak name and its goal.
 
-   **"Add more goals"** switches to **multi mode**. The name text moves into goal 1 (Edit keeps that goal's id), an empty goal 2 row is added (placeholder "Goal 2"), name_row empties, its title becomes "Streak name", and it takes focus. The button hides. The Goals group (title "Goals", placed **between** group 1 and Period) shows. Its description is “{text}” moved from the name field to goal 1." (New mode, only when text was moved) or "New goals apply from the current period. Earlier periods keep their recorded shade." (Edit mode).
+   **"Add more goals"** switches to **multi mode**. The name text moves into goal 1 (Edit keeps that goal's id), an empty goal 2 row is added (placeholder "Goal 2"), name_row empties, its title becomes "Streak name", and it takes focus. The button hides. The Goals group (title "Goals", placed **between** group 1 and Period) shows. Its description is "“{text}” moved from the name field to goal 1." (New mode, only when text was moved) or "New goals apply from the current period. Earlier periods keep their recorded shade." (Edit mode).
 
    Multi-mode goal rows: drag handle, flat entry (placeholder "Goal {n}" by position), remove button. Last row is `Adw.ButtonRow` "Add a goal". Save needs a non-empty streak name and at least 2 non-empty goals. Removing a goal when two remain **collapses back to single mode**: the remaining goal's text goes into name_row (title "Name"), the Goals group hides and "Add more goals" shows.
 
@@ -308,7 +308,7 @@ Edit mode adds a last group with `Adw.ButtonRow` "Delete streak" (`destructive-a
 Models: a streak with exactly one goal always stores that goal under the streak's name.
 
 Create: inserts `Streak` + `Goal`s (positions in order) in one transaction, closes, selects the new streak in the sidebar.
-Edit: updates name/colour/period/reminder/allow_skip; goals removed get `removed_on = today`, new ones appended.
+Edit: updates name/colour/period/reminder/allow_skip; goals removed get `removed_on = today` (newly removed only); new goals get `added_on = today` and count from the current period on.
 
 ## 7. Preferences (4e)
 
