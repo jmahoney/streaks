@@ -117,9 +117,9 @@ Vertical box, padding 8, gap 2:
    | name | meta | count |
    |---|---|---|
    | 75 Hard | Daily · 5 goals | 51 |
-   | No snoozing the alarm | Mon–Fri · 1 goal | 12 |
+   | No snoozing the alarm | Mon–Fri | 12 |
    | Gym, three times a week | 3× a week · 2 goals | 9 |
-   | Clip fingernails | Monthly · 1 goal | 4 |
+   | Clip fingernails | Monthly | 4 |
 4. Section label "ENDED" (only when there are ended streaks and the "Show ended runs in the sidebar" preference is on).
 5. Ended rows at 55 % opacity, dot `#c0bfbc`, no count. Fixture: "Couch to 5K" / "Ended 4 Mar · best 31".
 6. Spacer (vexpand).
@@ -127,9 +127,7 @@ Vertical box, padding 8, gap 2:
 
 Empty (4f): sidebar content is just a caption at padding 14, 42 % black: "No streaks yet". No Today row, no footer.
 
-Meta string rules (engine): `"Daily · {n} goals"`, `"Mon–Fri · {n} goal"` (weekday names abbreviated, en-dash for a
-contiguous range, otherwise comma-separated "Mon, Wed, Fri"), `"{N}× a week · {n} goals"`, `"Monthly · {n} goal"`;
-ended: `"Ended {d Mon} · best {n}"`. Use `ngettext` for goal/goals.
+Meta string rules (engine): `period_label()` is `"Daily"`, `"Mon–Fri"` (weekday names abbreviated, en-dash for a contiguous range, otherwise comma-separated "Mon, Wed, Fri"), `"{N}× a week"` or `"Monthly"`. A single-goal streak's meta is just the period label; with more goals it is `"{period} · {n} goals"` (`ngettext`). Ended: `"Ended {d Mon} · best {n}"`.
 
 ## 3. Today view (4a) — content pane
 
@@ -162,13 +160,15 @@ column that currently has fewer rows (fixture: 75 Hard left; Gym, No snoozing, C
   caption "3 of 5", flat link-styled button "Mark day missed" (12.5, `#1c71d8`). Footer only for daily/weekday cards
   with >1 goal; single-goal cards have no footer.
 
+**Single-goal card** (a streak with exactly one active goal, when due): one row, padding 12 16, gap 12. A 24×24 check box (`selection-mode`), then a vertical box: [8×8 colour dot, gap 8, name bold 14 (`heading`)] over a subtitle caption 11.5 at 50 % (margin-top 2). There's no header separator and no footer. Subtitle `"{period} · {status}"`, where status is `"done {HH:MM}"` when ticked today, otherwise daily/weekdays `"day {k}"`, n_per_week `"{done} of {N} this week"`, monthly `"{n} days left"` (`"done this month"` once the month is done). When ticked, the name gets `strike` + `dim-label`. Activating the row toggles the check. A weekday streak that isn't due today keeps the "Not today" card.
+
 Fixture cards:
 - **75 Hard** — meta "3 of 5 · day 51"; goals: Progress photo ✓ 07:12, 45 min outdoors ✓ 07:55, 45 min second workout ☐,
   Read 10 pages ☐, Stick to the diet ✓ 21:30; footer 60 %, "3 of 5", Mark day missed.
 - **Gym, three times a week** — meta "2 of 3 this week"; goals: 45 min session ☐, Log the weights ☐; no footer.
 - **No snoozing the alarm** — meta "Not today"; no goal rows; body caption (padding 12 16, 12.5 at 50 %):
   "Weekdays only. Next check-in Monday 14 September."
-- **Clip fingernails** — meta "Due this month"; goal row "Clip them" ☐ with right caption "17 days left"; no footer.
+- **Clip fingernails** is one row, subtitle "Monthly · 17 days left".
 
 Meta rules (engine): daily/weekdays due today → `"{done} of {n} · day {k}"` (k = day number within current run,
 counting today); n_per_week → `"{sessions} of {N} this week"`; weekdays not due → `"Not today"` and body
@@ -276,14 +276,22 @@ refreshes Today + history.
 ## 6. New streak dialog (4d) — also used for Edit
 
 `Adw.Dialog`, `content-width: 560`. Header: "Cancel" / title "New Streak" ("Edit Streak" in edit mode) / "Create"
-("Save") `suggested-action`, insensitive until name non-empty and ≥1 non-empty goal.
+("Save") `suggested-action`, insensitive until name non-empty; in multi mode, needs ≥2 non-empty goals.
 
 Content padding 18, gap 18 (use `Adw.PreferencesPage` + `Adw.PreferencesGroup`s):
 
 1. Group (no title), `card` list:
-   - `Adw.EntryRow` title "Name" (fixture text "75 Hard").
+   - `Adw.EntryRow` **name_row**.
    - `Adw.ActionRow` title "Colour"; suffix: 5 × 20px circles (gap 10) in the swatch colours; selected one has a ring
      (2px white + 1.5px in its colour). `Gtk.CheckButton`s in one group with class `colour-swatch`.
+   - Below the list (inside the same group), a flat button **"Add more goals"** (`list-add-symbolic` + label, both `accent`) with the dim hint "— for a checklist, e.g. a morning routine" (hint shown in New mode only).
+
+   **Single mode** (default for New; Edit of a 1-goal streak): name_row title "Name"; Goals group hidden. Save needs a non-empty name. The name is both the streak name and its goal.
+
+   **"Add more goals"** switches to **multi mode**. The name text moves into goal 1 (Edit keeps that goal's id), an empty goal 2 row is added (placeholder "Goal 2"), name_row empties, its title becomes "Streak name", and it takes focus. The button hides. The Goals group (title "Goals", placed **between** group 1 and Period) shows. Its description is “{text}” moved from the name field to goal 1." (New mode, only when text was moved) or "New goals apply from the current period. Earlier periods keep their recorded shade." (Edit mode).
+
+   Multi-mode goal rows: drag handle, flat entry (placeholder "Goal {n}" by position), remove button. Last row is `Adw.ButtonRow` "Add a goal". Save needs a non-empty streak name and at least 2 non-empty goals. Removing a goal when two remain **collapses back to single mode**: the remaining goal's text goes into name_row (title "Name"), the Goals group hides and "Add more goals" shows.
+
 2. Group title "Period", description (below the list, caption 11.5 at 45 %): "Every goal in a streak shares this period."
    - Row 1 (padding 10, 4 equal columns gap 6): `Adw.ToggleGroup` homogeneous: "Daily" | "Weekdays" | "N a week" |
      "Monthly". Selected: accent bg, bold white; others bg `#f2f1ef`.
@@ -294,12 +302,10 @@ Content padding 18, gap 18 (use `Adw.PreferencesPage` + `Adw.PreferencesGroup`s)
    - Row 3: `Adw.ActionRow` "Reminder", subtitle "A check-in notification each period", suffix label "20:00 ›" →
      activates a `Gtk.Popover` with hour/minute `Gtk.SpinButton`s and an "Off" switch. Stored only (delivery deferred).
    - Row 4: `Adw.SwitchRow` "Allow one skip a week", subtitle "A skipped period won't break the run". Default off.
-3. Group title "Goals — 5" (count updates live; "Goals — 1"):
-   - One row per goal (padding 11 16): drag handle glyph (`list-drag-handle-symbolic`, 30 % black), `Gtk.Entry`
-     (flat, 13.5, placeholder "Goal"), remove button `window-close-symbolic` flat (hidden when only one goal).
-   - Last row: `Adw.ButtonRow` "Add a goal" with `list-add-symbolic`, accent text, bg `#fcfcfc`.
-   Fixture goals: "Take a progress photo", "45 min workout — outside", "45 min second workout", "Read 10 pages",
-   "Stick to the diet".
+
+Edit mode adds a last group with `Adw.ButtonRow` "Delete streak" (`destructive-action`). It closes the dialog and runs `win.delete-streak` (the existing confirmation).
+
+Models: a streak with exactly one goal always stores that goal under the streak's name.
 
 Create: inserts `Streak` + `Goal`s (positions in order) in one transaction, closes, selects the new streak in the sidebar.
 Edit: updates name/colour/period/reminder/allow_skip; goals removed get `removed_on = today`, new ones appended.
