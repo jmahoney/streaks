@@ -92,7 +92,7 @@ template $StreaksStreakDialog : Adw.Dialog {
     }
 
     content: Adw.PreferencesPage {
-      Adw.PreferencesGroup {
+      Adw.PreferencesGroup name_group {
         Adw.EntryRow name_row {
           title: _("Name");
         }
@@ -140,6 +140,48 @@ template $StreaksStreakDialog : Adw.Dialog {
 
               styles ["colour-swatch"]
             }
+          }
+        }
+
+        Gtk.Button more_goals_button {
+          halign: start;
+          margin-top: 6;
+
+          styles ["flat"]
+
+          child: Gtk.Box {
+            spacing: 8;
+
+            Gtk.Image {
+              icon-name: "list-add-symbolic";
+              styles ["accent"]
+            }
+
+            Gtk.Label {
+              label: _("Add more goals");
+              styles ["accent"]
+            }
+
+            Gtk.Label more_goals_hint {
+              label: _("— for a checklist, e.g. a morning routine");
+              styles ["dim-label"]
+            }
+          };
+        }
+      }
+
+      Adw.PreferencesGroup goals_group {
+        title: _("Goals");
+        visible: false;
+
+        Gtk.ListBox goals_list {
+          selection-mode: none;
+
+          styles ["boxed-list"]
+
+          Adw.ButtonRow add_goal_row {
+            title: _("Add a goal");
+            start-icon-name: "list-add-symbolic";
           }
         }
       }
@@ -272,18 +314,13 @@ template $StreaksStreakDialog : Adw.Dialog {
         }
       }
 
-      Adw.PreferencesGroup goals_group {
-        title: _("Goals — 1");
+      Adw.PreferencesGroup delete_group {
+        visible: false;
 
-        Gtk.ListBox goals_list {
-          selection-mode: none;
+        Adw.ButtonRow delete_row {
+          title: _("Delete streak");
 
-          styles ["boxed-list"]
-
-          Adw.ButtonRow add_goal_row {
-            title: _("Add a goal");
-            start-icon-name: "list-add-symbolic";
-          }
+          styles ["destructive-action"]
         }
       }
     };

@@ -15,7 +15,7 @@ import gi
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 
-from gi.repository import Adw, Gdk, GObject, Gtk
+from gi.repository import Adw, Gdk, GLib, GObject, Gtk
 
 from streaks import theme
 from streaks.engine import PeriodKind, StreakData
@@ -25,11 +25,17 @@ from streaks.state import AppState
 
 _ = gettext.gettext
 
+# Shown as the Goals group description once a streak has more than one goal: earlier periods'
+# already-recorded shade shouldn't retroactively reflect goals that didn't exist yet.
+_EDIT_GOALS_DESCRIPTION = _(
+    "New goals apply from the current period. Earlier periods keep their recorded shade."
+)
+
 
 @Gtk.Template(resource_path="/com/cheerschopper/Streaks/streaks/ui/streak_dialog.ui")
 class StreaksStreakDialog(Adw.Dialog):
     """The New/Edit streak dialog. ``for_new()``/``for_edit()`` are the constructors; both
-    prepare the goal rows ``__init__`` leaves empty."""
+    leave the dialog in single mode unless the streak being edited has more than one goal."""
 
     __gtype_name__ = "StreaksStreakDialog"
 
@@ -60,20 +66,29 @@ class StreaksStreakDialog(Adw.Dialog):
     hour_spin = Gtk.Template.Child()
     minute_spin = Gtk.Template.Child()
     skip_row = Gtk.Template.Child()
+    name_group = Gtk.Template.Child()
+    more_goals_button = Gtk.Template.Child()
+    more_goals_hint = Gtk.Template.Child()
     goals_group = Gtk.Template.Child()
     goals_list = Gtk.Template.Child()
     add_goal_row = Gtk.Template.Child()
+    delete_group = Gtk.Template.Child()
+    delete_row = Gtk.Template.Child()
 
     def __init__(self, **kwargs):
-        """Initialize the dialog in its "new streak" default state.
+        """Initialize the dialog in its "new streak" default state (single mode, no goal rows).
 
-        Wires the widget signal handlers and adds one empty goal row; ``for_edit()`` replaces
-        that row via ``_load_from()``.
+        Wires the widget signal handlers; ``for_edit()`` overwrites this state via
+        ``_load_from()``.
         """
         super().__init__(**kwargs)
         self.state: AppState | None = None
         self._editing_id: int | None = None
         self._goal_rows: list[StreaksGoalEditRow] = []
+        self._multi = False
+        # A single-goal streak's one goal, tracked outside the (hidden) goal rows so its id
+        # survives a round trip through multi mode. 0 means "a new goal", same as a fresh row.
+        self._single_goal_id = 0
 
         self._swatches = (
             self.swatch_0,
@@ -115,11 +130,13 @@ class StreaksStreakDialog(Adw.Dialog):
         self.cancel_button.connect("clicked", self._on_cancel_clicked)
         self.save_button.connect("clicked", self._on_save_clicked)
         self.add_goal_row.connect("activated", self._on_add_goal_activated)
+        self.more_goals_button.connect("clicked", self._on_more_goals_clicked)
+        self.delete_row.connect("activated", self._on_delete_row_activated)
 
         self.period_toggle.set_active_name("daily")
         self._update_period_visibility("daily")
         self._update_reminder_label()
-        self._add_goal_row_widget()
+        self._set_multi(False)
 
     # -- construction -------------------------------------------------------------
 
@@ -175,8 +192,16 @@ class StreaksStreakDialog(Adw.Dialog):
         active_goals = sorted(
             (g for g in streak_data.goals if g.removed_on is None), key=lambda g: g.position
         )
-        for goal in active_goals:
-            self._add_goal_row_widget(text=goal.name, goal_id=goal.id)
+        if len(active_goals) == 1:
+            self._single_goal_id = active_goals[0].id
+            self._set_multi(False)
+        else:
+            for goal in active_goals:
+                self._add_goal_row_widget(text=goal.name, goal_id=goal.id)
+            self.goals_group.set_description(_EDIT_GOALS_DESCRIPTION)
+            self._set_multi(True)
+
+        self.delete_group.set_visible(True)
 
     # -- period ---------------------------------------------------------------------
 
@@ -224,6 +249,53 @@ class StreaksStreakDialog(Adw.Dialog):
         if not self.reminder_switch.get_active():
             return None
         return time(int(self.hour_spin.get_value()), int(self.minute_spin.get_value()))
+
+    # -- single/multi mode ---------------------------------------------------------------------
+
+    def _set_multi(self, multi: bool) -> None:
+        self._multi = multi
+        self.name_row.set_title(_("Streak name") if multi else _("Name"))
+        self.more_goals_button.set_visible(not multi)
+        self.goals_group.set_visible(multi)
+        # The hint only makes sense while creating a streak: an existing one may already have
+        # been expanded to multi goals in an earlier edit.
+        self.more_goals_hint.set_visible(self._editing_id is None)
+        self._update_save_sensitive()
+
+    def _on_more_goals_clicked(self, _button: Gtk.Button) -> None:
+        self._expand_to_multi()
+
+    def _expand_to_multi(self) -> None:
+        text = self.name_row.get_text().strip()
+        for row in list(self._goal_rows):
+            self.goals_list.remove(row)
+        self._goal_rows.clear()
+
+        # Editing keeps the single goal's id so its history survives; a new streak's goal 1 is a
+        # new goal, same as goal 2.
+        self._add_goal_row_widget(text=text, goal_id=self._single_goal_id)
+        self._add_goal_row_widget()
+        self.name_row.set_text("")
+
+        if self._editing_id is not None:
+            description = _EDIT_GOALS_DESCRIPTION
+        elif text:
+            description = _("“%(text)s” moved from the name field to goal 1.") % {"text": text}
+        else:
+            description = ""
+        self.goals_group.set_description(description)
+
+        self._set_multi(True)
+        self.name_row.grab_focus()
+
+    def _collapse_to_single(self, row: StreaksGoalEditRow) -> None:
+        text = row.entry.get_text()
+        self._single_goal_id = row.goal_id
+        for r in list(self._goal_rows):
+            self.goals_list.remove(r)
+        self._goal_rows.clear()
+        self.name_row.set_text(text)
+        self._set_multi(False)
 
     # -- goals ---------------------------------------------------------------------
 
@@ -295,7 +367,7 @@ class StreaksStreakDialog(Adw.Dialog):
         self._goal_rows.insert(target_index, source_row)
         self.goals_list.remove(source_row)
         self.goals_list.insert(source_row, target_index)
-        self._update_save_sensitive()
+        self._update_goals()
         return True
 
     def _on_add_goal_activated(self, *_args) -> None:
@@ -308,17 +380,20 @@ class StreaksStreakDialog(Adw.Dialog):
             new_row.entry.grab_focus()
 
     def _on_remove_goal_clicked(self, _button: Gtk.Button, row: StreaksGoalEditRow) -> None:
-        if len(self._goal_rows) <= 1:
+        # Two goals is the multi-mode floor: removing one collapses back to single mode instead
+        # of leaving a lone goal row around.
+        if len(self._goal_rows) == 2:
+            other = next(r for r in self._goal_rows if r is not row)
+            self._collapse_to_single(other)
             return
         self._goal_rows.remove(row)
         self.goals_list.remove(row)
         self._update_goals()
 
     def _update_goals(self) -> None:
-        only_one = len(self._goal_rows) == 1
-        for row in self._goal_rows:
-            row.remove_button.set_visible(not only_one)
-        self.goals_group.set_title(_("Goals — %(n)d") % {"n": len(self._goal_rows)})
+        for i, row in enumerate(self._goal_rows):
+            row.remove_button.set_visible(True)
+            row.entry.set_placeholder_text(_("Goal %(n)d") % {"n": i + 1})
         self._update_save_sensitive()
 
     def _goal_entries(self) -> list[tuple[int, str]]:
@@ -331,10 +406,17 @@ class StreaksStreakDialog(Adw.Dialog):
 
     def _update_save_sensitive(self) -> None:
         name_ok = bool(self.name_row.get_text().strip())
-        goal_ok = any(text.strip() for _gid, text in self._goal_entries())
-        self.save_button.set_sensitive(name_ok and goal_ok)
+        if self._multi:
+            goal_count = sum(1 for _gid, text in self._goal_entries() if text.strip())
+            self.save_button.set_sensitive(name_ok and goal_count >= 2)
+        else:
+            self.save_button.set_sensitive(name_ok)
 
     def _on_cancel_clicked(self, _button: Gtk.Button) -> None:
+        self.close()
+
+    def _on_delete_row_activated(self, *_args) -> None:
+        self.activate_action("win.delete-streak", GLib.Variant.new_int32(self._editing_id))
         self.close()
 
     def _on_save_clicked(self, _button: Gtk.Button) -> None:
@@ -351,7 +433,7 @@ class StreaksStreakDialog(Adw.Dialog):
         today = self.state.today()
 
         if self._editing_id is None:
-            goal_names = [text for _gid, text in self._goal_entries()]
+            goal_names = [text for _gid, text in self._goal_entries()] if self._multi else [name]
             streak = create_streak(
                 name,
                 colour,
@@ -365,7 +447,11 @@ class StreaksStreakDialog(Adw.Dialog):
             )
         else:
             streak = Streak.get_by_id(self._editing_id)
-            goals = [(gid or None, text) for gid, text in self._goal_entries()]
+            goals = (
+                [(gid or None, text) for gid, text in self._goal_entries()]
+                if self._multi
+                else [(self._single_goal_id or None, name)]
+            )
             streak = update_streak(
                 streak,
                 name=name,

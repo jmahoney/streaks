@@ -88,7 +88,9 @@ def _build_new_streak(ctx: BuildContext) -> Gtk.Widget:
     dialog = StreaksStreakDialog.for_new()
     dialog.set_state(window.state)
 
-    # The design fixture's five goals (design-spec §6), replacing the default empty row.
+    # The design fixture's five goals (design-spec §6). Task 6 rewrites this screen for the
+    # single/multi mode split; for now, just expand to multi mode to keep the goal rows around.
+    dialog._expand_to_multi()
     goal_texts = [
         "Take a progress photo",
         "45 min workout — outside",
@@ -96,11 +98,12 @@ def _build_new_streak(ctx: BuildContext) -> Gtk.Widget:
         "Read 10 pages",
         "Stick to the diet",
     ]
-    dialog.name_row.set_text("75 Hard")
     dialog._goal_rows[0].entry.set_text(goal_texts[0])
-    for text in goal_texts[1:]:
+    dialog._goal_rows[1].entry.set_text(goal_texts[1])
+    for text in goal_texts[2:]:
         row = dialog._add_goal_row_widget()
         row.entry.set_text(text)
+    dialog.name_row.set_text("75 Hard")
 
     dialog.present(window)
     process_events()
