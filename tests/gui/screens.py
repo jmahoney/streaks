@@ -87,23 +87,72 @@ def _build_new_streak(ctx: BuildContext) -> Gtk.Widget:
 
     dialog = StreaksStreakDialog.for_new()
     dialog.set_state(window.state)
+    dialog.name_row.set_text("Floss")
+    dialog.reminder_switch.set_active(True)
+    dialog.hour_spin.set_value(21)
+    dialog.minute_spin.set_value(30)
 
-    # The design fixture's five goals (design-spec §6). Task 6 rewrites this screen for the
-    # single/multi mode split; for now, just expand to multi mode to keep the goal rows around.
-    dialog._expand_to_multi()
-    goal_texts = [
-        "Take a progress photo",
-        "45 min workout — outside",
-        "45 min second workout",
-        "Read 10 pages",
-        "Stick to the diet",
-    ]
-    dialog._goal_rows[0].entry.set_text(goal_texts[0])
-    dialog._goal_rows[1].entry.set_text(goal_texts[1])
-    for text in goal_texts[2:]:
-        row = dialog._add_goal_row_widget()
-        row.entry.set_text(text)
-    dialog.name_row.set_text("75 Hard")
+    dialog.present(window)
+    process_events()
+
+    return _detach_dialog_content(dialog)
+
+
+def _build_new_streak_goals(ctx: BuildContext) -> Gtk.Widget:
+    from streaks.streak_dialog import StreaksStreakDialog
+
+    window = StreaksWindow(application=ctx.app)
+    ctx.window = window
+    window.present()
+    process_events()
+
+    dialog = StreaksStreakDialog.for_new()
+    dialog.set_state(window.state)
+    dialog.name_row.set_text("Floss")
+    dialog.more_goals_button.emit("clicked")
+    dialog.name_row.set_text("Evening routine")
+    dialog.reminder_switch.set_active(True)
+    dialog.hour_spin.set_value(21)
+    dialog.minute_spin.set_value(30)
+
+    dialog.present(window)
+    process_events()
+
+    return _detach_dialog_content(dialog)
+
+
+def _build_edit_streak(ctx: BuildContext) -> Gtk.Widget:
+    from streaks.streak_dialog import StreaksStreakDialog
+
+    window = StreaksWindow(application=ctx.app)
+    ctx.window = window
+    window.present()
+    process_events()
+
+    streak = next(s for s in window.state.streaks if s.name == "Clip fingernails")
+    dialog = StreaksStreakDialog.for_edit(streak)
+    dialog.set_state(window.state)
+
+    dialog.present(window)
+    process_events()
+
+    return _detach_dialog_content(dialog)
+
+
+def _build_edit_streak_goals(ctx: BuildContext) -> Gtk.Widget:
+    from streaks.streak_dialog import StreaksStreakDialog
+
+    window = StreaksWindow(application=ctx.app)
+    ctx.window = window
+    window.present()
+    process_events()
+
+    streak = next(s for s in window.state.streaks if s.name == "Clip fingernails")
+    dialog = StreaksStreakDialog.for_edit(streak)
+    dialog.set_state(window.state)
+    dialog.more_goals_button.emit("clicked")
+    dialog._goal_rows[1].entry.set_text("Haircut")
+    dialog.name_row.set_text("Grooming")
 
     dialog.present(window)
     process_events()
@@ -231,7 +280,14 @@ SCREENS: dict[str, Screen] = {
     "sidebar": Screen(name="sidebar", width=1160, height=760, build=_build_window),
     "today": Screen(name="today", width=1160, height=760, build=_build_today),
     "today-quiet": Screen(name="today-quiet", width=1160, height=760, build=_build_today_quiet),
-    "new-streak": Screen(name="new-streak", width=560, height=900, build=_build_new_streak),
+    "new-streak": Screen(name="new-streak", width=560, height=519, build=_build_new_streak),
+    "new-streak-goals": Screen(
+        name="new-streak-goals", width=560, height=714, build=_build_new_streak_goals
+    ),
+    "edit-streak": Screen(name="edit-streak", width=560, height=587, build=_build_edit_streak),
+    "edit-streak-goals": Screen(
+        name="edit-streak-goals", width=560, height=803, build=_build_edit_streak_goals
+    ),
     "streak": Screen(name="streak", width=1160, height=760, build=_build_streak),
     "streak-lifetime": Screen(
         name="streak-lifetime", width=1160, height=760, build=_build_streak_lifetime
