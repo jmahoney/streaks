@@ -9,6 +9,188 @@
 <x-dc>
 <helmet data-dc-atomics><meta name="design_doc_mode" content="canvas"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cantarell:ital,wght@0,400;0,700;1,400&display=swap"><style>body{margin:0;background:#e6e4df;font-family:Cantarell,system-ui,sans-serif}a{color:#1c71d8}a:hover{color:#1a5fb4}.dv-turn{padding:40px 44px 32px;border-bottom:1px solid rgba(0,0,0,.08);scroll-margin-top:16px}.dv-thd{display:flex;align-items:baseline;gap:10px;margin:0 0 20px}.dv-tid{font:700 10px ui-monospace,Menlo,monospace;padding:3px 7px;background:#1a1a1a;color:#fff;border-radius:4px;text-decoration:none}.dv-tname{font:700 13px/1.2 Cantarell,system-ui,sans-serif;color:#1a1a1a}.dv-opts{display:flex;flex-wrap:wrap;gap:34px;align-items:flex-start}.dv-opt{flex:none;display:flex;flex-direction:column;gap:9px;scroll-margin-top:16px}.dv-oid{font:700 10.5px ui-monospace,Menlo,monospace;padding:3px 7px;background:rgba(0,0,0,.08);color:#1a1a1a;border-radius:5px;text-decoration:none}.dv-olabel{display:flex;align-items:baseline;gap:8px;font:400 11px/1.3 Cantarell,system-ui,sans-serif;color:rgba(0,0,0,.55)}.dv-card{max-width:100%;background:#fff;border-radius:12px;box-shadow:0 1px 2px rgba(0,0,0,.12),0 14px 40px rgba(0,0,0,.18);overflow:hidden}.dv-opt:target .dv-oid{background:#3584e4;color:#fff}.dv-next{margin:22px 0 0;font:12px/1.5 Cantarell,system-ui,sans-serif;color:rgba(0,0,0,.5)}.dv-note{max-width:820px;font:13px/1.65 Cantarell,system-ui,sans-serif;color:rgba(0,0,0,.62);margin:0 0 26px}.dv-note b{color:#1a1a1a}</style></helmet>
 
+<section class="dv-turn" id="t6">
+<div class="dv-thd"><a class="dv-tid" href="#t6">6</a><span class="dv-tname">New streak — one goal by default</span></div>
+<p class="dv-note"><b>Three ways to make the single-goal streak a one-field form.</b> In each one, a new streak has one goal unless the user asks for more, and nothing is typed twice. <a class="dv-oid" href="#6a">6a</a> has a name field and an “Add more goals” row under it. Using it moves the typed text into goal 1 and empties the name field for a streak title. <a class="dv-oid" href="#6b">6b</a> drops the name field. The form opens as a goal list, and a Name row appears only once there are two goals. <a class="dv-oid" href="#6c">6c</a> keeps the name field and adds a Checklist switch, which makes multi-goal an explicit mode. For all three, a single-goal streak would check in as one row on Today, with no nested list.</p>
+<div class="dv-opts">
+
+<div class="dv-opt" id="6a"><div class="dv-olabel"><a class="dv-oid" href="#6a">6a</a>Name field, then “Add more goals” — default · after using it</div>
+<div style="display:flex;gap:20px;align-items:flex-start">
+<div class="dv-card" style="width:480px">
+  <div style="height:50px;display:flex;align-items:center;padding:0 12px;background:#fafafa;border-bottom:1px solid #e1dedb">
+    <div style="padding:6px 12px;border-radius:7px;border:1px solid rgba(0,0,0,.12);background:#fcfcfc;font:12.5px Cantarell,sans-serif;color:rgba(0,0,0,.78)">Cancel</div>
+    <div style="flex:1;text-align:center;font:700 14px Cantarell,sans-serif;color:rgba(0,0,0,.85)">New Streak</div>
+    <div style="padding:6px 13px;border-radius:7px;background:#3584e4;font:700 12.5px Cantarell,sans-serif;color:#fff">Create</div>
+  </div>
+  <div style="background:#fafafa;padding:18px;display:flex;flex-direction:column;gap:18px">
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:12px;overflow:hidden">
+        <div style="padding:9px 16px 10px;box-shadow:inset 0 0 0 2px rgba(53,132,228,.55);border-radius:12px 12px 0 0">
+          <div style="font:11px Cantarell,sans-serif;color:#1c71d8">Name</div>
+          <div style="display:flex;align-items:center;gap:1px;font:13.5px Cantarell,sans-serif;color:rgba(0,0,0,.88)">Floss<div style="width:1px;height:16px;background:#1c71d8"></div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px;padding:12px 16px;border-top:1px solid rgba(0,0,0,.06)"><div style="flex:1;font:13.5px Cantarell,sans-serif;color:rgba(0,0,0,.88)">Colour</div><div style="display:flex;gap:10px"><div style="width:18px;height:18px;border-radius:50%;background:#3584e4;box-shadow:0 0 0 2px #fff,0 0 0 3.5px #3584e4"></div><div style="width:18px;height:18px;border-radius:50%;background:#2ec27e"></div><div style="width:18px;height:18px;border-radius:50%;background:#e5a50a"></div><div style="width:18px;height:18px;border-radius:50%;background:#9141ac"></div></div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;padding:4px 6px">
+        <div style="font:15px Cantarell,sans-serif;color:#1c71d8">＋</div>
+        <div style="font:13px Cantarell,sans-serif;color:#1c71d8">Add more goals</div>
+        <div style="font:12px Cantarell,sans-serif;color:rgba(0,0,0,.45)">— for a checklist, e.g. a morning routine</div>
+      </div>
+    </div>
+    <div>
+      <div style="font:700 11px Cantarell,sans-serif;color:rgba(0,0,0,.45);letter-spacing:.05em;padding:0 4px 7px">PERIOD</div>
+      <div style="background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:12px;overflow:hidden">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:10px;border-bottom:1px solid rgba(0,0,0,.06)"><div style="text-align:center;padding:8px 0;border-radius:7px;background:#3584e4;font:700 12px Cantarell,sans-serif;color:#fff">Daily</div><div style="text-align:center;padding:8px 0;border-radius:7px;background:#f2f1ef;font:12px Cantarell,sans-serif;color:rgba(0,0,0,.75)">Weekdays</div><div style="text-align:center;padding:8px 0;border-radius:7px;background:#f2f1ef;font:12px Cantarell,sans-serif;color:rgba(0,0,0,.75)">N a week</div><div style="text-align:center;padding:8px 0;border-radius:7px;background:#f2f1ef;font:12px Cantarell,sans-serif;color:rgba(0,0,0,.75)">Monthly</div></div>
+        <div style="display:flex;align-items:center;gap:14px;padding:12px 16px"><div style="flex:1;font:13.5px Cantarell,sans-serif;color:rgba(0,0,0,.88)">Reminder</div><div style="font:12.5px Cantarell,sans-serif;color:rgba(0,0,0,.6)">21:30 ›</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="dv-card" style="width:480px">
+  <div style="height:50px;display:flex;align-items:center;padding:0 12px;background:#fafafa;border-bottom:1px solid #e1dedb">
+    <div style="padding:6px 12px;border-radius:7px;border:1px solid rgba(0,0,0,.12);background:#fcfcfc;font:12.5px Cantarell,sans-serif;color:rgba(0,0,0,.78)">Cancel</div>
+    <div style="flex:1;text-align:center;font:700 14px Cantarell,sans-serif;color:rgba(0,0,0,.85)">New Streak</div>
+    <div style="padding:6px 13px;border-radius:7px;background:#3584e4;font:700 12.5px Cantarell,sans-serif;color:#fff">Create</div>
+  </div>
+  <div style="background:#fafafa;padding:18px;display:flex;flex-direction:column;gap:18px">
+    <div style="background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:12px;overflow:hidden">
+      <div style="padding:9px 16px 10px;box-shadow:inset 0 0 0 2px rgba(53,132,228,.55);border-radius:12px 12px 0 0">
+        <div style="font:11px Cantarell,sans-serif;color:#1c71d8">Streak name</div>
+        <div style="display:flex;align-items:center;gap:1px;font:13.5px Cantarell,sans-serif;color:rgba(0,0,0,.88)">Evening routine<div style="width:1px;height:16px;background:#1c71d8"></div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;padding:12px 16px;border-top:1px solid rgba(0,0,0,.06)"><div style="flex:1;font:13.5px Cantarell,sans-serif;color:rgba(0,0,0,.88)">Colour</div><div style="display:flex;gap:10px"><div style="width:18px;height:18px;border-radius:50%;background:#3584e4;box-shadow:0 0 0 2px #fff,0 0 0 3.5px #3584e4"></div><div style="width:18px;height:18px;border-radius:50%;background:#2ec27e"></div><div style="width:18px;height:18px;border-radius:50%;background:#e5a50a"></div><div style="width:18px;height:18px;border-radius:50%;background:#9141ac"></div></div></div>
+    </div>
+    <div>
+      <div style="font:700 11px Cantarell,sans-serif;color:rgba(0,0,0,.45);letter-spacing:.05em;padding:0 4px 7px">GOALS</div>
+      <div style="background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:12px;overflow:hidden">
+        <div style="display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid rgba(0,0,0,.06)"><div style="font:13px Cantarell,sans-serif;color:rgba(0,0,0,.3)">⠿</div><div style="flex:1;font:13.5px Cantarell,sans-serif;color:rgba(0,0,0,.88)">Floss</div><div style="font:15px Cantarell,sans-serif;color:rgba(0,0,0,.4)">×</div></div>
+        <div style="display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid rgba(0,0,0,.06)"><div style="font:13px Cantarell,sans-serif;color:rgba(0,0,0,.3)">⠿</div><div style="flex:1;font:13.5px Cantarell,sans-serif;color:rgba(0,0,0,.35)">Goal 2</div><div style="font:15px Cantarell,sans-serif;color:rgba(0,0,0,.4)">×</div></div>
+        <div style="display:flex;align-items:center;gap:10px;padding:11px 16px;background:#fcfcfc"><div style="font:14px Cantarell,sans-serif;color:#1c71d8">＋</div><div style="flex:1;font:13.5px Cantarell,sans-serif;color:#1c71d8">Add a goal</div></div>
+      </div>
+      <div style="font:11.5px Cantarell,sans-serif;color:rgba(0,0,0,.45);padding:7px 4px 0">“Floss” moved from the name field to goal 1.</div>
+    </div>
+    <div>
+      <div style="font:700 11px Cantarell,sans-serif;color:rgba(0,0,0,.45);letter-spacing:.05em;padding:0 4px 7px">PERIOD</div>
+      <div style="background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:12px;overflow:hidden">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:10px"><div style="text-align:center;padding:8px 0;border-radius:7px;background:#3584e4;font:700 12px Cantarell,sans-serif;color:#fff">Daily</div><div style="text-align:center;padding:8px 0;border-radius:7px;background:#f2f1ef;font:12px Cantarell,sans-serif;color:rgba(0,0,0,.75)">Weekdays</div><div style="text-align:center;padding:8px 0;border-radius:7px;background:#f2f1ef;font:12px Cantarell,sans-serif;color:rgba(0,0,0,.75)">N a week</div><div style="text-align:center;padding:8px 0;border-radius:7px;background:#f2f1ef;font:12px Cantarell,sans-serif;color:rgba(0,0,0,.75)">Monthly</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div></div>
+
+<div class="dv-opt" id="6b"><div class="dv-olabel"><a class="dv-oid" href="#6b">6b</a>Goal list only; Name row appears at two goals — default · with a second goal</div>
+<div style="display:flex;gap:20px;align-items:flex-start">
+<div class="dv-card" style="width:480px">
+  <div style="height:50px;display:flex;align-items:center;padding:0 12px;background:#fafafa;border-bottom:1px solid #e1dedb">
+    <div style="padding:6px 12px;border-radius:7px;border:1px solid rgba(0,0,0,.12);background:#fcfcfc;font:12.5px Cantarell,sans-serif;color:rgba(0,0,0,.78)">Cancel</div>
+    <div style="flex:1;text-align:center;font:700 14px Cantarell,sans-serif;color:rgba(0,0,0,.85)">New Streak</div>
+    <div style="padding:6px 13px;border-radius:7px;background:#3584e4;font:700 12.5px Cantarell,sans-serif;color:#fff">Create</div>
+  </div>
+  <div style="background:#fafafa;padding:18px;display:flex;flex-direction:column;gap:18px">
+    <div>
+      <div style="font:700 11px Cantarell,sans-serif;color:rgba(0,0,0,.45);letter-spacing:.05em;padding:0 4px 7px">GOAL</div>
+      <div style="background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:12px;overflow:hidden">
+        <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;box-shadow:inset 0 0 0 2px rgba(53,132,228,.55);border-radius:12px 12px 0 0"><div style="width:22px;height:22px;border-radius:6px;box-sizing:border-box;border:1px solid #c0bfbc"></div><div style="flex:1;display:flex;align-items:center;gap:1px;font:13.5px Cantarell,sans-serif;color:rgba(0,0,0,.88)">Floss<div style="width:1px;height:16px;background:#1c71d8"></div></div></div>
+        <div style="display:flex;align-items:center;gap:12px;padding:11px 16px;border-top:1px solid rgba(0,0,0,.06);background:#fcfcfc"><div style="width:22px;text-align:center;font:14px Cantarell,sans-serif;color:#1c71d8">＋</div><div style="flex:1;font:13.5px Cantarell,sans-serif;color:#1c71d8">Add another goal</div></div>
+      </div>
+      <div style="font:11.5px Cantarell,sans-serif;color:rgba(0,0,0,.45);padding:7px 4px 0">A single goal also names the streak.</div>
+    </div>
+    <div style="background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:12px;overflow:hidden">
+      <div style="display:flex;align-items:center;gap:14px;padding:12px 16px"><div style="flex:1;font:13.5px Cantarell,sans-serif;color:rgba(0,0,0,.88)">Colour</div><div style="display:flex;gap:10px"><div style="width:18px;height:18px;border-radius:50%;background:#3584e4;box-shadow:0 0 0 2px #fff,0 0 0 3.5px #3584e4"></div><div style="width:18px;height:18px;border-radius:50%;background:#2ec27e"></div><div style="width:18px;height:18px;border-radius:50%;background:#e5a50a"></div><div style="width:18px;height:18px;border-radius:50%;background:#9141ac"></div></div></div>
+    </div>
+    <div>
+      <div style="font:700 11px Cantarell,sans-serif;color:rgba(0,0,0,.45);letter-spacing:.05em;padding:0 4px 7px">PERIOD</div>
+      <div style="background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:12px;overflow:hidden">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:10px;border-bottom:1px solid rgba(0,0,0,.06)"><div style="text-align:center;padding:8px 0;border-radius:7px;background:#3584e4;font:700 12px Cantarell,sans-serif;color:#fff">Daily</div><div style="text-align:center;padding:8px 0;border-radius:7px;background:#f2f1ef;font:12px Cantarell,sans-serif;color:rgba(0,0,0,.75)">Weekdays</div><div style="text-align:center;padding:8px 0;border-radius:7px;background:#f2f1ef;font:12px Cantarell,sans-serif;color:rgba(0,0,0,.75)">N a week</div><div style="text-align:center;padding:8px 0;border-radius:7px;background:#f2f1ef;font:12px Cantarell,sans-serif;color:rgba(0,0,0,.75)">Monthly</div></div>
+        <div style="display:flex;align-items:center;gap:14px;padding:12px 16px"><div style="flex:1;font:13.5px Cantarell,sans-serif;color:rgba(0,0,0,.88)">Reminder</div><div style="font:12.5px Cantarell,sans-serif;color:rgba(0,0,0,.6)">21:30 ›</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="dv-card" style="width:480px">
+  <div style="height:50px;display:flex;align-items:center;padding:0 12px;background:#fafafa;border-bottom:1px solid #e1dedb">
+    <div style="padding:6px 12px;border-radius:7px;border:1px solid rgba(0,0,0,.12);background:#fcfcfc;font:12.5px Cantarell,sans-serif;color:rgba(0,0,0,.78)">Cancel</div>
+    <div style="flex:1;text-align:center;font:700 14px Cantarell,sans-serif;color:rgba(0,0,0,.85)">New Streak</div>
+    <div style="padding:6px 13px;border-radius:7px;background:#3584e4;font:700 12.5px Cantarell,sans-serif;color:#fff;opacity:.45">Create</div>
+  </div>
+  <div style="background:#fafafa;padding:18px;display:flex;flex-direction:column;gap:18px">
+    <div style="background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:12px;overflow:hidden">
+      <div style="padding:9px 16px 10px;box-shadow:inset 0 0 0 2px rgba(53,132,228,.55);border-radius:12px">
+        <div style="font:11px Cantarell,sans-serif;color:#1c71d8">Streak name — required for 2 or more goals</div>
+        <div style="display:flex;align-items:center;gap:1px;font:13.5px Cantarell,sans-serif;color:rgba(0,0,0,.35)"><div style="width:1px;height:16px;background:#1c71d8"></div>e.g. Evening routine</div>
+      </div>
+    </div>
+    <div>
+      <div style="font:700 11px Cantarell,sans-serif;color:rgba(0,0,0,.45);letter-spacing:.05em;padding:0 4px 7px">GOALS</div>
+      <div style="background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:12px;overflow:hidden">
+        <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid rgba(0,0,0,.06)"><div style="width:22px;height:22px;border-radius:6px;box-sizing:border-box;border:1px solid #c0bfbc"></div><div style="flex:1;font:13.5px Cantarell,sans-serif;color:rgba(0,0,0,.88)">Floss</div><div style="font:15px Cantarell,sans-serif;color:rgba(0,0,0,.4)">×</div></div>
+        <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid rgba(0,0,0,.06)"><div style="width:22px;height:22px;border-radius:6px;box-sizing:border-box;border:1px solid #c0bfbc"></div><div style="flex:1;font:13.5px Cantarell,sans-serif;color:rgba(0,0,0,.88)">Retainer in</div><div style="font:15px Cantarell,sans-serif;color:rgba(0,0,0,.4)">×</div></div>
+        <div style="display:flex;align-items:center;gap:12px;padding:11px 16px;background:#fcfcfc"><div style="width:22px;text-align:center;font:14px Cantarell,sans-serif;color:#1c71d8">＋</div><div style="flex:1;font:13.5px Cantarell,sans-serif;color:#1c71d8">Add another goal</div></div>
+      </div>
+    </div>
+    <div style="background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:12px;overflow:hidden">
+      <div style="display:flex;align-items:center;gap:14px;padding:12px 16px"><div style="flex:1;font:13.5px Cantarell,sans-serif;color:rgba(0,0,0,.88)">Colour</div><div style="display:flex;gap:10px"><div style="width:18px;height:18px;border-radius:50%;background:#3584e4;box-shadow:0 0 0 2px #fff,0 0 0 3.5px #3584e4"></div><div style="width:18px;height:18px;border-radius:50%;background:#2ec27e"></div><div style="width:18px;height:18px;border-radius:50%;background:#e5a50a"></div><div style="width:18px;height:18px;border-radius:50%;background:#9141ac"></div></div></div>
+    </div>
+  </div>
+</div>
+</div></div>
+
+<div class="dv-opt" id="6c"><div class="dv-olabel"><a class="dv-oid" href="#6c">6c</a>Checklist switch — off · on</div>
+<div style="display:flex;gap:20px;align-items:flex-start">
+<div class="dv-card" style="width:480px">
+  <div style="height:50px;display:flex;align-items:center;padding:0 12px;background:#fafafa;border-bottom:1px solid #e1dedb">
+    <div style="padding:6px 12px;border-radius:7px;border:1px solid rgba(0,0,0,.12);background:#fcfcfc;font:12.5px Cantarell,sans-serif;color:rgba(0,0,0,.78)">Cancel</div>
+    <div style="flex:1;text-align:center;font:700 14px Cantarell,sans-serif;color:rgba(0,0,0,.85)">New Streak</div>
+    <div style="padding:6px 13px;border-radius:7px;background:#3584e4;font:700 12.5px Cantarell,sans-serif;color:#fff">Create</div>
+  </div>
+  <div style="background:#fafafa;padding:18px;display:flex;flex-direction:column;gap:18px">
+    <div style="background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:12px;overflow:hidden">
+      <div style="padding:9px 16px 10px;box-shadow:inset 0 0 0 2px rgba(53,132,228,.55);border-radius:12px 12px 0 0">
+        <div style="font:11px Cantarell,sans-serif;color:#1c71d8">Name</div>
+        <div style="display:flex;align-items:center;gap:1px;font:13.5px Cantarell,sans-serif;color:rgba(0,0,0,.88)">Floss<div style="width:1px;height:16px;background:#1c71d8"></div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;padding:12px 16px;border-top:1px solid rgba(0,0,0,.06)"><div style="flex:1"><div style="font:13.5px Cantarell,sans-serif;color:rgba(0,0,0,.88)">Checklist</div><div style="font:11.5px Cantarell,sans-serif;color:rgba(0,0,0,.5)">Several goals per check-in</div></div><div style="width:42px;height:24px;border-radius:12px;background:#dcdad7;display:flex;align-items:center;padding:2px;box-sizing:border-box"><div style="width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.25)"></div></div></div>
+      <div style="display:flex;align-items:center;gap:14px;padding:12px 16px;border-top:1px solid rgba(0,0,0,.06)"><div style="flex:1;font:13.5px Cantarell,sans-serif;color:rgba(0,0,0,.88)">Colour</div><div style="display:flex;gap:10px"><div style="width:18px;height:18px;border-radius:50%;background:#3584e4;box-shadow:0 0 0 2px #fff,0 0 0 3.5px #3584e4"></div><div style="width:18px;height:18px;border-radius:50%;background:#2ec27e"></div><div style="width:18px;height:18px;border-radius:50%;background:#e5a50a"></div><div style="width:18px;height:18px;border-radius:50%;background:#9141ac"></div></div></div>
+    </div>
+    <div>
+      <div style="font:700 11px Cantarell,sans-serif;color:rgba(0,0,0,.45);letter-spacing:.05em;padding:0 4px 7px">PERIOD</div>
+      <div style="background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:12px;overflow:hidden">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:10px;border-bottom:1px solid rgba(0,0,0,.06)"><div style="text-align:center;padding:8px 0;border-radius:7px;background:#3584e4;font:700 12px Cantarell,sans-serif;color:#fff">Daily</div><div style="text-align:center;padding:8px 0;border-radius:7px;background:#f2f1ef;font:12px Cantarell,sans-serif;color:rgba(0,0,0,.75)">Weekdays</div><div style="text-align:center;padding:8px 0;border-radius:7px;background:#f2f1ef;font:12px Cantarell,sans-serif;color:rgba(0,0,0,.75)">N a week</div><div style="text-align:center;padding:8px 0;border-radius:7px;background:#f2f1ef;font:12px Cantarell,sans-serif;color:rgba(0,0,0,.75)">Monthly</div></div>
+        <div style="display:flex;align-items:center;gap:14px;padding:12px 16px"><div style="flex:1;font:13.5px Cantarell,sans-serif;color:rgba(0,0,0,.88)">Reminder</div><div style="font:12.5px Cantarell,sans-serif;color:rgba(0,0,0,.6)">21:30 ›</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="dv-card" style="width:480px">
+  <div style="height:50px;display:flex;align-items:center;padding:0 12px;background:#fafafa;border-bottom:1px solid #e1dedb">
+    <div style="padding:6px 12px;border-radius:7px;border:1px solid rgba(0,0,0,.12);background:#fcfcfc;font:12.5px Cantarell,sans-serif;color:rgba(0,0,0,.78)">Cancel</div>
+    <div style="flex:1;text-align:center;font:700 14px Cantarell,sans-serif;color:rgba(0,0,0,.85)">New Streak</div>
+    <div style="padding:6px 13px;border-radius:7px;background:#3584e4;font:700 12.5px Cantarell,sans-serif;color:#fff">Create</div>
+  </div>
+  <div style="background:#fafafa;padding:18px;display:flex;flex-direction:column;gap:18px">
+    <div style="background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:12px;overflow:hidden">
+      <div style="padding:9px 16px 10px">
+        <div style="font:11px Cantarell,sans-serif;color:rgba(0,0,0,.5)">Name</div>
+        <div style="font:13.5px Cantarell,sans-serif;color:rgba(0,0,0,.88)">Evening routine</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;padding:12px 16px;border-top:1px solid rgba(0,0,0,.06)"><div style="flex:1"><div style="font:13.5px Cantarell,sans-serif;color:rgba(0,0,0,.88)">Checklist</div><div style="font:11.5px Cantarell,sans-serif;color:rgba(0,0,0,.5)">Several goals per check-in</div></div><div style="width:42px;height:24px;border-radius:12px;background:#3584e4;display:flex;align-items:center;justify-content:flex-end;padding:2px;box-sizing:border-box"><div style="width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.25)"></div></div></div>
+      <div style="border-top:1px solid rgba(0,0,0,.06);background:#fcfcfc">
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 16px 10px 28px;border-bottom:1px solid rgba(0,0,0,.05)"><div style="width:20px;height:20px;border-radius:6px;box-sizing:border-box;border:1px solid #c0bfbc;background:#fff"></div><div style="flex:1;font:13px Cantarell,sans-serif;color:rgba(0,0,0,.88)">Floss</div><div style="font:15px Cantarell,sans-serif;color:rgba(0,0,0,.4)">×</div></div>
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 16px 10px 28px;border-bottom:1px solid rgba(0,0,0,.05)"><div style="width:20px;height:20px;border-radius:6px;box-sizing:border-box;border:1px solid #c0bfbc;background:#fff"></div><div style="flex:1;font:13px Cantarell,sans-serif;color:rgba(0,0,0,.88)">Retainer in</div><div style="font:15px Cantarell,sans-serif;color:rgba(0,0,0,.4)">×</div></div>
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 16px 10px 28px"><div style="width:20px;text-align:center;font:14px Cantarell,sans-serif;color:#1c71d8">＋</div><div style="flex:1;font:13px Cantarell,sans-serif;color:#1c71d8">Add a goal</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;padding:12px 16px;border-top:1px solid rgba(0,0,0,.06)"><div style="flex:1;font:13.5px Cantarell,sans-serif;color:rgba(0,0,0,.88)">Colour</div><div style="display:flex;gap:10px"><div style="width:18px;height:18px;border-radius:50%;background:#3584e4;box-shadow:0 0 0 2px #fff,0 0 0 3.5px #3584e4"></div><div style="width:18px;height:18px;border-radius:50%;background:#2ec27e"></div><div style="width:18px;height:18px;border-radius:50%;background:#e5a50a"></div><div style="width:18px;height:18px;border-radius:50%;background:#9141ac"></div></div></div>
+    </div>
+    <div style="font:11.5px Cantarell,sans-serif;color:rgba(0,0,0,.45);padding:0 4px;margin-top:-10px">Turning the switch on copies the name into goal 1. Turning it off keeps only goal 1.</div>
+  </div>
+</div>
+</div></div>
+
+</div>
+<p class="dv-next">Try next: "go with <a class="dv-oid" href="#6b">6b</a> and show the single-goal row on Today" · "show editing an existing streak from one goal to several"</p>
+</section>
+
 <section class="dv-turn" id="t5">
 <div class="dv-thd"><a class="dv-tid" href="#t5">5</a><span class="dv-tname">Dark variant — amber accent</span></div>
 <p class="dv-note"><b>The same six views in Adwaita dark.</b> Blue at 13px on a #1e1e20 ground goes muddy and the chart scale collapses into the background, so dark runs on <b>amber</b> instead: #ffa348 for fills, buttons and the top of the chart scale, with dark ink on the fills rather than white. The shade ramp is #4a3a22 → #a8712e → #ffa348, which keeps four legible steps where the blue ramp had two. Missed days are #8e4a50, unconfirmed days are hollow with a #6b5230 outline. Streak dots move to the dark Adwaita hues: green #8ff0a4, purple #dc8add, yellow #f9f06b.</p>
@@ -115,13 +297,9 @@
             <div style="padding:12px 16px;font:12.5px Cantarell,sans-serif;color:rgba(255,255,255,.56)">Weekdays only. Next check-in Monday 14 September.</div>
           </div>
 
-          <div style="background:#303034;border:1px solid rgba(255,255,255,.108);border-radius:12px;overflow:hidden">
-            <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.095)">
-              <div style="width:8px;height:8px;border-radius:50%;background:#f9f06b"></div>
-              <div style="flex:1;font:700 14px Cantarell,sans-serif;color:rgba(255,255,255,.94)">Clip fingernails</div>
-              <div style="font:11.5px Cantarell,sans-serif;color:rgba(255,255,255,.56)">Due this month</div>
-            </div>
-            <div style="display:flex;align-items:center;gap:12px;padding:0 16px;height:46px"><div style="width:24px;height:24px;border-radius:6px;border:1px solid #5c5c63;background:#303034"></div><div style="flex:1;font:13.5px Cantarell,sans-serif;color:rgba(255,255,255,.9099999999999999)">Clip them</div><div style="font:11px Cantarell,sans-serif;color:rgba(255,255,255,.51)">17 days left</div></div>
+          <div style="background:#303034;border:1px solid rgba(255,255,255,.108);border-radius:12px;display:flex;align-items:center;gap:12px;padding:12px 16px">
+            <div style="width:24px;height:24px;border-radius:6px;box-sizing:border-box;border:1px solid #5c5c63;background:#303034"></div>
+            <div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:8px"><div style="width:8px;height:8px;border-radius:50%;background:#f9f06b"></div><div style="font:700 14px Cantarell,sans-serif;color:rgba(255,255,255,.94)">Clip fingernails</div></div><div style="font:11.5px Cantarell,sans-serif;color:rgba(255,255,255,.56);margin-top:2px">Monthly · 17 days left</div></div>
           </div>
         </div>
       </div>
@@ -288,8 +466,39 @@
   </div>
 </div></div>
 
-<div class="dv-opt" id="5d"><div class="dv-olabel"><a class="dv-oid" href="#5d">5d</a>New streak dialog</div>
-<div class="dv-card" style="width:560px">
+<div class="dv-opt" id="5d"><div class="dv-olabel"><a class="dv-oid" href="#5d">5d</a>New streak — one goal by default · after “Add more goals”</div>
+<div style="display:flex;gap:20px;align-items:flex-start">
+<div class="dv-card" style="width:480px">
+  <div style="height:50px;display:flex;align-items:center;padding:0 12px;background:#1e1e20;border-bottom:1px solid #3a3a3f">
+    <div style="padding:6px 12px;border-radius:7px;border:1px solid rgba(255,255,255,.162);background:#35353a;font:12.5px Cantarell,sans-serif;color:rgba(255,255,255,.8400000000000001)">Cancel</div>
+    <div style="flex:1;text-align:center;font:700 14px Cantarell,sans-serif;color:rgba(255,255,255,.9099999999999999)">New Streak</div>
+    <div style="padding:6px 13px;border-radius:7px;background:#ffa348;font:700 12.5px Cantarell,sans-serif;color:#2a1c09">Create</div>
+  </div>
+  <div style="background:#1e1e20;padding:18px;display:flex;flex-direction:column;gap:18px">
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="background:#303034;border:1px solid rgba(255,255,255,.108);border-radius:12px;overflow:hidden">
+        <div style="padding:9px 16px 10px;box-shadow:inset 0 0 0 2px rgba(255,163,72,.55);border-radius:12px 12px 0 0">
+          <div style="font:11px Cantarell,sans-serif;color:#ffbe6f">Name</div>
+          <div style="display:flex;align-items:center;gap:1px;font:13.5px Cantarell,sans-serif;color:rgba(255,255,255,.94)">Floss<div style="width:1px;height:16px;background:#ffbe6f"></div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px;padding:12px 16px;border-top:1px solid rgba(255,255,255,.081)"><div style="flex:1;font:13.5px Cantarell,sans-serif;color:rgba(255,255,255,.94)">Colour</div><div style="display:flex;gap:10px"><div style="width:18px;height:18px;border-radius:50%;background:#ffa348;box-shadow:0 0 0 2px #303034,0 0 0 3.5px #ffa348"></div><div style="width:18px;height:18px;border-radius:50%;background:#8ff0a4"></div><div style="width:18px;height:18px;border-radius:50%;background:#f9f06b"></div><div style="width:18px;height:18px;border-radius:50%;background:#dc8add"></div></div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;padding:4px 6px">
+        <div style="font:15px Cantarell,sans-serif;color:#ffbe6f">＋</div>
+        <div style="font:13px Cantarell,sans-serif;color:#ffbe6f">Add more goals</div>
+        <div style="font:12px Cantarell,sans-serif;color:rgba(255,255,255,.51)">— for a checklist, e.g. a morning routine</div>
+      </div>
+    </div>
+    <div>
+      <div style="font:700 11px Cantarell,sans-serif;color:rgba(255,255,255,.51);letter-spacing:.05em;padding:0 4px 7px">PERIOD</div>
+      <div style="background:#303034;border:1px solid rgba(255,255,255,.108);border-radius:12px;overflow:hidden">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:10px;border-bottom:1px solid rgba(255,255,255,.081)"><div style="text-align:center;padding:8px 0;border-radius:7px;background:#ffa348;font:700 12px Cantarell,sans-serif;color:#2a1c09">Daily</div><div style="text-align:center;padding:8px 0;border-radius:7px;background:#3a3a3f;font:12px Cantarell,sans-serif;color:rgba(255,255,255,.81)">Weekdays</div><div style="text-align:center;padding:8px 0;border-radius:7px;background:#3a3a3f;font:12px Cantarell,sans-serif;color:rgba(255,255,255,.81)">N a week</div><div style="text-align:center;padding:8px 0;border-radius:7px;background:#3a3a3f;font:12px Cantarell,sans-serif;color:rgba(255,255,255,.81)">Monthly</div></div>
+        <div style="display:flex;align-items:center;gap:14px;padding:12px 16px"><div style="flex:1;font:13.5px Cantarell,sans-serif;color:rgba(255,255,255,.94)">Reminder</div><div style="font:12.5px Cantarell,sans-serif;color:rgba(255,255,255,.6599999999999999)">21:30 ›</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="dv-card" style="width:480px">
   <div style="height:50px;display:flex;align-items:center;padding:0 12px;background:#1e1e20;border-bottom:1px solid #3a3a3f">
     <div style="padding:6px 12px;border-radius:7px;border:1px solid rgba(255,255,255,.162);background:#35353a;font:12.5px Cantarell,sans-serif;color:rgba(255,255,255,.8400000000000001)">Cancel</div>
     <div style="flex:1;text-align:center;font:700 14px Cantarell,sans-serif;color:rgba(255,255,255,.9099999999999999)">New Streak</div>
@@ -297,38 +506,29 @@
   </div>
   <div style="background:#1e1e20;padding:18px;display:flex;flex-direction:column;gap:18px">
     <div style="background:#303034;border:1px solid rgba(255,255,255,.108);border-radius:12px;overflow:hidden">
-      <div style="display:flex;align-items:center;gap:14px;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.081)"><div style="width:70px;font:12.5px Cantarell,sans-serif;color:rgba(255,255,255,.6100000000000001)">Name</div><div style="flex:1;font:13.5px Cantarell,sans-serif;color:rgba(255,255,255,.94)">75 Hard</div></div>
-      <div style="display:flex;align-items:center;gap:14px;padding:12px 16px"><div style="width:70px;font:12.5px Cantarell,sans-serif;color:rgba(255,255,255,.6100000000000001)">Colour</div><div style="display:flex;gap:10px"><div style="width:20px;height:20px;border-radius:50%;background:#ffa348;box-shadow:0 0 0 2px #303034,0 0 0 3.5px #ffa348"></div><div style="width:20px;height:20px;border-radius:50%;background:#8ff0a4"></div><div style="width:20px;height:20px;border-radius:50%;background:#f9f06b"></div><div style="width:20px;height:20px;border-radius:50%;background:#e01b24"></div><div style="width:20px;height:20px;border-radius:50%;background:#dc8add"></div></div></div>
+      <div style="padding:9px 16px 10px;box-shadow:inset 0 0 0 2px rgba(255,163,72,.55);border-radius:12px 12px 0 0">
+        <div style="font:11px Cantarell,sans-serif;color:#ffbe6f">Streak name</div>
+        <div style="display:flex;align-items:center;gap:1px;font:13.5px Cantarell,sans-serif;color:rgba(255,255,255,.94)">Evening routine<div style="width:1px;height:16px;background:#ffbe6f"></div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;padding:12px 16px;border-top:1px solid rgba(255,255,255,.081)"><div style="flex:1;font:13.5px Cantarell,sans-serif;color:rgba(255,255,255,.94)">Colour</div><div style="display:flex;gap:10px"><div style="width:18px;height:18px;border-radius:50%;background:#ffa348;box-shadow:0 0 0 2px #303034,0 0 0 3.5px #ffa348"></div><div style="width:18px;height:18px;border-radius:50%;background:#8ff0a4"></div><div style="width:18px;height:18px;border-radius:50%;background:#f9f06b"></div><div style="width:18px;height:18px;border-radius:50%;background:#dc8add"></div></div></div>
     </div>
-
+    <div>
+      <div style="font:700 11px Cantarell,sans-serif;color:rgba(255,255,255,.51);letter-spacing:.05em;padding:0 4px 7px">GOALS</div>
+      <div style="background:#303034;border:1px solid rgba(255,255,255,.108);border-radius:12px;overflow:hidden">
+        <div style="display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid rgba(255,255,255,.081)"><div style="font:13px Cantarell,sans-serif;color:rgba(255,255,255,.36)">⠿</div><div style="flex:1;font:13.5px Cantarell,sans-serif;color:rgba(255,255,255,.94)">Floss</div><div style="font:15px Cantarell,sans-serif;color:rgba(255,255,255,.46)">×</div></div>
+        <div style="display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid rgba(255,255,255,.081)"><div style="font:13px Cantarell,sans-serif;color:rgba(255,255,255,.36)">⠿</div><div style="flex:1;font:13.5px Cantarell,sans-serif;color:rgba(255,255,255,.41)">Goal 2</div><div style="font:15px Cantarell,sans-serif;color:rgba(255,255,255,.46)">×</div></div>
+        <div style="display:flex;align-items:center;gap:10px;padding:11px 16px;background:#35353a"><div style="font:14px Cantarell,sans-serif;color:#ffbe6f">＋</div><div style="flex:1;font:13.5px Cantarell,sans-serif;color:#ffbe6f">Add a goal</div></div>
+      </div>
+      <div style="font:11.5px Cantarell,sans-serif;color:rgba(255,255,255,.51);padding:7px 4px 0">“Floss” moved from the name field to goal 1.</div>
+    </div>
     <div>
       <div style="font:700 11px Cantarell,sans-serif;color:rgba(255,255,255,.51);letter-spacing:.05em;padding:0 4px 7px">PERIOD</div>
       <div style="background:#303034;border:1px solid rgba(255,255,255,.108);border-radius:12px;overflow:hidden">
-        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:10px;border-bottom:1px solid rgba(255,255,255,.081)">
-          <div style="text-align:center;padding:9px 0;border-radius:7px;background:#ffa348;font:700 12px Cantarell,sans-serif;color:#2a1c09">Daily</div>
-          <div style="text-align:center;padding:9px 0;border-radius:7px;background:#3a3a3f;font:12px Cantarell,sans-serif;color:rgba(255,255,255,.81)">Weekdays</div>
-          <div style="text-align:center;padding:9px 0;border-radius:7px;background:#3a3a3f;font:12px Cantarell,sans-serif;color:rgba(255,255,255,.81)">N a week</div>
-          <div style="text-align:center;padding:9px 0;border-radius:7px;background:#3a3a3f;font:12px Cantarell,sans-serif;color:rgba(255,255,255,.81)">Monthly</div>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px;padding:11px 16px;border-bottom:1px solid rgba(255,255,255,.081);opacity:.4">
-          <sc-for list="{{ dowLabels }}" as="d" hint-placeholder-count="7"><div style="width:30px;height:30px;border-radius:50%;border:1px solid rgba(255,255,255,.189);display:flex;align-items:center;justify-content:center;font:12px Cantarell,sans-serif;color:rgba(255,255,255,.76)">{{ d }}</div></sc-for>
-        </div>
-        <div style="display:flex;align-items:center;gap:14px;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.081)"><div style="flex:1"><div style="font:13.5px Cantarell,sans-serif;color:rgba(255,255,255,.94)">Reminder</div><div style="font:11.5px Cantarell,sans-serif;color:rgba(255,255,255,.56)">A check-in notification each period</div></div><div style="font:12.5px Cantarell,sans-serif;color:rgba(255,255,255,.6599999999999999)">20:00 ›</div></div>
-        <div style="display:flex;align-items:center;gap:14px;padding:12px 16px"><div style="flex:1"><div style="font:13.5px Cantarell,sans-serif;color:rgba(255,255,255,.94)">Allow one skip a week</div><div style="font:11.5px Cantarell,sans-serif;color:rgba(255,255,255,.56)">A skipped period won't break the run</div></div><div style="width:42px;height:24px;border-radius:12px;background:#4a4a50;display:flex;align-items:center;padding:2px"><div style="width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.4)"></div></div></div>
-      </div>
-      <div style="font:11.5px Cantarell,sans-serif;color:rgba(255,255,255,.51);padding:7px 4px 0">Every goal in a streak shares this period.</div>
-    </div>
-
-    <div>
-      <div style="font:700 11px Cantarell,sans-serif;color:rgba(255,255,255,.51);letter-spacing:.05em;padding:0 4px 7px">GOALS — 5</div>
-      <div style="background:#303034;border:1px solid rgba(255,255,255,.108);border-radius:12px;overflow:hidden">
-        <sc-for list="{{ newGoals }}" as="g" hint-placeholder-count="5">
-          <div style="display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid rgba(255,255,255,.081)"><div style="font:13px Cantarell,sans-serif;color:rgba(255,255,255,.36)">⠿</div><div style="flex:1;font:13.5px Cantarell,sans-serif;color:rgba(255,255,255,.94);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ g }}</div><div style="font:15px Cantarell,sans-serif;color:rgba(255,255,255,.46)">×</div></div>
-        </sc-for>
-        <div style="display:flex;align-items:center;gap:10px;padding:11px 16px;background:#35353a"><div style="font:14px Cantarell,sans-serif;color:#ffbe6f">＋</div><div style="flex:1;font:13.5px Cantarell,sans-serif;color:#ffbe6f">Add a goal</div></div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:10px"><div style="text-align:center;padding:8px 0;border-radius:7px;background:#ffa348;font:700 12px Cantarell,sans-serif;color:#2a1c09">Daily</div><div style="text-align:center;padding:8px 0;border-radius:7px;background:#3a3a3f;font:12px Cantarell,sans-serif;color:rgba(255,255,255,.81)">Weekdays</div><div style="text-align:center;padding:8px 0;border-radius:7px;background:#3a3a3f;font:12px Cantarell,sans-serif;color:rgba(255,255,255,.81)">N a week</div><div style="text-align:center;padding:8px 0;border-radius:7px;background:#3a3a3f;font:12px Cantarell,sans-serif;color:rgba(255,255,255,.81)">Monthly</div></div>
       </div>
     </div>
   </div>
+</div>
 </div></div>
 
 <div class="dv-opt" id="5e"><div class="dv-olabel"><a class="dv-oid" href="#5e">5e</a>Preferences window — journal section removed</div>
@@ -392,6 +592,61 @@
       <div style="padding:10px 18px;border-radius:8px;background:#ffa348;font:700 13px Cantarell,sans-serif;color:#2a1c09;margin-top:4px">Create a streak</div>
     </div>
   </div>
+</div></div>
+
+<div class="dv-opt" id="5g"><div class="dv-olabel"><a class="dv-oid" href="#5g">5g</a>Edit streak — one goal · after “Add more goals”</div>
+<div style="display:flex;gap:20px;align-items:flex-start">
+<div class="dv-card" style="width:480px">
+  <div style="height:50px;display:flex;align-items:center;padding:0 12px;background:#1e1e20;border-bottom:1px solid #3a3a3f">
+    <div style="padding:6px 12px;border-radius:7px;border:1px solid rgba(255,255,255,.162);background:#35353a;font:12.5px Cantarell,sans-serif;color:rgba(255,255,255,.8400000000000001)">Cancel</div>
+    <div style="flex:1;text-align:center;font:700 14px Cantarell,sans-serif;color:rgba(255,255,255,.9099999999999999)">Edit Streak</div>
+    <div style="padding:6px 13px;border-radius:7px;background:#ffa348;font:700 12.5px Cantarell,sans-serif;color:#2a1c09">Save</div>
+  </div>
+  <div style="background:#1e1e20;padding:18px;display:flex;flex-direction:column;gap:18px">
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="background:#303034;border:1px solid rgba(255,255,255,.108);border-radius:12px;overflow:hidden">
+        <div style="padding:9px 16px 10px"><div style="font:11px Cantarell,sans-serif;color:rgba(255,255,255,.56)">Name</div><div style="font:13.5px Cantarell,sans-serif;color:rgba(255,255,255,.94)">Clip fingernails</div></div>
+        <div style="display:flex;align-items:center;gap:14px;padding:12px 16px;border-top:1px solid rgba(255,255,255,.081)"><div style="flex:1;font:13.5px Cantarell,sans-serif;color:rgba(255,255,255,.94)">Colour</div><div style="display:flex;gap:10px"><div style="width:18px;height:18px;border-radius:50%;background:#ffa348"></div><div style="width:18px;height:18px;border-radius:50%;background:#8ff0a4"></div><div style="width:18px;height:18px;border-radius:50%;background:#f9f06b;box-shadow:0 0 0 2px #303034,0 0 0 3.5px #f9f06b"></div><div style="width:18px;height:18px;border-radius:50%;background:#dc8add"></div></div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;padding:4px 6px"><div style="font:15px Cantarell,sans-serif;color:#ffbe6f">＋</div><div style="font:13px Cantarell,sans-serif;color:#ffbe6f">Add more goals</div></div>
+    </div>
+    <div>
+      <div style="font:700 11px Cantarell,sans-serif;color:rgba(255,255,255,.51);letter-spacing:.05em;padding:0 4px 7px">PERIOD</div>
+      <div style="background:#303034;border:1px solid rgba(255,255,255,.108);border-radius:12px;overflow:hidden">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:10px"><div style="text-align:center;padding:8px 0;border-radius:7px;background:#3a3a3f;font:12px Cantarell,sans-serif;color:rgba(255,255,255,.81)">Daily</div><div style="text-align:center;padding:8px 0;border-radius:7px;background:#3a3a3f;font:12px Cantarell,sans-serif;color:rgba(255,255,255,.81)">Weekdays</div><div style="text-align:center;padding:8px 0;border-radius:7px;background:#3a3a3f;font:12px Cantarell,sans-serif;color:rgba(255,255,255,.81)">N a week</div><div style="text-align:center;padding:8px 0;border-radius:7px;background:#ffa348;font:700 12px Cantarell,sans-serif;color:#2a1c09">Monthly</div></div>
+      </div>
+    </div>
+    <div style="background:#303034;border:1px solid rgba(255,255,255,.108);border-radius:12px;padding:12px 16px;font:13.5px Cantarell,sans-serif;color:#ff7b63">Delete streak</div>
+  </div>
+</div>
+<div class="dv-card" style="width:480px">
+  <div style="height:50px;display:flex;align-items:center;padding:0 12px;background:#1e1e20;border-bottom:1px solid #3a3a3f">
+    <div style="padding:6px 12px;border-radius:7px;border:1px solid rgba(255,255,255,.162);background:#35353a;font:12.5px Cantarell,sans-serif;color:rgba(255,255,255,.8400000000000001)">Cancel</div>
+    <div style="flex:1;text-align:center;font:700 14px Cantarell,sans-serif;color:rgba(255,255,255,.9099999999999999)">Edit Streak</div>
+    <div style="padding:6px 13px;border-radius:7px;background:#ffa348;font:700 12.5px Cantarell,sans-serif;color:#2a1c09">Save</div>
+  </div>
+  <div style="background:#1e1e20;padding:18px;display:flex;flex-direction:column;gap:18px">
+    <div style="background:#303034;border:1px solid rgba(255,255,255,.108);border-radius:12px;overflow:hidden">
+      <div style="padding:9px 16px 10px;box-shadow:inset 0 0 0 2px rgba(255,163,72,.55);border-radius:12px 12px 0 0"><div style="font:11px Cantarell,sans-serif;color:#ffbe6f">Streak name</div><div style="display:flex;align-items:center;gap:1px;font:13.5px Cantarell,sans-serif;color:rgba(255,255,255,.94)">Grooming<div style="width:1px;height:16px;background:#ffbe6f"></div></div></div>
+      <div style="display:flex;align-items:center;gap:14px;padding:12px 16px;border-top:1px solid rgba(255,255,255,.081)"><div style="flex:1;font:13.5px Cantarell,sans-serif;color:rgba(255,255,255,.94)">Colour</div><div style="display:flex;gap:10px"><div style="width:18px;height:18px;border-radius:50%;background:#ffa348"></div><div style="width:18px;height:18px;border-radius:50%;background:#8ff0a4"></div><div style="width:18px;height:18px;border-radius:50%;background:#f9f06b;box-shadow:0 0 0 2px #303034,0 0 0 3.5px #f9f06b"></div><div style="width:18px;height:18px;border-radius:50%;background:#dc8add"></div></div></div>
+    </div>
+    <div>
+      <div style="font:700 11px Cantarell,sans-serif;color:rgba(255,255,255,.51);letter-spacing:.05em;padding:0 4px 7px">GOALS</div>
+      <div style="background:#303034;border:1px solid rgba(255,255,255,.108);border-radius:12px;overflow:hidden">
+        <div style="display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid rgba(255,255,255,.081)"><div style="font:13px Cantarell,sans-serif;color:rgba(255,255,255,.36)">⠿</div><div style="flex:1;font:13.5px Cantarell,sans-serif;color:rgba(255,255,255,.94)">Clip fingernails</div><div style="font:15px Cantarell,sans-serif;color:rgba(255,255,255,.46)">×</div></div>
+        <div style="display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid rgba(255,255,255,.081)"><div style="font:13px Cantarell,sans-serif;color:rgba(255,255,255,.36)">⠿</div><div style="flex:1;font:13.5px Cantarell,sans-serif;color:rgba(255,255,255,.94)">Haircut</div><div style="font:15px Cantarell,sans-serif;color:rgba(255,255,255,.46)">×</div></div>
+        <div style="display:flex;align-items:center;gap:10px;padding:11px 16px;background:#35353a"><div style="font:14px Cantarell,sans-serif;color:#ffbe6f">＋</div><div style="flex:1;font:13.5px Cantarell,sans-serif;color:#ffbe6f">Add a goal</div></div>
+      </div>
+      <div style="font:11.5px/1.5 Cantarell,sans-serif;color:rgba(255,255,255,.51);padding:7px 4px 0">New goals apply from the current period. Earlier periods keep their recorded shade.</div>
+    </div>
+    <div>
+      <div style="font:700 11px Cantarell,sans-serif;color:rgba(255,255,255,.51);letter-spacing:.05em;padding:0 4px 7px">PERIOD</div>
+      <div style="background:#303034;border:1px solid rgba(255,255,255,.108);border-radius:12px;overflow:hidden">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:10px"><div style="text-align:center;padding:8px 0;border-radius:7px;background:#3a3a3f;font:12px Cantarell,sans-serif;color:rgba(255,255,255,.81)">Daily</div><div style="text-align:center;padding:8px 0;border-radius:7px;background:#3a3a3f;font:12px Cantarell,sans-serif;color:rgba(255,255,255,.81)">Weekdays</div><div style="text-align:center;padding:8px 0;border-radius:7px;background:#3a3a3f;font:12px Cantarell,sans-serif;color:rgba(255,255,255,.81)">N a week</div><div style="text-align:center;padding:8px 0;border-radius:7px;background:#ffa348;font:700 12px Cantarell,sans-serif;color:#2a1c09">Monthly</div></div>
+      </div>
+    </div>
+  </div>
+</div>
 </div></div>
 
 </div>
@@ -504,13 +759,9 @@
             <div style="padding:12px 16px;font:12.5px Cantarell,sans-serif;color:rgba(0,0,0,.5)">Weekdays only. Next check-in Monday 14 September.</div>
           </div>
 
-          <div style="background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:12px;overflow:hidden">
-            <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid rgba(0,0,0,.07)">
-              <div style="width:8px;height:8px;border-radius:50%;background:#e5a50a"></div>
-              <div style="flex:1;font:700 14px Cantarell,sans-serif;color:rgba(0,0,0,.88)">Clip fingernails</div>
-              <div style="font:11.5px Cantarell,sans-serif;color:rgba(0,0,0,.5)">Due this month</div>
-            </div>
-            <div style="display:flex;align-items:center;gap:12px;padding:0 16px;height:46px"><div style="width:24px;height:24px;border-radius:6px;border:1px solid #c0bfbc;background:#fff"></div><div style="flex:1;font:13.5px Cantarell,sans-serif;color:rgba(0,0,0,.85)">Clip them</div><div style="font:11px Cantarell,sans-serif;color:rgba(0,0,0,.45)">17 days left</div></div>
+          <div style="background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:12px;display:flex;align-items:center;gap:12px;padding:12px 16px">
+            <div style="width:24px;height:24px;border-radius:6px;box-sizing:border-box;border:1px solid #c0bfbc;background:#fff"></div>
+            <div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:8px"><div style="width:8px;height:8px;border-radius:50%;background:#e5a50a"></div><div style="font:700 14px Cantarell,sans-serif;color:rgba(0,0,0,.88)">Clip fingernails</div></div><div style="font:11.5px Cantarell,sans-serif;color:rgba(0,0,0,.5);margin-top:2px">Monthly · 17 days left</div></div>
           </div>
         </div>
       </div>
@@ -677,8 +928,39 @@
   </div>
 </div></div>
 
-<div class="dv-opt" id="4d"><div class="dv-olabel"><a class="dv-oid" href="#4d">4d</a>New streak dialog</div>
-<div class="dv-card" style="width:560px">
+<div class="dv-opt" id="4d"><div class="dv-olabel"><a class="dv-oid" href="#4d">4d</a>New streak — one goal by default · after “Add more goals”</div>
+<div style="display:flex;gap:20px;align-items:flex-start">
+<div class="dv-card" style="width:480px">
+  <div style="height:50px;display:flex;align-items:center;padding:0 12px;background:#fafafa;border-bottom:1px solid #e1dedb">
+    <div style="padding:6px 12px;border-radius:7px;border:1px solid rgba(0,0,0,.12);background:#fcfcfc;font:12.5px Cantarell,sans-serif;color:rgba(0,0,0,.78)">Cancel</div>
+    <div style="flex:1;text-align:center;font:700 14px Cantarell,sans-serif;color:rgba(0,0,0,.85)">New Streak</div>
+    <div style="padding:6px 13px;border-radius:7px;background:#3584e4;font:700 12.5px Cantarell,sans-serif;color:#fff">Create</div>
+  </div>
+  <div style="background:#fafafa;padding:18px;display:flex;flex-direction:column;gap:18px">
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:12px;overflow:hidden">
+        <div style="padding:9px 16px 10px;box-shadow:inset 0 0 0 2px rgba(53,132,228,.55);border-radius:12px 12px 0 0">
+          <div style="font:11px Cantarell,sans-serif;color:#1c71d8">Name</div>
+          <div style="display:flex;align-items:center;gap:1px;font:13.5px Cantarell,sans-serif;color:rgba(0,0,0,.88)">Floss<div style="width:1px;height:16px;background:#1c71d8"></div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px;padding:12px 16px;border-top:1px solid rgba(0,0,0,.06)"><div style="flex:1;font:13.5px Cantarell,sans-serif;color:rgba(0,0,0,.88)">Colour</div><div style="display:flex;gap:10px"><div style="width:18px;height:18px;border-radius:50%;background:#3584e4;box-shadow:0 0 0 2px #fff,0 0 0 3.5px #3584e4"></div><div style="width:18px;height:18px;border-radius:50%;background:#2ec27e"></div><div style="width:18px;height:18px;border-radius:50%;background:#e5a50a"></div><div style="width:18px;height:18px;border-radius:50%;background:#9141ac"></div></div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;padding:4px 6px">
+        <div style="font:15px Cantarell,sans-serif;color:#1c71d8">＋</div>
+        <div style="font:13px Cantarell,sans-serif;color:#1c71d8">Add more goals</div>
+        <div style="font:12px Cantarell,sans-serif;color:rgba(0,0,0,.45)">— for a checklist, e.g. a morning routine</div>
+      </div>
+    </div>
+    <div>
+      <div style="font:700 11px Cantarell,sans-serif;color:rgba(0,0,0,.45);letter-spacing:.05em;padding:0 4px 7px">PERIOD</div>
+      <div style="background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:12px;overflow:hidden">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:10px;border-bottom:1px solid rgba(0,0,0,.06)"><div style="text-align:center;padding:8px 0;border-radius:7px;background:#3584e4;font:700 12px Cantarell,sans-serif;color:#fff">Daily</div><div style="text-align:center;padding:8px 0;border-radius:7px;background:#f2f1ef;font:12px Cantarell,sans-serif;color:rgba(0,0,0,.75)">Weekdays</div><div style="text-align:center;padding:8px 0;border-radius:7px;background:#f2f1ef;font:12px Cantarell,sans-serif;color:rgba(0,0,0,.75)">N a week</div><div style="text-align:center;padding:8px 0;border-radius:7px;background:#f2f1ef;font:12px Cantarell,sans-serif;color:rgba(0,0,0,.75)">Monthly</div></div>
+        <div style="display:flex;align-items:center;gap:14px;padding:12px 16px"><div style="flex:1;font:13.5px Cantarell,sans-serif;color:rgba(0,0,0,.88)">Reminder</div><div style="font:12.5px Cantarell,sans-serif;color:rgba(0,0,0,.6)">21:30 ›</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="dv-card" style="width:480px">
   <div style="height:50px;display:flex;align-items:center;padding:0 12px;background:#fafafa;border-bottom:1px solid #e1dedb">
     <div style="padding:6px 12px;border-radius:7px;border:1px solid rgba(0,0,0,.12);background:#fcfcfc;font:12.5px Cantarell,sans-serif;color:rgba(0,0,0,.78)">Cancel</div>
     <div style="flex:1;text-align:center;font:700 14px Cantarell,sans-serif;color:rgba(0,0,0,.85)">New Streak</div>
@@ -686,38 +968,29 @@
   </div>
   <div style="background:#fafafa;padding:18px;display:flex;flex-direction:column;gap:18px">
     <div style="background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:12px;overflow:hidden">
-      <div style="display:flex;align-items:center;gap:14px;padding:12px 16px;border-bottom:1px solid rgba(0,0,0,.06)"><div style="width:70px;font:12.5px Cantarell,sans-serif;color:rgba(0,0,0,.55)">Name</div><div style="flex:1;font:13.5px Cantarell,sans-serif;color:rgba(0,0,0,.88)">75 Hard</div></div>
-      <div style="display:flex;align-items:center;gap:14px;padding:12px 16px"><div style="width:70px;font:12.5px Cantarell,sans-serif;color:rgba(0,0,0,.55)">Colour</div><div style="display:flex;gap:10px"><div style="width:20px;height:20px;border-radius:50%;background:#3584e4;box-shadow:0 0 0 2px #fff,0 0 0 3.5px #3584e4"></div><div style="width:20px;height:20px;border-radius:50%;background:#2ec27e"></div><div style="width:20px;height:20px;border-radius:50%;background:#e5a50a"></div><div style="width:20px;height:20px;border-radius:50%;background:#e01b24"></div><div style="width:20px;height:20px;border-radius:50%;background:#9141ac"></div></div></div>
+      <div style="padding:9px 16px 10px;box-shadow:inset 0 0 0 2px rgba(53,132,228,.55);border-radius:12px 12px 0 0">
+        <div style="font:11px Cantarell,sans-serif;color:#1c71d8">Streak name</div>
+        <div style="display:flex;align-items:center;gap:1px;font:13.5px Cantarell,sans-serif;color:rgba(0,0,0,.88)">Evening routine<div style="width:1px;height:16px;background:#1c71d8"></div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;padding:12px 16px;border-top:1px solid rgba(0,0,0,.06)"><div style="flex:1;font:13.5px Cantarell,sans-serif;color:rgba(0,0,0,.88)">Colour</div><div style="display:flex;gap:10px"><div style="width:18px;height:18px;border-radius:50%;background:#3584e4;box-shadow:0 0 0 2px #fff,0 0 0 3.5px #3584e4"></div><div style="width:18px;height:18px;border-radius:50%;background:#2ec27e"></div><div style="width:18px;height:18px;border-radius:50%;background:#e5a50a"></div><div style="width:18px;height:18px;border-radius:50%;background:#9141ac"></div></div></div>
     </div>
-
+    <div>
+      <div style="font:700 11px Cantarell,sans-serif;color:rgba(0,0,0,.45);letter-spacing:.05em;padding:0 4px 7px">GOALS</div>
+      <div style="background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:12px;overflow:hidden">
+        <div style="display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid rgba(0,0,0,.06)"><div style="font:13px Cantarell,sans-serif;color:rgba(0,0,0,.3)">⠿</div><div style="flex:1;font:13.5px Cantarell,sans-serif;color:rgba(0,0,0,.88)">Floss</div><div style="font:15px Cantarell,sans-serif;color:rgba(0,0,0,.4)">×</div></div>
+        <div style="display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid rgba(0,0,0,.06)"><div style="font:13px Cantarell,sans-serif;color:rgba(0,0,0,.3)">⠿</div><div style="flex:1;font:13.5px Cantarell,sans-serif;color:rgba(0,0,0,.35)">Goal 2</div><div style="font:15px Cantarell,sans-serif;color:rgba(0,0,0,.4)">×</div></div>
+        <div style="display:flex;align-items:center;gap:10px;padding:11px 16px;background:#fcfcfc"><div style="font:14px Cantarell,sans-serif;color:#1c71d8">＋</div><div style="flex:1;font:13.5px Cantarell,sans-serif;color:#1c71d8">Add a goal</div></div>
+      </div>
+      <div style="font:11.5px Cantarell,sans-serif;color:rgba(0,0,0,.45);padding:7px 4px 0">“Floss” moved from the name field to goal 1.</div>
+    </div>
     <div>
       <div style="font:700 11px Cantarell,sans-serif;color:rgba(0,0,0,.45);letter-spacing:.05em;padding:0 4px 7px">PERIOD</div>
       <div style="background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:12px;overflow:hidden">
-        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:10px;border-bottom:1px solid rgba(0,0,0,.06)">
-          <div style="text-align:center;padding:9px 0;border-radius:7px;background:#3584e4;font:700 12px Cantarell,sans-serif;color:#fff">Daily</div>
-          <div style="text-align:center;padding:9px 0;border-radius:7px;background:#f2f1ef;font:12px Cantarell,sans-serif;color:rgba(0,0,0,.75)">Weekdays</div>
-          <div style="text-align:center;padding:9px 0;border-radius:7px;background:#f2f1ef;font:12px Cantarell,sans-serif;color:rgba(0,0,0,.75)">N a week</div>
-          <div style="text-align:center;padding:9px 0;border-radius:7px;background:#f2f1ef;font:12px Cantarell,sans-serif;color:rgba(0,0,0,.75)">Monthly</div>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px;padding:11px 16px;border-bottom:1px solid rgba(0,0,0,.06);opacity:.4">
-          <sc-for list="{{ dowLabels }}" as="d" hint-placeholder-count="7"><div style="width:30px;height:30px;border-radius:50%;border:1px solid rgba(0,0,0,.14);display:flex;align-items:center;justify-content:center;font:12px Cantarell,sans-serif;color:rgba(0,0,0,.7)">{{ d }}</div></sc-for>
-        </div>
-        <div style="display:flex;align-items:center;gap:14px;padding:12px 16px;border-bottom:1px solid rgba(0,0,0,.06)"><div style="flex:1"><div style="font:13.5px Cantarell,sans-serif;color:rgba(0,0,0,.88)">Reminder</div><div style="font:11.5px Cantarell,sans-serif;color:rgba(0,0,0,.5)">A check-in notification each period</div></div><div style="font:12.5px Cantarell,sans-serif;color:rgba(0,0,0,.6)">20:00 ›</div></div>
-        <div style="display:flex;align-items:center;gap:14px;padding:12px 16px"><div style="flex:1"><div style="font:13.5px Cantarell,sans-serif;color:rgba(0,0,0,.88)">Allow one skip a week</div><div style="font:11.5px Cantarell,sans-serif;color:rgba(0,0,0,.5)">A skipped period won't break the run</div></div><div style="width:42px;height:24px;border-radius:12px;background:#dcdad7;display:flex;align-items:center;padding:2px"><div style="width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.25)"></div></div></div>
-      </div>
-      <div style="font:11.5px Cantarell,sans-serif;color:rgba(0,0,0,.45);padding:7px 4px 0">Every goal in a streak shares this period.</div>
-    </div>
-
-    <div>
-      <div style="font:700 11px Cantarell,sans-serif;color:rgba(0,0,0,.45);letter-spacing:.05em;padding:0 4px 7px">GOALS — 5</div>
-      <div style="background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:12px;overflow:hidden">
-        <sc-for list="{{ newGoals }}" as="g" hint-placeholder-count="5">
-          <div style="display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid rgba(0,0,0,.06)"><div style="font:13px Cantarell,sans-serif;color:rgba(0,0,0,.3)">⠿</div><div style="flex:1;font:13.5px Cantarell,sans-serif;color:rgba(0,0,0,.88);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ g }}</div><div style="font:15px Cantarell,sans-serif;color:rgba(0,0,0,.4)">×</div></div>
-        </sc-for>
-        <div style="display:flex;align-items:center;gap:10px;padding:11px 16px;background:#fcfcfc"><div style="font:14px Cantarell,sans-serif;color:#1c71d8">＋</div><div style="flex:1;font:13.5px Cantarell,sans-serif;color:#1c71d8">Add a goal</div></div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:10px"><div style="text-align:center;padding:8px 0;border-radius:7px;background:#3584e4;font:700 12px Cantarell,sans-serif;color:#fff">Daily</div><div style="text-align:center;padding:8px 0;border-radius:7px;background:#f2f1ef;font:12px Cantarell,sans-serif;color:rgba(0,0,0,.75)">Weekdays</div><div style="text-align:center;padding:8px 0;border-radius:7px;background:#f2f1ef;font:12px Cantarell,sans-serif;color:rgba(0,0,0,.75)">N a week</div><div style="text-align:center;padding:8px 0;border-radius:7px;background:#f2f1ef;font:12px Cantarell,sans-serif;color:rgba(0,0,0,.75)">Monthly</div></div>
       </div>
     </div>
   </div>
+</div>
 </div></div>
 
 <div class="dv-opt" id="4e"><div class="dv-olabel"><a class="dv-oid" href="#4e">4e</a>Preferences window — journal section removed</div>
@@ -781,6 +1054,61 @@
       <div style="padding:10px 18px;border-radius:8px;background:#3584e4;font:700 13px Cantarell,sans-serif;color:#fff;margin-top:4px">Create a streak</div>
     </div>
   </div>
+</div></div>
+
+<div class="dv-opt" id="4g"><div class="dv-olabel"><a class="dv-oid" href="#4g">4g</a>Edit streak — one goal · after “Add more goals”</div>
+<div style="display:flex;gap:20px;align-items:flex-start">
+<div class="dv-card" style="width:480px">
+  <div style="height:50px;display:flex;align-items:center;padding:0 12px;background:#fafafa;border-bottom:1px solid #e1dedb">
+    <div style="padding:6px 12px;border-radius:7px;border:1px solid rgba(0,0,0,.12);background:#fcfcfc;font:12.5px Cantarell,sans-serif;color:rgba(0,0,0,.78)">Cancel</div>
+    <div style="flex:1;text-align:center;font:700 14px Cantarell,sans-serif;color:rgba(0,0,0,.85)">Edit Streak</div>
+    <div style="padding:6px 13px;border-radius:7px;background:#3584e4;font:700 12.5px Cantarell,sans-serif;color:#fff">Save</div>
+  </div>
+  <div style="background:#fafafa;padding:18px;display:flex;flex-direction:column;gap:18px">
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:12px;overflow:hidden">
+        <div style="padding:9px 16px 10px"><div style="font:11px Cantarell,sans-serif;color:rgba(0,0,0,.5)">Name</div><div style="font:13.5px Cantarell,sans-serif;color:rgba(0,0,0,.88)">Clip fingernails</div></div>
+        <div style="display:flex;align-items:center;gap:14px;padding:12px 16px;border-top:1px solid rgba(0,0,0,.06)"><div style="flex:1;font:13.5px Cantarell,sans-serif;color:rgba(0,0,0,.88)">Colour</div><div style="display:flex;gap:10px"><div style="width:18px;height:18px;border-radius:50%;background:#3584e4"></div><div style="width:18px;height:18px;border-radius:50%;background:#2ec27e"></div><div style="width:18px;height:18px;border-radius:50%;background:#e5a50a;box-shadow:0 0 0 2px #fff,0 0 0 3.5px #e5a50a"></div><div style="width:18px;height:18px;border-radius:50%;background:#9141ac"></div></div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;padding:4px 6px"><div style="font:15px Cantarell,sans-serif;color:#1c71d8">＋</div><div style="font:13px Cantarell,sans-serif;color:#1c71d8">Add more goals</div></div>
+    </div>
+    <div>
+      <div style="font:700 11px Cantarell,sans-serif;color:rgba(0,0,0,.45);letter-spacing:.05em;padding:0 4px 7px">PERIOD</div>
+      <div style="background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:12px;overflow:hidden">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:10px"><div style="text-align:center;padding:8px 0;border-radius:7px;background:#f2f1ef;font:12px Cantarell,sans-serif;color:rgba(0,0,0,.75)">Daily</div><div style="text-align:center;padding:8px 0;border-radius:7px;background:#f2f1ef;font:12px Cantarell,sans-serif;color:rgba(0,0,0,.75)">Weekdays</div><div style="text-align:center;padding:8px 0;border-radius:7px;background:#f2f1ef;font:12px Cantarell,sans-serif;color:rgba(0,0,0,.75)">N a week</div><div style="text-align:center;padding:8px 0;border-radius:7px;background:#3584e4;font:700 12px Cantarell,sans-serif;color:#fff">Monthly</div></div>
+      </div>
+    </div>
+    <div style="background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:12px;padding:12px 16px;font:13.5px Cantarell,sans-serif;color:#c01c28">Delete streak</div>
+  </div>
+</div>
+<div class="dv-card" style="width:480px">
+  <div style="height:50px;display:flex;align-items:center;padding:0 12px;background:#fafafa;border-bottom:1px solid #e1dedb">
+    <div style="padding:6px 12px;border-radius:7px;border:1px solid rgba(0,0,0,.12);background:#fcfcfc;font:12.5px Cantarell,sans-serif;color:rgba(0,0,0,.78)">Cancel</div>
+    <div style="flex:1;text-align:center;font:700 14px Cantarell,sans-serif;color:rgba(0,0,0,.85)">Edit Streak</div>
+    <div style="padding:6px 13px;border-radius:7px;background:#3584e4;font:700 12.5px Cantarell,sans-serif;color:#fff">Save</div>
+  </div>
+  <div style="background:#fafafa;padding:18px;display:flex;flex-direction:column;gap:18px">
+    <div style="background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:12px;overflow:hidden">
+      <div style="padding:9px 16px 10px;box-shadow:inset 0 0 0 2px rgba(53,132,228,.55);border-radius:12px 12px 0 0"><div style="font:11px Cantarell,sans-serif;color:#1c71d8">Streak name</div><div style="display:flex;align-items:center;gap:1px;font:13.5px Cantarell,sans-serif;color:rgba(0,0,0,.88)">Grooming<div style="width:1px;height:16px;background:#1c71d8"></div></div></div>
+      <div style="display:flex;align-items:center;gap:14px;padding:12px 16px;border-top:1px solid rgba(0,0,0,.06)"><div style="flex:1;font:13.5px Cantarell,sans-serif;color:rgba(0,0,0,.88)">Colour</div><div style="display:flex;gap:10px"><div style="width:18px;height:18px;border-radius:50%;background:#3584e4"></div><div style="width:18px;height:18px;border-radius:50%;background:#2ec27e"></div><div style="width:18px;height:18px;border-radius:50%;background:#e5a50a;box-shadow:0 0 0 2px #fff,0 0 0 3.5px #e5a50a"></div><div style="width:18px;height:18px;border-radius:50%;background:#9141ac"></div></div></div>
+    </div>
+    <div>
+      <div style="font:700 11px Cantarell,sans-serif;color:rgba(0,0,0,.45);letter-spacing:.05em;padding:0 4px 7px">GOALS</div>
+      <div style="background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:12px;overflow:hidden">
+        <div style="display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid rgba(0,0,0,.06)"><div style="font:13px Cantarell,sans-serif;color:rgba(0,0,0,.3)">⠿</div><div style="flex:1;font:13.5px Cantarell,sans-serif;color:rgba(0,0,0,.88)">Clip fingernails</div><div style="font:15px Cantarell,sans-serif;color:rgba(0,0,0,.4)">×</div></div>
+        <div style="display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid rgba(0,0,0,.06)"><div style="font:13px Cantarell,sans-serif;color:rgba(0,0,0,.3)">⠿</div><div style="flex:1;font:13.5px Cantarell,sans-serif;color:rgba(0,0,0,.88)">Haircut</div><div style="font:15px Cantarell,sans-serif;color:rgba(0,0,0,.4)">×</div></div>
+        <div style="display:flex;align-items:center;gap:10px;padding:11px 16px;background:#fcfcfc"><div style="font:14px Cantarell,sans-serif;color:#1c71d8">＋</div><div style="flex:1;font:13.5px Cantarell,sans-serif;color:#1c71d8">Add a goal</div></div>
+      </div>
+      <div style="font:11.5px/1.5 Cantarell,sans-serif;color:rgba(0,0,0,.45);padding:7px 4px 0">New goals apply from the current period. Earlier periods keep their recorded shade.</div>
+    </div>
+    <div>
+      <div style="font:700 11px Cantarell,sans-serif;color:rgba(0,0,0,.45);letter-spacing:.05em;padding:0 4px 7px">PERIOD</div>
+      <div style="background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:12px;overflow:hidden">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:10px"><div style="text-align:center;padding:8px 0;border-radius:7px;background:#f2f1ef;font:12px Cantarell,sans-serif;color:rgba(0,0,0,.75)">Daily</div><div style="text-align:center;padding:8px 0;border-radius:7px;background:#f2f1ef;font:12px Cantarell,sans-serif;color:rgba(0,0,0,.75)">Weekdays</div><div style="text-align:center;padding:8px 0;border-radius:7px;background:#f2f1ef;font:12px Cantarell,sans-serif;color:rgba(0,0,0,.75)">N a week</div><div style="text-align:center;padding:8px 0;border-radius:7px;background:#3584e4;font:700 12px Cantarell,sans-serif;color:#fff">Monthly</div></div>
+      </div>
+    </div>
+  </div>
+</div>
 </div></div>
 
 </div>
@@ -868,9 +1196,9 @@ class Component extends DCLogic {
   defs(){
     return [
       { name: '75 Hard', meta: 'Daily · 5 goals', colour: '#3584e4', count: 51 },
-      { name: 'No snoozing the alarm', meta: 'Mon–Fri · 1 goal', colour: '#2ec27e', count: 12 },
+      { name: 'No snoozing the alarm', meta: 'Mon–Fri', colour: '#2ec27e', count: 12 },
       { name: 'Gym, three times a week', meta: '3× a week · 2 goals', colour: '#9141ac', count: 9 },
-      { name: 'Clip fingernails', meta: 'Monthly · 1 goal', colour: '#e5a50a', count: 4 }
+      { name: 'Clip fingernails', meta: 'Monthly', colour: '#e5a50a', count: 4 }
     ];
   }
 
