@@ -208,6 +208,47 @@ def test_active_goals_excludes_removed_before_period_start():
     assert [g.id for g in active_goals(s, after)] == [1]
 
 
+def test_active_goals_excludes_goal_added_after_period_end():
+    goals = (
+        GoalData(id=1, name="g1", position=0, removed_on=None, added_on=None),
+        GoalData(id=2, name="g2", position=1, removed_on=None, added_on=date(2026, 9, 1)),
+    )
+    s = dataclasses.replace(_mk(date(2026, 5, 1), n_goals=0), goals=goals)
+    august = Period(date(2026, 8, 1), date(2026, 8, 31))
+    september = Period(date(2026, 9, 1), date(2026, 9, 30))
+    assert [g.id for g in active_goals(s, august)] == [1]
+    assert [g.id for g in active_goals(s, september)] == [1, 2]
+
+
+def test_evaluate_new_goal_does_not_change_past_period_status():
+    """A goal added mid-streak counts from the period it was added in on; earlier periods keep
+    the status they already had, unaffected by the new goal."""
+    checks = {
+        date(2026, 5, 15): {0},
+        date(2026, 6, 15): {0},
+        date(2026, 7, 15): {0},
+        date(2026, 8, 15): {0},
+    }
+    goals = (
+        GoalData(id=1, name="g1", position=0, removed_on=None, added_on=date(2026, 5, 1)),
+        GoalData(id=2, name="g2", position=1, removed_on=None, added_on=date(2026, 9, 1)),
+    )
+    s = dataclasses.replace(
+        _mk(date(2026, 5, 1), checks, n_goals=0, period_kind=PeriodKind.MONTHLY),
+        goals=goals,
+    )
+
+    results = evaluate(s, date(2026, 9, 10), Settings())
+    by_month = {(pr.period.start.year, pr.period.start.month): pr for pr in results}
+
+    for month in (5, 6, 7, 8):
+        pr = by_month[(2026, month)]
+        assert pr.status == Status.KEPT
+        assert pr.total == 1
+
+    assert by_month[(2026, 9)].total == 2
+
+
 # ----------------------------------------------------------------------------------------------
 # evaluate() — period status.
 # ----------------------------------------------------------------------------------------------
@@ -360,7 +401,7 @@ def test_current_run_none_for_ended_streak():
 
 
 def test_sidebar_meta_daily_single_goal():
-    # A single-goal streak's meta is just the period label, with no goal count.
+    # A single-goal streak's meta is the period label alone.
     s = _mk(date(2026, 1, 1), n_goals=1)
     assert sidebar_meta(s) == "Daily"
 

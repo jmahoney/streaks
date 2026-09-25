@@ -4,7 +4,8 @@ from datetime import time
 
 from helpers import listbox_rows
 
-from streaks.models import Goal, GoalCheck, Streak
+from streaks.engine import Settings, evaluate
+from streaks.models import Goal, GoalCheck, Streak, load_streak_data
 from streaks.streak_dialog import StreaksStreakDialog
 
 _EDIT_GOALS_DESCRIPTION = (
@@ -325,6 +326,11 @@ def test_edit_single_to_multi_keeps_goal_id(seeded_state, seeded_window, process
 
     streak_data = next(s for s in seeded_state.streaks if s.name == "Clip fingernails")
     original_goal_id = next(g.id for g in streak_data.goals if g.removed_on is None)
+    today = seeded_state.today()
+    results_before = {
+        (pr.period.start.year, pr.period.start.month): pr
+        for pr in evaluate(streak_data, today, Settings())
+    }
 
     dialog = StreaksStreakDialog.for_edit(streak_data)
     dialog.set_state(seeded_state)
@@ -355,6 +361,15 @@ def test_edit_single_to_multi_keeps_goal_id(seeded_state, seeded_window, process
 
     streak = Streak.get_by_id(original_goal.streak_id)
     assert streak.name == "Grooming"
+
+    # Adding "Haircut" grows the goal count from September on but must not retroactively
+    # change June-August, which were already recorded against the one goal.
+    results_after = {
+        (pr.period.start.year, pr.period.start.month): pr
+        for pr in evaluate(load_streak_data(streak), today, Settings())
+    }
+    for month in (6, 7, 8):
+        assert results_after[(2026, month)] == results_before[(2026, month)]
 
 
 def test_edit_collapse_keeps_surviving_goal(seeded_state, seeded_window, process_events):

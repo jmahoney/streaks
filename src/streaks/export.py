@@ -45,6 +45,7 @@ def dump() -> dict[str, Any]:
             "name": g.name,
             "position": g.position,
             "removed_on": _iso_or_none(g.removed_on),
+            "added_on": _iso_or_none(g.added_on),
         }
         for g in Goal.select().order_by(Goal.id)
     ]
@@ -109,6 +110,7 @@ def load(data: dict[str, Any]) -> None:
                 name=row["name"],
                 position=row["position"],
                 removed_on=date.fromisoformat(row["removed_on"]) if row["removed_on"] else None,
+                added_on=date.fromisoformat(row["added_on"]) if row.get("added_on") else None,
             )
         for row in data.get("checks", []):
             GoalCheck.create(

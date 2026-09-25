@@ -9,6 +9,11 @@ from pathlib import Path
 
 EXPECTED_RUNTIME_VERSION = "50"
 
+# Import names that ship inside another PyPI distribution's sdist rather than having their own
+# Flatpak module: `playhouse` (Peewee's migration/extension helpers) is part of the `peewee`
+# package itself, installed by the "python3-peewee" module.
+BUNDLED_IMPORTS = {"playhouse": "peewee"}
+
 repo_root = Path(__file__).parent.parent
 src_dir = repo_root / "src" / "streaks"
 manifest_file = repo_root / "com.cheerschopper.Streaks.json"
@@ -67,10 +72,10 @@ imports = {m for m in imports if m not in stdlib_modules and m != "gi"}
 
 # Check each import
 for module in sorted(imports):
-    if module not in manifest_modules:
-        errors.append(
-            f"FAIL manifest: import '{module}' not found in com.cheerschopper.Streaks.json"
-        )
+    bundled_with = BUNDLED_IMPORTS.get(module)
+    if module in manifest_modules or bundled_with in manifest_modules:
+        continue
+    errors.append(f"FAIL manifest: import '{module}' not found in com.cheerschopper.Streaks.json")
 
 # Print results
 if errors:

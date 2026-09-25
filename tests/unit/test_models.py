@@ -212,6 +212,37 @@ def test_update_streak_single_new_goal_takes_streak_name(today):
     assert Goal.get_by_id(old_goal.id).removed_on == today
 
 
+def test_create_streak_sets_added_on_to_created_on():
+    created_on = date(2026, 1, 1)
+    streak = create_streak("A", COLOURS[0], PeriodKind.DAILY, ["g1", "g2"], created_on=created_on)
+    assert [g.added_on for g in streak.goals] == [created_on, created_on]
+
+
+def test_update_streak_new_goal_gets_added_on_today_existing_keep_theirs():
+    created_on = date(2026, 1, 1)
+    streak = create_streak("A", COLOURS[0], PeriodKind.DAILY, ["g1", "g2"], created_on=created_on)
+    g1, g2 = list(Goal.select().where(Goal.streak == streak).order_by(Goal.position))
+
+    today = date(2026, 2, 1)
+    update_streak(
+        streak,
+        name="A",
+        colour=COLOURS[0],
+        period_kind=PeriodKind.DAILY,
+        weekdays_mask=31,
+        times_per_week=3,
+        reminder_time=None,
+        allow_skip=False,
+        goals=[(g1.id, "g1"), (g2.id, "g2"), (None, "g3")],
+        today=today,
+    )
+
+    assert Goal.get_by_id(g1.id).added_on == created_on
+    assert Goal.get_by_id(g2.id).added_on == created_on
+    g3 = Goal.get(Goal.streak == streak, Goal.name == "g3")
+    assert g3.added_on == today
+
+
 def test_toggle_goal_check_creates_then_removes():
     streak = create_streak("A", COLOURS[0], PeriodKind.DAILY, ["g1"], created_on=date(2026, 1, 1))
     goal = Goal.select().where(Goal.streak == streak).get()
@@ -507,6 +538,42 @@ def test_init_db_leaves_multi_goal_names(tmp_path):
         names = {g.name for g in Goal.select().where(Goal.streak == streak)}
         assert names == {"Clip", "Haircut"}
         assert db.pragma("user_version") == SCHEMA_VERSION
+    finally:
+        if not db.is_closed():
+            db.close()
+        db.init(":memory:", pragmas={"foreign_keys": 1})
+        db.connect()
+        db.create_tables(MODELS)
+
+
+def test_init_db_adds_added_on_column_for_v2_database(tmp_path):
+    """A pre-v3 database file, built before the ``added_on`` column existed, gets it added on
+    open (via ``playhouse.migrate``) without losing any data, and ``user_version`` advances to
+    ``SCHEMA_VERSION``."""
+    from playhouse.migrate import SqliteMigrator, migrate
+
+    from streaks.models import MODELS, db
+
+    path = str(tmp_path / "s.db")
+    try:
+        init_db(path)
+        streak = create_streak(
+            "A", COLOURS[0], PeriodKind.DAILY, ["g1", "g2"], created_on=date(2026, 1, 1)
+        )
+        goal_ids = [g.id for g in Goal.select().where(Goal.streak == streak)]
+
+        # Roll the schema back to pre-v3: drop the column ``added_on``, as a real v2 database
+        # (built before this column existed) would never have had it.
+        migrator = SqliteMigrator(db)
+        migrate(migrator.drop_column("goal", "added_on"))
+        db.pragma("user_version", 2)
+        db.close()
+
+        init_db(path)
+
+        assert {c.name for c in db.get_columns("goal")} >= {"added_on"}
+        assert db.pragma("user_version") == SCHEMA_VERSION
+        assert {g.id for g in Goal.select().where(Goal.streak == streak)} == set(goal_ids)
     finally:
         if not db.is_closed():
             db.close()

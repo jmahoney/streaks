@@ -29,6 +29,7 @@ from peewee import (
     TimeField,
     fn,
 )
+from playhouse.migrate import SqliteMigrator, migrate
 
 from streaks.engine import (
     WEEKDAYS_MON_TO_FRI,
@@ -71,7 +72,9 @@ COLOURS = ("#3584e4", "#2ec27e", "#e5a50a", "#e01b24", "#9141ac")
 
 # v2 adds the single-goal name invariant: a streak with exactly one active goal always names
 # that goal after the streak (see `create_streak`/`update_streak`/`_sync_single_goal_names`).
-SCHEMA_VERSION = 2
+# v3 adds `Goal.added_on`, so a goal added mid-streak counts from its own period on instead of
+# retroactively changing periods that predate it (see `engine.active_goals`).
+SCHEMA_VERSION = 3
 
 db = SqliteDatabase(None)
 
@@ -99,6 +102,7 @@ class Goal(BaseModel):
     name = CharField()
     position = IntegerField(default=0)
     removed_on = DateField(null=True)
+    added_on = DateField(null=True)  # NULL means "always existed" (rows predating this column)
 
 
 class GoalCheck(BaseModel):
@@ -173,6 +177,7 @@ def init_db(path: str | None = None) -> SqliteDatabase:
         db.connect(reuse_if_open=True)
         db.create_tables(MODELS)
         if db.pragma("user_version") < SCHEMA_VERSION:
+            _add_goal_added_on_column()
             _sync_single_goal_names()
             db.pragma("user_version", SCHEMA_VERSION)
     except (OSError, PeeweeException) as exc:
@@ -191,6 +196,15 @@ def _sync_single_goal_names() -> None:
             if len(active_goals) == 1 and active_goals[0].name != streak.name:
                 active_goals[0].name = streak.name
                 active_goals[0].save()
+
+
+def _add_goal_added_on_column() -> None:
+    """Bring a pre-v3 database up to the v3 schema: add `Goal.added_on` if it isn't already
+    there. A fresh database created by `create_tables` already has it."""
+    existing_columns = {c.name for c in db.get_columns("goal")}
+    if "added_on" not in existing_columns:
+        migrator = SqliteMigrator(db)
+        migrate(migrator.add_column("goal", "added_on", Goal.added_on))
 
 
 def create_streak(
@@ -234,7 +248,7 @@ def create_streak(
             position=position,
         )
         for i, goal_name in enumerate(goal_names):
-            Goal.create(streak=streak, name=goal_name, position=i)
+            Goal.create(streak=streak, name=goal_name, position=i, added_on=created_on)
     return streak
 
 
@@ -282,7 +296,7 @@ def update_streak(
             Goal.update(removed_on=today).where(Goal.id.in_(removed_ids)).execute()
         for position, (gid, goal_name) in enumerate(goal_entries):
             if gid is None:
-                Goal.create(streak=streak, name=goal_name, position=position)
+                Goal.create(streak=streak, name=goal_name, position=position, added_on=today)
             else:
                 Goal.update(name=goal_name, position=position).where(Goal.id == gid).execute()
     return streak
@@ -358,7 +372,14 @@ def _build_streak_data(
     answers: list[DayAnswer],
 ) -> StreakData:
     goal_data = tuple(
-        GoalData(id=g.id, name=g.name, position=g.position, removed_on=g.removed_on) for g in goals
+        GoalData(
+            id=g.id,
+            name=g.name,
+            position=g.position,
+            removed_on=g.removed_on,
+            added_on=g.added_on,
+        )
+        for g in goals
     )
     check_data = tuple(
         sorted(

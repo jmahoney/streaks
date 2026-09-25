@@ -63,6 +63,7 @@ class GoalData:
     name: str
     position: int
     removed_on: date | None
+    added_on: date | None = None  # None means "always existed" (legacy rows predating this field)
 
 
 @dataclass(frozen=True)
@@ -385,10 +386,19 @@ def next_due_day(streak: StreakData, after: date) -> date:
 
 
 def active_goals(streak: StreakData, period: Period) -> tuple[GoalData, ...]:
-    """Goals that existed for (at least part of) ``period``, in position order."""
+    """Goals that existed for (at least part of) ``period``, in position order.
+
+    A goal added after ``period`` ends doesn't count for it, so a new goal applies from its own
+    period on and leaves earlier periods' recorded status alone.
+    """
     return tuple(
         sorted(
-            (g for g in streak.goals if g.removed_on is None or g.removed_on > period.start),
+            (
+                g
+                for g in streak.goals
+                if (g.removed_on is None or g.removed_on > period.start)
+                and (g.added_on is None or g.added_on <= period.end)
+            ),
             key=lambda g: g.position,
         )
     )
