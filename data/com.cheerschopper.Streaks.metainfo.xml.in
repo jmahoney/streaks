@@ -6,10 +6,42 @@
   <name>Streaks</name>
   <summary>Keep track of things you do regularly</summary>
   <description>
-    <p>Streaks helps you keep track of things you want to do regularly. Whether it's daily habits like exercise or cutting your nails, weekly goals like going to the gym, or special challenges like 75Hard, Streaks helps you maintain your streaks and see your progress.</p>
+    <p>Streaks keeps track of the things you want to do regularly, like cutting your nails, going to the gym five times a week, or getting through 75 Hard. It's a tracker, not a coach: you tell it what you did, and it keeps count.</p>
+    <ul>
+      <li>Daily, weekday, several-times-a-week or monthly streaks</li>
+      <li>A single goal, or a checklist of goals that must all be done</li>
+      <li>Check in from the Today view, or catch up on several quiet days at once</li>
+      <li>History heatmap, current and best runs, and a per-goal breakdown</li>
+      <li>Everything stays on your computer, and you can export all of it</li>
+    </ul>
   </description>
-  <url type="homepage">https://github.com/cheerschopper/streaks</url>
+  <url type="homepage">https://github.com/jmahoney/streaks</url>
+  <url type="bugtracker">https://github.com/jmahoney/streaks/issues</url>
+  <url type="vcs-browser">https://github.com/jmahoney/streaks</url>
+  <url type="contribute">https://github.com/jmahoney/streaks/blob/main/CONTRIBUTING.md</url>
   <launchable type="desktop-id">com.cheerschopper.Streaks.desktop</launchable>
+  <screenshots>
+    <screenshot type="default">
+      <image>https://raw.githubusercontent.com/jmahoney/streaks/main/docs/screenshots/today.png</image>
+      <caption>Today's check-ins</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://raw.githubusercontent.com/jmahoney/streaks/main/docs/screenshots/streak.png</image>
+      <caption>A streak's history</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://raw.githubusercontent.com/jmahoney/streaks/main/docs/screenshots/catch-up.png</image>
+      <caption>Catching up on quiet days</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://raw.githubusercontent.com/jmahoney/streaks/main/docs/screenshots/dark/today.png</image>
+      <caption>Dark style</caption>
+    </screenshot>
+  </screenshots>
+  <branding>
+    <color type="primary" scheme_preference="light">#99c1f1</color>
+    <color type="primary" scheme_preference="dark">#5c3c00</color>
+  </branding>
   <releases>
     <release version="0.1.0" date="2026-09-19">
       <description>
@@ -19,7 +51,7 @@
   </releases>
   <content_rating type="oars-1.1" />
   <developer id="com.cheerschopper">
-    <name>Cheers Chopper</name>
+    <name>Joe Mahoney</name>
   </developer>
   <requires>
     <display_length compare="ge">768</display_length>

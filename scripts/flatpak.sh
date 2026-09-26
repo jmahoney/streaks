@@ -17,7 +17,7 @@ case "$action" in
   test)
     # Two deterministic, headless checks that the installed bundle is actually usable. Runs under
     # Xvfb on the X11 backend so the check is deterministic and never opens a window on the
-    # developer's desktop (see README › Development).
+    # developer's desktop (see docs/HACKING.md › Headless tests).
 
     echo "-- bundle import check --"
     # Proves the sandbox's Python can see both the vendored `peewee` module and the app's own
@@ -35,8 +35,8 @@ case "$action" in
 
     echo "-- headless window-open check --"
     # Proves `flatpak run` actually opens the main window. Runs under Xvfb on the X11 backend so
-    # the check is deterministic and never opens a window on the developer's desktop (see README
-    # › Development).
+    # the check is deterministic and never opens a window on the developer's desktop (see
+    # docs/HACKING.md › Headless tests).
     # `--nosocket=wayland` overrides the manifest's `--socket=wayland` finish-arg for this one
     # run: on a real desktop session (as in this dev sandbox, which has a live Wayland compositor
     # alongside Xvfb) GTK would otherwise happily connect to *that* real, live compositor instead

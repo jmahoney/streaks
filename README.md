@@ -1,11 +1,27 @@
 # Streaks
 
-A native GNOME app for keeping track of things you want to do regularly — daily, weekdays,
-N times a week, or monthly. It's a tracker you update by hand, not a scold or a coach: check in
-when you've done the thing, mark a day missed when you haven't, and Streaks keeps the count.
+A native GNOME app for keeping track of things you want to do regularly: cutting your
+fingernails every couple of weeks, going to the gym five times a week, or getting through all 75
+days of 75 Hard. Streaks is a tracker, not a coach. It won't nag you and it won't cheer you on.
+You tell it what you did, and it keeps count.
 
-Built with Python 3, GTK 4 and libadwaita, backed by a local SQLite database (Peewee ORM).
-Everything stays on the machine — there is no account, no network access, and no telemetry.
+## What it does
+
+- **Streaks on your schedule.** A streak can be daily, weekdays only, N times a week, or monthly.
+- **One goal or a checklist.** A streak can be a single thing ("Floss") or several goals that
+  must all be done ("75 Hard": two workouts, a gallon of water, ten pages…).
+- **Today view.** A check-in card for every running streak, so you can tick things off as you
+  go.
+- **Catch up on quiet days.** If you forget to open the app for a few days, one dialog lets you
+  answer for every unconfirmed day at once.
+- **History.** Each streak has a heatmap, current and best runs, earlier runs, and a per-goal
+  breakdown for the month.
+- **Ended streaks.** You can end a streak and still look back at it later.
+- **Preferences.** Set when your day starts (so a 1 a.m. check-in counts for the night before),
+  how far back you can answer for, and how runs are counted.
+- **Your data stays yours.** Everything is stored in a local SQLite database. There's no
+  account, no network access and no telemetry. You can export everything to JSON.
+- Light and dark styles that follow your system setting.
 
 ## Screenshots
 
@@ -15,125 +31,106 @@ Everything stays on the machine — there is no account, no network access, and 
 | ![Streak history](docs/screenshots/streak.png) Streak history — stats, heatmap, per-goal bars | ![New streak](docs/screenshots/new-streak.png) New/Edit streak dialog — single goal |
 | ![New streak, multi-goal](docs/screenshots/new-streak-goals.png) New/Edit streak dialog — "Add more goals" | ![Catch up](docs/screenshots/catch-up.png) Catch-up dialog |
 | ![Preferences](docs/screenshots/preferences.png) Preferences | ![Edit streak, multi-goal](docs/screenshots/edit-streak-goals.png) Editing a streak into a checklist |
-| ![Today, dark](docs/screenshots/dark/today.png) Dark scheme — amber accent | ![Streak history, dark](docs/screenshots/dark/streak.png) Dark scheme — amber chart scale |
+| ![Today, dark](docs/screenshots/dark/today.png) Dark style — amber accent | ![Streak history, dark](docs/screenshots/dark/streak.png) Dark style — amber chart scale |
 
-More: [`docs/screenshots/`](docs/screenshots/) (copied from the approved golden snapshots in
-`tests/snapshots/` — see `scripts/snapshots.sh`).
+More in [`docs/screenshots/`](docs/screenshots/).
 
-## Quick start
+## Project status
 
-Install the toolchain (Meson, Ninja, blueprint-compiler, GTK4/Adwaita GI bindings, Peewee,
-pytest, Flatpak, etc.):
+This is a **hobby project**. I work on it in my spare time, when and as I feel like it. It
+works, I use it, and there is no roadmap or release schedule. Issues and small pull requests
+are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) first.
+
+## Getting started
+
+These steps assume a Debian/Ubuntu-style system with GNOME 50-era libraries. The app is written
+in Python 3.11+ with GTK 4, libadwaita, Blueprint and Meson.
+
+### 1. Get the code and the toolchain
 
 ```bash
-scripts/bootstrap.sh --install
+git clone https://github.com/jmahoney/streaks.git
+cd streaks
+scripts/bootstrap.sh            # check what's missing and print how to install it
+scripts/bootstrap.sh --install  # or: install it (apt, plus ruff and the Flatpak runtime)
 ```
 
-Build:
+### 2. Build and run
 
 ```bash
 meson setup _build
 meson compile -C _build
+scripts/run.sh          # run from the build tree (rebuilds first if needed)
+scripts/run.sh --seed   # start fresh with five sample streaks, with "today" pinned to 13 Sep 2026
 ```
 
-Run:
+`scripts/run.sh` keeps its data in `_build/devdata/`, so development never touches the database
+of an installed copy of the app.
+
+### 3. Or build it as a Flatpak
 
 ```bash
-scripts/run.sh
-# or, with the design-fixture data pre-loaded:
-scripts/run.sh --seed
+scripts/flatpak.sh build   # flatpak-builder --user --install
+scripts/flatpak.sh run
 ```
 
-## Development
+## Running the tests
 
-`scripts/check.sh` is the single entry point for everything CI also runs: `ruff format`/`ruff
-check`, the Blueprint compile, the Meson build, the template-consistency and i18n-completeness
-checks (`scripts/check_templates.py`), the Flatpak-manifest dependency check
-(`scripts/check_manifest.py`), desktop-file/AppStream/GSettings-schema validation, the unit suite,
-the GUI suite, and the golden-image snapshot suite.
+`scripts/check.sh` runs everything CI would. That covers lint and formatting (Ruff), the
+Blueprint and Meson build, template and translation checks, desktop-file/AppStream/GSettings
+validation, the unit tests, the GUI tests and the screenshot comparison tests.
 
 ```bash
-scripts/check.sh                # everything, including snapshots
-scripts/check.sh --unit         # ruff + unit tests only (fast)
-scripts/check.sh --gui          # skip the standalone unit-test stage (GUI tests exercise them too)
-scripts/check.sh --no-snapshots # skip the snapshot-image comparison
-scripts/check.sh --fast         # unit + GUI, no snapshots, no re-render
+scripts/check.sh                # everything
+scripts/check.sh --fast         # unit + GUI tests, no screenshot comparison (the usual inner loop)
+scripts/check.sh --unit         # Ruff + unit tests only
+scripts/check.sh --no-snapshots # everything except the screenshot comparison
 ```
 
-GUI and snapshot tests run under Xvfb by default (`STREAKS_HEADLESS=1`, the default) so a test
-window can never appear on — or hang — your real desktop. Set `STREAKS_HEADLESS=0` only if you
-deliberately want to watch them run on your own display.
+The GUI tests open real GTK windows, but inside a virtual X display (Xvfb), so nothing pops up
+on your desktop and a stuck test can't lock up your session.
 
-Under Xvfb the scripts also pin GTK to the X11 backend (`GDK_BACKEND=x11`, `WAYLAND_DISPLAY`
-unset): with a Wayland socket still visible, GTK 4 prefers it and the "headless" windows would
-open on the real desktop.
-
-Other scripts:
-
-- `scripts/screenshot.sh [screen]` — render one (or all) screens to `_build/screenshots/`
-  (gitignored) for a quick look, headless by default; add `--dark` for the dark scheme.
-- `scripts/snapshots.sh check` — compare the current UI against `tests/snapshots/*.png` (light)
-  and `tests/snapshots/dark/*.png`.
-- `scripts/snapshots.sh update` — re-render and overwrite the goldens, both schemes (only after a
-  deliberate, reviewed visual change).
-- `scripts/add_ui.py <name>` — scaffold a new `.blp`/`.py` component pair and wire it into
-  `meson.build`, `streaks.gresource.xml` and `po/POTFILES`.
-
-### Translations
-
-Every user-facing string in `.blp`/`.py` is wrapped in `_()`/`ngettext()`.
-`scripts/check_templates.py` (part of `scripts/check.sh`) fails the build if a `label:`/`title:`/
-`subtitle:`/`tooltip-text:`/`placeholder-text:` in a `.blp`, or a matching Python keyword
-argument, is ever given an untranslated literal (anything containing a letter). Regenerate the
-template after adding/changing translatable strings:
+The **snapshot tests** render every screen and compare it pixel by pixel against the approved
+images in `tests/snapshots/`. If you change the UI on purpose, check the new renders with
+`scripts/screenshot.sh`, then accept them:
 
 ```bash
-meson compile -C _build streaks-pot
+scripts/snapshots.sh update
 ```
 
-## Distribution (Flatpak)
+## Making changes
 
-```bash
-scripts/flatpak.sh build   # flatpak-builder --user --install --force-clean
-scripts/flatpak.sh run     # flatpak run com.cheerschopper.Streaks
-scripts/flatpak.sh test    # deterministic, headless: bundle imports + the window actually opens
-```
+[docs/HACKING.md](docs/HACKING.md) covers the code layout, the conventions the code follows, the
+test fixtures, the helper scripts and translations. [CONTRIBUTING.md](CONTRIBUTING.md) explains how
+to get a change merged.
 
-`scripts/flatpak.sh test` never touches a live display either: its window-open check runs under
-Xvfb with the sandbox's Wayland access temporarily overridden off (`--nosocket=wayland`), so it
-can't accidentally connect to a real desktop's compositor, and the app quits itself
-(`STREAKS_QUIT_AFTER_STARTUP=1`) the moment the window is realised.
+## How this was built
 
-## Project layout
+Streaks started as a rapid prototype built mostly by [Claude](https://claude.com/claude-code). I
+decided what to build and reviewed and steered the result, and Claude wrote most of the code. It's
+a good way to go from an idea to a working app in days, but the prompts don't prove anything. The
+tests do, and I care that they pass:
 
-Three layers. `engine` computes every string, number and colour token from
-plain data. `models` loads that data from SQLite and performs writes.
-Everything else is a GTK view: it places what the engine produced into a
-Blueprint template and reports user actions as signals or `models` writes
-followed by `AppState.reload()`.
+- a unit suite for the streak engine, which pins every rule in
+  [docs/engine-rules.md](docs/engine-rules.md);
+- GUI integration tests that drive the real widgets;
+- golden-image snapshot tests of every screen, in both light and dark styles, so the app keeps
+  looking the way it was designed to look.
 
-- `src/streaks/` — application code: `engine.py` is the pure (no GTK/DB) streak/run/history
-  calculator; `models.py` is the Peewee data layer; everything else is GTK view code bound to
-  `src/streaks/ui/*.blp` Blueprint templates.
-- `docs/design-spec.md` — the source-of-truth UI/behaviour spec, extracted from `claude-design/`.
-- `docs/engine-rules.md` — the rules the engine applies to turn check-ins into period statuses,
-  runs and counts.
-- `tests/unit/` — pure-Python tests against an in-memory database (no GTK).
-- `tests/gui/` — PyGObject integration tests (headless by default) plus the golden-image
-  snapshot suite in `tests/gui/test_snapshots.py`.
+You don't need an AI assistant to work on Streaks, and the repo doesn't ship any agent
+configuration. If you use one, bring your own setup. `AGENTS.md`, `CLAUDE.md` and similar files
+are gitignored.
 
 ## Known gaps
 
-- **Reminders are stored only.** A streak's reminder time round-trips through create/edit/export
-  (`reminder_time` on `Streak`), but nothing schedules or delivers a notification yet — there is
-  no background service, and the app doesn't need to be running for a reminder to notionally be
-  "due". Wiring this up to `Gio.Notification`/a scheduled background activation is future work.
-- **Narrow-window layout.** The design (and this implementation) only covers the desktop-width
-  layout in `docs/design-spec.md`; there's no adaptive/narrow breakpoint for the sidebar or the
-  Today two-column card grid.
-- **Dark scheme.** Amber accent and chart scale via `@media (prefers-color-scheme: dark)` in
-  `data/style.css` and `streaks.theme`; follows the system setting, no in-app toggle.
+- **Reminders are stored but never sent.** A streak's reminder time is saved, edited and
+  exported, but nothing schedules or delivers a notification yet. Hooking it up to
+  `Gio.Notification` or a scheduled background activation is future work.
+- **No narrow-window layout.** Only the desktop-width layout exists. The sidebar and the Today
+  card grid don't adapt to narrow windows.
+- **No in-app light/dark switch.** The dark style (amber accent and chart scale) always follows
+  the system setting.
 
 ## License
 
-MIT
+MIT. See [COPYING](COPYING).

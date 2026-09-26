@@ -8,7 +8,7 @@
 #                        NEED_XVFB=0)
 #   HEADLESS_RUNNER_STR  the same prefix as a string, for a caller that builds its command with
 #                        `eval` (empty when NEED_XVFB=0)
-# Xvfb needs GTK on the X11 backend; see README › Development.
+# Xvfb needs GTK on the X11 backend; see docs/HACKING.md › Headless tests.
 headless_setup() {
   NEED_XVFB=0
   if [[ "${1:-}" == "always" ]] || [[ "${STREAKS_HEADLESS:-1}" == "1" ]] \

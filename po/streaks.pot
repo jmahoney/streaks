@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: streaks\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-24 22:30+1200\n"
+"POT-Creation-Date: 2026-09-27 11:57+1300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -36,18 +36,53 @@ msgstr ""
 
 #: data/com.cheerschopper.Streaks.metainfo.xml.in:9
 msgid ""
-"Streaks helps you keep track of things you want to do regularly. Whether "
-"it's daily habits like exercise or cutting your nails, weekly goals like "
-"going to the gym, or special challenges like 75Hard, Streaks helps you "
-"maintain your streaks and see your progress."
+"Streaks keeps track of the things you want to do regularly, like cutting "
+"your nails, going to the gym five times a week, or getting through 75 Hard. "
+"It's a tracker, not a coach: you tell it what you did, and it keeps count."
 msgstr ""
 
-#: data/com.cheerschopper.Streaks.metainfo.xml.in:16
+#: data/com.cheerschopper.Streaks.metainfo.xml.in:11
+msgid "Daily, weekday, several-times-a-week or monthly streaks"
+msgstr ""
+
+#: data/com.cheerschopper.Streaks.metainfo.xml.in:12
+msgid "A single goal, or a checklist of goals that must all be done"
+msgstr ""
+
+#: data/com.cheerschopper.Streaks.metainfo.xml.in:13
+msgid "Check in from the Today view, or catch up on several quiet days at once"
+msgstr ""
+
+#: data/com.cheerschopper.Streaks.metainfo.xml.in:14
+msgid "History heatmap, current and best runs, and a per-goal breakdown"
+msgstr ""
+
+#: data/com.cheerschopper.Streaks.metainfo.xml.in:15
+msgid "Everything stays on your computer, and you can export all of it"
+msgstr ""
+
+#: data/com.cheerschopper.Streaks.metainfo.xml.in:26
+msgid "Today's check-ins"
+msgstr ""
+
+#: data/com.cheerschopper.Streaks.metainfo.xml.in:30
+msgid "A streak's history"
+msgstr ""
+
+#: data/com.cheerschopper.Streaks.metainfo.xml.in:34
+msgid "Catching up on quiet days"
+msgstr ""
+
+#: data/com.cheerschopper.Streaks.metainfo.xml.in:38
+msgid "Dark style"
+msgstr ""
+
+#: data/com.cheerschopper.Streaks.metainfo.xml.in:48
 msgid "Initial release."
 msgstr ""
 
-#: data/com.cheerschopper.Streaks.metainfo.xml.in:22
-msgid "Cheers Chopper"
+#: data/com.cheerschopper.Streaks.metainfo.xml.in:54
+msgid "Joe Mahoney"
 msgstr ""
 
 #: data/com.cheerschopper.Streaks.gschema.xml:6
@@ -124,298 +159,315 @@ msgstr ""
 msgid "Whether to show ended runs in the sidebar"
 msgstr ""
 
-#: src/streaks/engine.py:636
+#: src/streaks/engine.py:647
 #, python-format
 msgid "%(n)d goal"
 msgid_plural "%(n)d goals"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/streaks/engine.py:643
-#, python-format
-msgid "Daily · %(goals)s"
+#: src/streaks/engine.py:653 src/streaks/ui/streak_dialog.blp:199
+msgid "Daily"
 msgstr ""
 
-#: src/streaks/engine.py:646
+#: src/streaks/engine.py:657
 #, python-format
-msgid "%(days)s · %(goals)s"
+msgid "%(n)d× a week"
 msgstr ""
 
-#: src/streaks/engine.py:648
-#, python-format
-msgid "%(n)d× a week · %(goals)s"
+#: src/streaks/engine.py:659 src/streaks/ui/streak_dialog.blp:214
+msgid "Monthly"
 msgstr ""
 
-#: src/streaks/engine.py:653
+#: src/streaks/engine.py:670
 #, python-format
-msgid "Monthly · %(goals)s"
+msgid "%(period)s · %(goals)s"
 msgstr ""
 
-#: src/streaks/engine.py:659
+#: src/streaks/engine.py:675
 #, python-format
 msgid "Ended %(date)s · best %(best)d"
 msgstr ""
 
-#: src/streaks/engine.py:672
+#: src/streaks/engine.py:688
 msgid "missed — run ended"
 msgstr ""
 
-#: src/streaks/engine.py:674
+#: src/streaks/engine.py:690
 msgid "no check-in yet — unconfirmed"
 msgstr ""
 
-#: src/streaks/engine.py:675
+#: src/streaks/engine.py:691
 #, python-format
 msgid "%(done)d of %(n)d goal"
 msgid_plural "%(done)d of %(n)d goals"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/streaks/engine.py:701
+#: src/streaks/engine.py:717
 msgid "upcoming"
 msgstr ""
 
-#: src/streaks/engine.py:722
+#: src/streaks/engine.py:738
 msgid "No check-ins open"
 msgstr ""
 
-#: src/streaks/engine.py:723
+#: src/streaks/engine.py:739
 #, python-format
 msgid "%(n)d check-in open"
 msgid_plural "%(n)d check-ins open"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/streaks/engine.py:729
+#: src/streaks/engine.py:745
 #, python-format
 msgid "%(n)d earlier day unconfirmed"
 msgid_plural "%(n)d earlier days unconfirmed"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/streaks/engine.py:735
+#: src/streaks/engine.py:751
 #, python-format
 msgid "One day without a check-in — %(day)s"
 msgstr ""
 
-#: src/streaks/engine.py:740
+#: src/streaks/engine.py:756
 #, python-format
 msgid "%(n)s days without a check-in — %(range)s"
 msgstr ""
 
-#: src/streaks/engine.py:791
+#: src/streaks/engine.py:811
 #, python-format
-msgid "Weekdays only. Next check-in %(day)s."
+msgid "done %(time)s"
 msgstr ""
 
-#: src/streaks/engine.py:793
-#, python-format
-msgid "%(days)s only. Next check-in %(day)s."
+#: src/streaks/engine.py:814
+msgid "done this month"
 msgstr ""
 
-#: src/streaks/engine.py:801
-msgid "Not today"
-msgstr ""
-
-#: src/streaks/engine.py:818
-msgid "Done this month"
-msgstr ""
-
-#: src/streaks/engine.py:818
-msgid "Due this month"
-msgstr ""
-
-#: src/streaks/engine.py:825
+#: src/streaks/engine.py:816 src/streaks/engine.py:896
 #, python-format
 msgid "%(n)d day left"
 msgid_plural "%(n)d days left"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/streaks/engine.py:844
+#: src/streaks/engine.py:819 src/streaks/engine.py:915
 #, python-format
 msgid "%(done)d of %(n)d this week"
 msgstr ""
 
-#: src/streaks/engine.py:848
+#: src/streaks/engine.py:821
+#, python-format
+msgid "day %(k)d"
+msgstr ""
+
+#: src/streaks/engine.py:835
+#, python-format
+msgid "%(period)s · %(status)s"
+msgstr ""
+
+#: src/streaks/engine.py:858
+#, python-format
+msgid "Weekdays only. Next check-in %(day)s."
+msgstr ""
+
+#: src/streaks/engine.py:860
+#, python-format
+msgid "%(days)s only. Next check-in %(day)s."
+msgstr ""
+
+#: src/streaks/engine.py:868
+msgid "Not today"
+msgstr ""
+
+#: src/streaks/engine.py:889
+msgid "Done this month"
+msgstr ""
+
+#: src/streaks/engine.py:889
+msgid "Due this month"
+msgstr ""
+
+#: src/streaks/engine.py:919
 #, python-format
 msgid "%(done)d of %(n)d · day %(k)d"
 msgstr ""
 
-#: src/streaks/engine.py:867
+#: src/streaks/engine.py:938
 #, python-format
 msgid "%(done)d of %(n)d"
 msgstr ""
 
-#: src/streaks/engine.py:904
+#: src/streaks/engine.py:975
 #, python-format
 msgid "The %(n)s-day run continues. Unconfirmed days do not end a run."
 msgstr ""
 
-#: src/streaks/engine.py:928
+#: src/streaks/engine.py:999
 msgid "weeks running"
 msgstr ""
 
-#: src/streaks/engine.py:930
+#: src/streaks/engine.py:1001
 msgid "months running"
 msgstr ""
 
-#: src/streaks/engine.py:931
+#: src/streaks/engine.py:1002
 msgid "days running"
 msgstr ""
 
-#: src/streaks/engine.py:938
+#: src/streaks/engine.py:1009
 msgid "weeks, best run"
 msgstr ""
 
-#: src/streaks/engine.py:940
+#: src/streaks/engine.py:1011
 msgid "months, best run"
 msgstr ""
 
-#: src/streaks/engine.py:941
+#: src/streaks/engine.py:1012
 msgid "days, best run"
 msgstr ""
 
-#: src/streaks/engine.py:1007
+#: src/streaks/engine.py:1078
 msgid "done"
 msgstr ""
 
-#: src/streaks/engine.py:1007
+#: src/streaks/engine.py:1078
 #, python-format
 msgid "all %(word)s"
 msgstr ""
 
-#: src/streaks/engine.py:1011
+#: src/streaks/engine.py:1082
 msgid "some"
 msgstr ""
 
-#: src/streaks/engine.py:1012 src/streaks/engine.py:1086
+#: src/streaks/engine.py:1083 src/streaks/engine.py:1157
 msgid "unconfirmed"
 msgstr ""
 
-#: src/streaks/engine.py:1013
+#: src/streaks/engine.py:1084
 msgid "missed"
 msgstr ""
 
-#: src/streaks/engine.py:1069
+#: src/streaks/engine.py:1140
 #, python-format
 msgid "%(meta)s · ended %(date)s"
 msgstr ""
 
-#: src/streaks/engine.py:1076
+#: src/streaks/engine.py:1147
 #, python-format
 msgid "%(meta)s · run %(idx)d"
 msgstr ""
 
-#: src/streaks/engine.py:1087
+#: src/streaks/engine.py:1158
 msgid "confirmed kept"
 msgstr ""
 
-#: src/streaks/engine.py:1088
+#: src/streaks/engine.py:1159
 msgid "goals hit"
 msgstr ""
 
-#: src/streaks/engine.py:1093 src/streaks/ui/streak_view.blp:83
+#: src/streaks/engine.py:1164 src/streaks/ui/streak_view.blp:83
 msgid "Lifetime"
 msgstr ""
 
-#: src/streaks/engine.py:1098
+#: src/streaks/engine.py:1169
 #, python-format
 msgid "Run %(idx)d · since %(date)s"
 msgstr ""
 
-#: src/streaks/engine.py:1103
+#: src/streaks/engine.py:1174
 #, python-format
 msgid "Run %(idx)d · %(range)s"
 msgstr ""
 
-#: src/streaks/engine.py:1119
+#: src/streaks/engine.py:1190
 #, python-format
 msgid "%(n)d day unconfirmed — catch up"
 msgid_plural "%(n)d days unconfirmed — catch up"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/streaks/engine.py:1128 src/streaks/streak_view.py:111
+#: src/streaks/engine.py:1199 src/streaks/streak_view.py:111
 #, python-format
 msgid "Run %(idx)d"
 msgstr ""
 
-#: src/streaks/engine.py:1129
+#: src/streaks/engine.py:1200
 #, python-format
 msgid "%(range)s · %(n)d days"
 msgstr ""
 
-#: src/streaks/engine.py:1142 src/streaks/ui/streak_dialog.blp:186
+#: src/streaks/engine.py:1213 src/streaks/ui/streak_dialog.blp:228
 msgid "M"
 msgstr ""
 
-#: src/streaks/engine.py:1142 src/streaks/ui/streak_dialog.blp:202
+#: src/streaks/engine.py:1213 src/streaks/ui/streak_dialog.blp:244
 msgid "W"
 msgstr ""
 
-#: src/streaks/engine.py:1142 src/streaks/ui/streak_dialog.blp:218
+#: src/streaks/engine.py:1213 src/streaks/ui/streak_dialog.blp:260
 msgid "F"
 msgstr ""
 
-#: src/streaks/engine.py:1166
+#: src/streaks/engine.py:1237
 #, python-format
 msgid "%(name)s · %(n)d day"
 msgid_plural "%(name)s · %(n)d days"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/streaks/engine.py:1196
+#: src/streaks/engine.py:1267
 msgid "Unconfirmed"
 msgstr ""
 
-#: src/streaks/engine.py:1201
+#: src/streaks/engine.py:1272
 msgid "Kept"
 msgstr ""
 
-#: src/streaks/engine.py:1201
+#: src/streaks/engine.py:1272
 #, python-format
 msgid "All %(n)d kept"
 msgstr ""
 
-#: src/streaks/engine.py:1205
+#: src/streaks/engine.py:1276
 #, python-format
 msgid "%(done)d of %(n)d kept · %(missed)d missed"
 msgstr ""
 
-#: src/streaks/engine.py:1211
+#: src/streaks/engine.py:1282
 msgid "Missed"
 msgstr ""
 
-#: src/streaks/engine.py:1225
+#: src/streaks/engine.py:1296
 #, python-format
 msgid "Run %(idx)d ends on %(day)s at %(len)d day."
 msgid_plural "Run %(idx)d ends on %(day)s at %(len)d days."
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/streaks/engine.py:1234
+#: src/streaks/engine.py:1305
 #, python-format
 msgid "Run %(idx)d starts on %(day)s at %(len)d day."
 msgid_plural "Run %(idx)d starts on %(day)s at %(len)d days."
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/streaks/engine.py:1263
+#: src/streaks/engine.py:1334
 #, python-format
 msgid "Run %(idx)d continues at %(len)d day."
 msgid_plural "Run %(idx)d continues at %(len)d days."
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/streaks/engine.py:1273
+#: src/streaks/engine.py:1344
 #, python-format
 msgid "%(n)d day unconfirmed."
 msgid_plural "%(n)d days unconfirmed."
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/streaks/engine.py:1326
+#: src/streaks/engine.py:1397
 #, python-format
 msgid "This ends run %(idx)d at %(len)d days."
 msgstr ""
@@ -501,7 +553,7 @@ msgstr ""
 msgid "Mark missed"
 msgstr ""
 
-#: src/streaks/ui/window.blp:28 src/streaks/streak_dialog.py:130
+#: src/streaks/ui/window.blp:28 src/streaks/streak_dialog.py:148
 msgid "New Streak"
 msgstr ""
 
@@ -554,7 +606,7 @@ msgstr ""
 msgid "Catch up"
 msgstr ""
 
-#: src/streaks/ui/checkin_card.blp:88
+#: src/streaks/ui/checkin_card.blp:91
 msgid "Mark day missed"
 msgstr ""
 
@@ -566,11 +618,11 @@ msgstr ""
 msgid "Cancel"
 msgstr ""
 
-#: src/streaks/ui/streak_dialog.blp:87 src/streaks/streak_dialog.py:131
+#: src/streaks/ui/streak_dialog.blp:87 src/streaks/streak_dialog.py:149
 msgid "Create"
 msgstr ""
 
-#: src/streaks/ui/streak_dialog.blp:97
+#: src/streaks/ui/streak_dialog.blp:97 src/streaks/streak_dialog.py:256
 msgid "Name"
 msgstr ""
 
@@ -578,81 +630,100 @@ msgstr ""
 msgid "Colour"
 msgstr ""
 
-#: src/streaks/ui/streak_dialog.blp:148
-msgid "Period"
+#: src/streaks/ui/streak_dialog.blp:161
+msgid "Add more goals"
 msgstr ""
 
-#: src/streaks/ui/streak_dialog.blp:149
-msgid "Every goal in a streak shares this period."
+#: src/streaks/ui/streak_dialog.blp:166
+msgid "— for a checklist, e.g. a morning routine"
 msgstr ""
 
-#: src/streaks/ui/streak_dialog.blp:157
-msgid "Daily"
+#: src/streaks/ui/streak_dialog.blp:174
+msgid "Goals"
 msgstr ""
 
-#: src/streaks/ui/streak_dialog.blp:162
-msgid "Weekdays"
-msgstr ""
-
-#: src/streaks/ui/streak_dialog.blp:167
-msgid "N a week"
-msgstr ""
-
-#: src/streaks/ui/streak_dialog.blp:172
-msgid "Monthly"
-msgstr ""
-
-#: src/streaks/ui/streak_dialog.blp:194 src/streaks/ui/streak_dialog.blp:210
-msgid "T"
-msgstr ""
-
-#: src/streaks/ui/streak_dialog.blp:226 src/streaks/ui/streak_dialog.blp:234
-msgid "S"
-msgstr ""
-
-#: src/streaks/ui/streak_dialog.blp:244
-msgid "Times a week"
-msgstr ""
-
-#: src/streaks/ui/streak_dialog.blp:256
-msgid "Reminder"
-msgstr ""
-
-#: src/streaks/ui/streak_dialog.blp:257
-msgid "A check-in notification each period"
-msgstr ""
-
-#: src/streaks/ui/streak_dialog.blp:262 src/streaks/streak_dialog.py:221
-msgid "Off ›"
-msgstr ""
-
-#: src/streaks/ui/streak_dialog.blp:270
-msgid "Allow one skip a week"
-msgstr ""
-
-#: src/streaks/ui/streak_dialog.blp:271
-msgid "A skipped period won't break the run"
-msgstr ""
-
-#: src/streaks/ui/streak_dialog.blp:276
-msgid "Goals — 1"
-msgstr ""
-
-#: src/streaks/ui/streak_dialog.blp:284
+#: src/streaks/ui/streak_dialog.blp:183
 msgid "Add a goal"
 msgstr ""
 
-#: src/streaks/streak_dialog.py:139
+#: src/streaks/ui/streak_dialog.blp:190
+msgid "Period"
+msgstr ""
+
+#: src/streaks/ui/streak_dialog.blp:191
+msgid "Every goal in a streak shares this period."
+msgstr ""
+
+#: src/streaks/ui/streak_dialog.blp:204
+msgid "Weekdays"
+msgstr ""
+
+#: src/streaks/ui/streak_dialog.blp:209
+msgid "N a week"
+msgstr ""
+
+#: src/streaks/ui/streak_dialog.blp:236 src/streaks/ui/streak_dialog.blp:252
+msgid "T"
+msgstr ""
+
+#: src/streaks/ui/streak_dialog.blp:268 src/streaks/ui/streak_dialog.blp:276
+msgid "S"
+msgstr ""
+
+#: src/streaks/ui/streak_dialog.blp:286
+msgid "Times a week"
+msgstr ""
+
+#: src/streaks/ui/streak_dialog.blp:298
+msgid "Reminder"
+msgstr ""
+
+#: src/streaks/ui/streak_dialog.blp:299
+msgid "A check-in notification each period"
+msgstr ""
+
+#: src/streaks/ui/streak_dialog.blp:304 src/streaks/streak_dialog.py:245
+msgid "Off ›"
+msgstr ""
+
+#: src/streaks/ui/streak_dialog.blp:312
+msgid "Allow one skip a week"
+msgstr ""
+
+#: src/streaks/ui/streak_dialog.blp:313
+msgid "A skipped period won't break the run"
+msgstr ""
+
+#: src/streaks/ui/streak_dialog.blp:321
+msgid "Delete streak"
+msgstr ""
+
+#: src/streaks/streak_dialog.py:32
+msgid ""
+"New goals apply from the current period. Earlier periods keep their recorded "
+"shade."
+msgstr ""
+
+#: src/streaks/streak_dialog.py:157
 msgid "Edit Streak"
 msgstr ""
 
-#: src/streaks/streak_dialog.py:140 src/streaks/ui/catchup_dialog.blp:25
+#: src/streaks/streak_dialog.py:158 src/streaks/ui/catchup_dialog.blp:25
 msgid "Save"
 msgstr ""
 
-#: src/streaks/streak_dialog.py:321
+#: src/streaks/streak_dialog.py:256
+msgid "Streak name"
+msgstr ""
+
+#: src/streaks/streak_dialog.py:286
 #, python-format
-msgid "Goals — %(n)d"
+msgid "“%(text)s” moved from the name field to goal 1."
+msgstr ""
+
+#: src/streaks/streak_dialog.py:397
+#, python-format
+msgid "Goal %(n)d"
 msgstr ""
 
 #: src/streaks/ui/goal_edit_row.blp:24
