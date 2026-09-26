@@ -1,7 +1,7 @@
 """Fixtures shared by the unit test suite: an isolated in-memory database per test.
 
-Per ``CLAUDE.md``, tests never touch the user's live/production database — each test gets a
-fresh ``:memory:`` SQLite database bound to the Peewee models.
+Tests never touch the user's live/production database (see ``docs/HACKING.md``) — each test gets
+a fresh ``:memory:`` SQLite database bound to the Peewee models.
 """
 
 from __future__ import annotations

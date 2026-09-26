@@ -1,8 +1,9 @@
 # Streaks — design specification
 
-Extracted from the design mock in `claude-design/streak-tracking-gnome-app/`. This file is the
-source of truth for layout, wording and colours; the HTML mock is reference material. Every
-quoted string below is exact and must be wrapped in `_()` in code. The fixture date is **Sunday
+The UI/behaviour spec the app was built against, originally extracted from an HTML design mock.
+It is the reference for layout, wording and colours; the golden snapshots in `tests/snapshots/`
+are the visual source of truth for what actually ships. Code comments cite its sections as
+`design-spec §N`. Every quoted string below is exact and must be wrapped in `_()` in code. The fixture date is **Sunday
 13 September 2026**.
 
 Design tokens (px, light theme; libadwaita's Adwaita already provides most of these — use style classes, not custom CSS,

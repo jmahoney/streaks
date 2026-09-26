@@ -57,3 +57,12 @@ ENV/
 *.swp
 *~
 .DS_Store
+
+# ==========================================
+# AI / agent tooling (local only — bring your own)
+# ==========================================
+AGENTS.md
+CLAUDE.md
+claude-design/
+.claude/
+.superpowers/
