@@ -1,6 +1,14 @@
+app_conf = configuration_data()
+app_conf.set('APPLICATION_ID', application_id)
+app_conf.set('bindir', get_option('prefix') / get_option('bindir'))
+
 desktop_file = i18n.merge_file(
-  input: 'com.cheerschopper.Streaks.desktop.in',
-  output: 'com.cheerschopper.Streaks.desktop',
+  input: configure_file(
+    input: 'com.cheerschopper.Streaks.desktop.in',
+    output: application_id + '.desktop.in',
+    configuration: app_conf,
+  ),
+  output: application_id + '.desktop',
   type: 'desktop',
   po_dir: '../po',
   install: true,
@@ -10,8 +18,12 @@ desktop_file = i18n.merge_file(
 test('Validate desktop file', find_program('desktop-file-validate'), args: [desktop_file])
 
 appstream_file = i18n.merge_file(
-  input: 'com.cheerschopper.Streaks.metainfo.xml.in',
-  output: 'com.cheerschopper.Streaks.metainfo.xml',
+  input: configure_file(
+    input: 'com.cheerschopper.Streaks.metainfo.xml.in',
+    output: application_id + '.metainfo.xml.in',
+    configuration: app_conf,
+  ),
+  output: application_id + '.metainfo.xml',
   type: 'xml',
   po_dir: '../po',
   install: true,
@@ -27,8 +39,11 @@ install_data(
 
 # The desktop file declares DBusActivatable=true, so Flatpak export requires a matching D-Bus
 # service file.
-install_data(
-  'com.cheerschopper.Streaks.service',
+configure_file(
+  input: 'com.cheerschopper.Streaks.service.in',
+  output: application_id + '.service',
+  configuration: app_conf,
+  install: true,
   install_dir: get_option('datadir') / 'dbus-1' / 'services'
 )
 

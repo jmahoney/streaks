@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
-  <id>com.cheerschopper.Streaks</id>
+  <id>@APPLICATION_ID@</id>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>MIT</project_license>
   <name>Streaks</name>
@@ -19,7 +19,7 @@
   <url type="bugtracker">https://github.com/jmahoney/streaks/issues</url>
   <url type="vcs-browser">https://github.com/jmahoney/streaks</url>
   <url type="contribute">https://github.com/jmahoney/streaks/blob/main/CONTRIBUTING.md</url>
-  <launchable type="desktop-id">com.cheerschopper.Streaks.desktop</launchable>
+  <launchable type="desktop-id">@APPLICATION_ID@.desktop</launchable>
   <screenshots>
     <screenshot type="default">
       <image>https://raw.githubusercontent.com/jmahoney/streaks/main/docs/screenshots/today.png</image>

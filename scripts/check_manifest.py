@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Cross-checks `com.cheerschopper.Streaks.json` against `src/streaks/`'s third-party imports:
-flags a runtime-version mismatch and any import with no matching Flatpak module."""
+flags a runtime-version mismatch and any import with no matching Flatpak module. Also checks that
+the development manifest (`com.cheerschopper.Streaks.Devel.json`, used by GNOME Builder) matches
+it apart from the app ID, command and `-Dprofile=development`."""
 
 import ast
 import json
@@ -17,12 +19,28 @@ BUNDLED_IMPORTS = {"playhouse": "peewee"}
 repo_root = Path(__file__).parent.parent
 src_dir = repo_root / "src" / "streaks"
 manifest_file = repo_root / "com.cheerschopper.Streaks.json"
+devel_manifest_file = repo_root / "com.cheerschopper.Streaks.Devel.json"
 
 errors = []
 
 # Load manifest
 with open(manifest_file) as f:
     manifest = json.load(f)
+
+# The development manifest is the release one plus a `.Devel` ID and the development profile.
+with open(devel_manifest_file) as f:
+    devel_manifest = json.load(f)
+expected_devel = json.loads(json.dumps(manifest))
+expected_devel["id"] = f"{manifest['id']}.Devel"
+expected_devel["command"] = f"{manifest['command']}.Devel"
+for module in expected_devel.get("modules", []):
+    if module.get("name") == "streaks":
+        module.setdefault("config-opts", []).append("-Dprofile=development")
+if devel_manifest != expected_devel:
+    errors.append(
+        f"FAIL manifest: {devel_manifest_file.name} has drifted from {manifest_file.name}; it "
+        "should differ only by a '.Devel' id/command and '-Dprofile=development' on 'streaks'"
+    )
 
 # Check runtime version
 if manifest.get("runtime-version") != EXPECTED_RUNTIME_VERSION:

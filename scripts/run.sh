@@ -4,8 +4,8 @@ cd "$(dirname "$0")/.."
 export PATH="$HOME/.local/bin:$PATH"
 
 # Compile if needed
-[[ ! -f _build/build.ninja ]] && meson setup _build
-meson compile -C _build
+[[ ! -f builddir/build.ninja ]] && meson setup builddir
+meson compile -C builddir
 
 # Parse arguments
 seed=0
@@ -17,14 +17,14 @@ while [[ $# -gt 0 ]]; do
 done
 
 # Set up environment
-export STREAKS_GRESOURCE="_build/src/streaks.gresource"
-export GSETTINGS_SCHEMA_DIR="_build/data"
-export STREAKS_DATA_DIR="_build/devdata"
+export STREAKS_GRESOURCE="builddir/src/streaks.gresource"
+export GSETTINGS_SCHEMA_DIR="builddir/data"
+export STREAKS_DATA_DIR="builddir/devdata"
 export PYTHONPATH="src"
 
 # Seed data if requested
 if [[ $seed -eq 1 ]]; then
-  rm -rf _build/devdata
+  rm -rf builddir/devdata
   # Matches tests/fixtures/seed.py::FIXTURE_TODAY.
   export STREAKS_FAKE_TODAY="2026-09-13"
   if [[ -f tests/fixtures/seed.py ]]; then

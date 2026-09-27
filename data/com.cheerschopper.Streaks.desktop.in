@@ -1,8 +1,8 @@
 [Desktop Entry]
 Name=Streaks
 Comment=Keep track of things you do regularly
-Exec=com.cheerschopper.Streaks
-Icon=com.cheerschopper.Streaks
+Exec=@APPLICATION_ID@
+Icon=@APPLICATION_ID@
 Terminal=false
 Type=Application
 Categories=GNOME;GTK;Utility;

@@ -126,14 +126,14 @@ def test_window_initialization(fresh_window, process_events):
 ### Development Lifecycle
 Meson compiles your Blueprint files, checks resources, and packages the environment smoothly.
 
-*   **Configure Build:** `meson setup _build`
-*   **Compile Code & Layouts:** `meson compile -C _build`
+*   **Configure Build:** `meson setup builddir`
+*   **Compile Code & Layouts:** `meson compile -C builddir`
 *   **Run App Locally:** `scripts/run.sh` (add `--seed` to pre-load the design-fixture data)
 
 ### Running Tests Automatically via Meson
 *   **Run all automated test suites:**
     ```bash
-    meson test -C _build --verbose
+    meson test -C builddir --verbose
     ```
 *   **Headless CI Execution:**
     ```bash
@@ -147,4 +147,4 @@ Meson compiles your Blueprint files, checks resources, and packages the environm
 *   **NEVER** build layout templates imperatively in Python. Implement all UI wireframes in Blueprint (`.blp`) files following the `claude-design/` source-of-truth instructions.
 *   **NEVER** construct database queries using raw string concatenation or custom SQL fragments. Always utilize Peewee’s API methods (`.select()`, `.create()`, `.where()`) for safety.
 *   **NEVER** execute heavy data queries iteratively directly on the main UI thread loop.
-*   **ALWAYS** verify that any dependency added (like `peewee`) is explicitly added to the Flatpak manifest (`com.cheerschopper.Streaks.json`) so it correctly installs inside the containerised environment.
+*   **ALWAYS** verify that any dependency added (like `peewee`) is explicitly added to both Flatpak manifests (`com.cheerschopper.Streaks.json` and the Builder one, `com.cheerschopper.Streaks.Devel.json`) so it correctly installs inside the containerised environment.

@@ -15,8 +15,10 @@ for _path in (
     if str(_path) not in sys.path:
         sys.path.insert(0, str(_path))
 
-os.environ.setdefault("STREAKS_GRESOURCE", str(repo_root / "_build" / "src" / "streaks.gresource"))
-os.environ.setdefault("GSETTINGS_SCHEMA_DIR", str(repo_root / "_build" / "data"))
+os.environ.setdefault(
+    "STREAKS_GRESOURCE", str(repo_root / "builddir" / "src" / "streaks.gresource")
+)
+os.environ.setdefault("GSETTINGS_SCHEMA_DIR", str(repo_root / "builddir" / "data"))
 os.environ.setdefault("GSETTINGS_BACKEND", "memory")
 
 if "STREAKS_DATA_DIR" not in os.environ:

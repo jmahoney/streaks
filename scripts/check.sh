@@ -5,8 +5,8 @@ export PATH="$HOME/.local/bin:$PATH"
 source scripts/lib/headless.sh
 
 # Set test environment
-export STREAKS_GRESOURCE="${STREAKS_GRESOURCE:-_build/src/streaks.gresource}"
-export GSETTINGS_SCHEMA_DIR="${GSETTINGS_SCHEMA_DIR:-_build/data}"
+export STREAKS_GRESOURCE="${STREAKS_GRESOURCE:-builddir/src/streaks.gresource}"
+export GSETTINGS_SCHEMA_DIR="${GSETTINGS_SCHEMA_DIR:-builddir/data}"
 export GSETTINGS_BACKEND="${GSETTINGS_BACKEND:-memory}"
 
 headless_setup
@@ -63,15 +63,15 @@ else
   blp_out=$(mktemp -d)
   run_stage "blueprint" "blueprint-compiler batch-compile $blp_out src \$(find src -name '*.blp')"
   rm -rf "$blp_out"
-  if [[ -f _build/build.ninja ]]; then
-    run_stage "meson" "meson compile -C _build"
+  if [[ -f builddir/build.ninja ]]; then
+    run_stage "meson" "meson compile -C builddir"
   else
-    run_stage "meson" "meson setup _build && meson compile -C _build"
+    run_stage "meson" "meson setup builddir && meson compile -C builddir"
   fi
   run_stage "templates" "python3 scripts/check_templates.py"
   run_stage "manifest" "python3 scripts/check_manifest.py"
-  run_stage "desktop" "desktop-file-validate _build/data/com.cheerschopper.Streaks.desktop"
-  run_stage "appstream" "appstreamcli validate --no-net --explain _build/data/com.cheerschopper.Streaks.metainfo.xml"
+  run_stage "desktop" "desktop-file-validate builddir/data/com.cheerschopper.Streaks.desktop"
+  run_stage "appstream" "appstreamcli validate --no-net --explain builddir/data/com.cheerschopper.Streaks.metainfo.xml"
   run_stage "schema" "glib-compile-schemas --strict --dry-run data"
 
   if [[ $gui_only -ne 1 ]]; then

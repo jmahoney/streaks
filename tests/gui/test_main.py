@@ -48,3 +48,24 @@ def test_do_activate_shows_database_error_and_never_builds_a_window(monkeypatch,
     assert app.window is None
     assert app._db_error_dialog is not None
     assert "/fake/data/streaks.db" in app._db_error_dialog.get_body()
+
+
+def test_development_profile_marks_the_window_devel(app, process_events):
+    """A development build (GNOME Builder, `-Dprofile=development`) gets GNOME's striped
+    `devel` header bar so it can't be mistaken for the installed app. (The session `app`
+    fixture is only requested so libadwaita is initialised.)"""
+    streaks_app = StreaksApplication(flags=Gio.ApplicationFlags.NON_UNIQUE, profile="development")
+    streaks_app.do_activate()
+    process_events()
+
+    assert streaks_app.window.has_css_class("devel")
+    streaks_app.window.destroy()
+
+
+def test_default_profile_leaves_the_window_unmarked(app, process_events):
+    streaks_app = StreaksApplication(flags=Gio.ApplicationFlags.NON_UNIQUE)
+    streaks_app.do_activate()
+    process_events()
+
+    assert not streaks_app.window.has_css_class("devel")
+    streaks_app.window.destroy()

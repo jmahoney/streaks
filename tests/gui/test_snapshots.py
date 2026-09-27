@@ -18,8 +18,8 @@ import compare_png  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 GOLDEN_DIR = REPO_ROOT / "tests" / "snapshots"
-ACTUAL_DIR = REPO_ROOT / "_build" / "snapshot-actual"
-DIFF_DIR = REPO_ROOT / "_build" / "snapshot-diffs"
+ACTUAL_DIR = REPO_ROOT / "builddir" / "snapshot-actual"
+DIFF_DIR = REPO_ROOT / "builddir" / "snapshot-diffs"
 
 
 @pytest.mark.parametrize("scheme", ["light", "dark"])

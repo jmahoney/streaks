@@ -46,8 +46,9 @@ Other places worth knowing:
 - **Database access goes through Peewee.** Use `.select()`, `.where()`, `.create()` and so on,
   never SQL built from strings. Keep database code in `models.py`, out of the views. The real
   database lives under `GLib.get_user_data_dir()`.
-- **Runtime dependencies go in the Flatpak manifest.** If you add a Python dependency, add it to
-  `com.cheerschopper.Streaks.json` as well. `scripts/check_manifest.py` checks this.
+- **Runtime dependencies go in the Flatpak manifests.** If you add a Python dependency, add it to
+  `com.cheerschopper.Streaks.json` and `com.cheerschopper.Streaks.Devel.json` as well.
+  `scripts/check_manifest.py` checks this.
 - **Style.** Code is type-hinted Python 3.11+, formatted with `ruff format` (line length 100)
   and linted with `ruff check`.
 
@@ -76,7 +77,7 @@ does this setup. Use the repo scripts rather than calling `pytest` directly on t
 ### Screenshots and snapshots
 
 - `scripts/screenshot.sh [screen] [--dark]` renders one screen, or all of them, to
-  `_build/screenshots/` so you can take a quick look.
+  `builddir/screenshots/` so you can take a quick look.
 - `scripts/snapshots.sh check` compares the current UI against the golden images in
   `tests/snapshots/` (light) and `tests/snapshots/dark/`.
 - `scripts/snapshots.sh update` re-renders the goldens in both styles. Run it only after a
@@ -92,7 +93,7 @@ screenshots.
 Regenerate the template after adding or changing translatable strings:
 
 ```bash
-meson compile -C _build streaks-pot
+meson compile -C builddir streaks-pot
 ```
 
 ## Distribution
@@ -107,6 +108,20 @@ scripts/flatpak.sh test    # headless: the bundle imports and the window actuall
 sandbox's Wayland access overridden off (`--nosocket=wayland`), and the app quits itself
 (`STREAKS_QUIT_AFTER_STARTUP=1`) as soon as the window is realised.
 
-The app ID `com.cheerschopper.Streaks` uses a domain the maintainer owns. On Flathub, the app
-would be verified by serving a token at
-`https://cheerschopper.com/.well-known/org.flathub.VerifiedApps.txt`.
+### GNOME Builder
+
+Open the project in Builder and choose the **com.cheerschopper.Streaks.Devel.json**
+configuration. That manifest is the release one plus `-Dprofile=development`, which gives the
+app the ID `com.cheerschopper.Streaks.Devel`. It runs alongside the installed app, with its own
+database, settings and D-Bus name, and a striped header bar so the two are easy to tell apart.
+`scripts/check_manifest.py` fails if the two manifests differ in anything else, so change
+modules in both.
+
+As a backstop, a build of the *release* manifest run from Builder (or `flatpak-builder --run`)
+still keeps its data in a separate `streaks-devel/` directory. The app spots this from
+`build=true` in `/.flatpak-info`, so even that never opens your real database.
+
+Builder keeps its build directory at `_build/` in the source tree, and the host scripts use
+`builddir/`. Don't point host `meson` at `_build/`. Builder only runs `meson setup` when
+`_build/build.ninja` is missing, so it would reuse a host configuration with `/usr/local` as the
+prefix and a different Meson version, and then fail to install into the read-only sandbox.

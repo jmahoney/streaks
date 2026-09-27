@@ -25,8 +25,10 @@ from pathlib import Path  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
-os.environ.setdefault("STREAKS_GRESOURCE", str(REPO_ROOT / "_build" / "src" / "streaks.gresource"))
-os.environ.setdefault("GSETTINGS_SCHEMA_DIR", str(REPO_ROOT / "_build" / "data"))
+os.environ.setdefault(
+    "STREAKS_GRESOURCE", str(REPO_ROOT / "builddir" / "src" / "streaks.gresource")
+)
+os.environ.setdefault("GSETTINGS_SCHEMA_DIR", str(REPO_ROOT / "builddir" / "data"))
 os.environ.setdefault("GSETTINGS_BACKEND", "memory")
 
 sys.path[0:0] = [str(REPO_ROOT / "src"), str(REPO_ROOT / "tests"), str(REPO_ROOT / "tests" / "gui")]

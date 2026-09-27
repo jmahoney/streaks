@@ -1,0 +1,2 @@
+option('profile', type: 'combo', choices: ['default', 'development'], value: 'default',
+  description: 'development builds run as com.cheerschopper.Streaks.Devel, alongside the installed app')

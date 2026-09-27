@@ -23,7 +23,9 @@ def load_resources() -> None:
     )
 
     if not os.path.exists(resource_path):
-        raise RuntimeError(f"gresource not found at {resource_path} — run: meson compile -C _build")
+        raise RuntimeError(
+            f"gresource not found at {resource_path} — run: meson compile -C builddir"
+        )
 
     resource = Gio.Resource.load(resource_path)
     resource._register()

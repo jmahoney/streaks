@@ -15,6 +15,8 @@ __pycache__/
 # Meson defaults to a directory named 'build' or 'builddir'
 build/
 builddir/
+# GNOME Builder's in-tree build directory (host scripts use builddir/)
+_build/
 subprojects/
 
 # Compiled GSettings schemas (generated locally during tests/runs)

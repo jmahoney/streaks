@@ -4,7 +4,7 @@ cd "$(dirname "$0")/.."
 export PATH="$HOME/.local/bin:$PATH"
 source scripts/lib/headless.sh
 
-mkdir -p _build/screenshots
+mkdir -p builddir/screenshots
 
 # Check if render_screens.py exists
 if [[ ! -f scripts/render_screens.py ]]; then
@@ -13,14 +13,14 @@ if [[ ! -f scripts/render_screens.py ]]; then
 fi
 
 # Set test environment
-export STREAKS_GRESOURCE="_build/src/streaks.gresource"
-export GSETTINGS_SCHEMA_DIR="_build/data"
+export STREAKS_GRESOURCE="builddir/src/streaks.gresource"
+export GSETTINGS_SCHEMA_DIR="builddir/data"
 export GSETTINGS_BACKEND="memory"
 export PYTHONPATH="src"
 
 headless_setup
 "${HEADLESS_RUNNER[@]}" timeout "${PYTEST_TIMEOUT:-600}" python3 scripts/render_screens.py \
-  --out _build/screenshots "$@"
+  --out builddir/screenshots "$@"
 
 # List PNGs written
-find _build/screenshots -name '*.png' -type f
+find builddir/screenshots -name '*.png' -type f

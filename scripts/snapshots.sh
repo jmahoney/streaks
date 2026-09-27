@@ -8,8 +8,8 @@ source scripts/lib/headless.sh
 action="${1:-update}"
 
 # Set test environment
-export STREAKS_GRESOURCE="_build/src/streaks.gresource"
-export GSETTINGS_SCHEMA_DIR="_build/data"
+export STREAKS_GRESOURCE="builddir/src/streaks.gresource"
+export GSETTINGS_SCHEMA_DIR="builddir/data"
 export GSETTINGS_BACKEND="memory"
 export PYTHONPATH="src"
 

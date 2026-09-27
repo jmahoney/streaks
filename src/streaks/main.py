@@ -17,18 +17,25 @@ from streaks.resources import load_resources
 
 _ = gettext.gettext
 
+APPLICATION_ID = "com.cheerschopper.Streaks"
+
 
 class StreaksApplication(Adw.Application):
     """Registers app actions and accelerators, opens the database, and shows the main window or
     a database-error dialog."""
 
-    def __init__(self, *, version: str = "0.2.0", **kwargs):
-        """Initialize the application."""
-        kwargs.setdefault("application_id", "com.cheerschopper.Streaks")
+    def __init__(self, *, version: str = "0.2.0", profile: str = "default", **kwargs):
+        """Initialize the application.
+
+        ``profile`` is Meson's ``-Dprofile``: ``"development"`` builds (GNOME Builder) run as
+        ``com.cheerschopper.Streaks.Devel`` alongside the installed app.
+        """
+        kwargs.setdefault("application_id", APPLICATION_ID)
         kwargs.setdefault("flags", Gio.ApplicationFlags.DEFAULT_FLAGS)
         super().__init__(**kwargs)
         self.resource_base_path = "/com/cheerschopper/Streaks"
         self.version = version
+        self.profile = profile
         self.window = None
         self._db_error_dialog: Adw.AlertDialog | None = None
         self.preferences_dialog: Adw.Dialog | None = None
@@ -68,6 +75,8 @@ class StreaksApplication(Adw.Application):
             from streaks.window import StreaksWindow
 
             self.window = StreaksWindow(application=self)
+            if self.profile == "development":
+                self.window.add_css_class("devel")
 
             # STREAKS_QUIT_AFTER_STARTUP makes the app quit once the window maps, for the
             # headless Flatpak smoke check.
@@ -115,8 +124,8 @@ class StreaksApplication(Adw.Application):
         about.present(self.window)
 
 
-def main(version):
+def main(version: str, application_id: str = APPLICATION_ID, profile: str = "default") -> int:
     """Entry point for the application."""
     load_resources()
-    app = StreaksApplication(version=version)
+    app = StreaksApplication(version=version, profile=profile, application_id=application_id)
     return app.run(sys.argv)

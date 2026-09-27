@@ -11,6 +11,7 @@ from datetime import date, datetime, time
 import pytest
 from peewee import IntegrityError
 
+from streaks import models
 from streaks.engine import Answer, PeriodKind
 from streaks.models import (
     COLOURS,
@@ -23,6 +24,7 @@ from streaks.models import (
     answer_day,
     clear_answer,
     create_streak,
+    database_path,
     delete_all,
     delete_streak,
     end_streak,
@@ -445,6 +447,42 @@ def test_reminder_time_round_trips_through_update_streak():
         today=date(2026, 1, 2),
     )
     assert Streak.get_by_id(streak.id).reminder_time is None
+
+
+@pytest.fixture
+def flatpak_info(tmp_path, monkeypatch):
+    """Point ``models`` at a fake ``/.flatpak-info`` and clear ``STREAKS_DATA_DIR``, so
+    ``database_path()`` falls back to its default under a fake user data dir."""
+    info = tmp_path / "flatpak-info"
+    monkeypatch.setattr(models, "FLATPAK_INFO_PATH", str(info))
+    monkeypatch.delenv("STREAKS_DATA_DIR", raising=False)
+    monkeypatch.setattr(models.GLib, "get_user_data_dir", lambda: str(tmp_path / "data"))
+    return info
+
+
+def test_database_path_uses_devel_dir_in_an_uninstalled_flatpak_build(flatpak_info, tmp_path):
+    """GNOME Builder runs the app with ``flatpak build``, which marks the instance
+    ``build=true``; that run must never open the installed app's real database."""
+    flatpak_info.write_text("[Instance]\nbuild=true\ndevel=true\n")
+
+    assert database_path() == str(tmp_path / "data" / "streaks-devel" / "streaks.db")
+
+
+def test_database_path_uses_real_dir_in_an_installed_flatpak(flatpak_info, tmp_path):
+    flatpak_info.write_text("[Instance]\ninstance-path=/home/me/.var/app/x\n")
+
+    assert database_path() == str(tmp_path / "data" / "streaks" / "streaks.db")
+
+
+def test_database_path_uses_real_dir_outside_flatpak(flatpak_info, tmp_path):
+    assert database_path() == str(tmp_path / "data" / "streaks" / "streaks.db")
+
+
+def test_streaks_data_dir_overrides_the_flatpak_build_default(flatpak_info, tmp_path, monkeypatch):
+    flatpak_info.write_text("[Instance]\nbuild=true\n")
+    monkeypatch.setenv("STREAKS_DATA_DIR", str(tmp_path / "custom"))
+
+    assert database_path() == str(tmp_path / "custom" / "streaks.db")
 
 
 def test_init_db_raises_database_init_error_for_unwritable_data_dir(tmp_path, monkeypatch):

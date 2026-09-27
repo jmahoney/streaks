@@ -141,10 +141,28 @@ class DatabaseInitError(RuntimeError):
         self.reason = reason
 
 
+FLATPAK_INFO_PATH = "/.flatpak-info"
+
+
+def _is_uninstalled_flatpak_build() -> bool:
+    """True when running from ``flatpak build`` (GNOME Builder, ``flatpak-builder --run``)
+    rather than an installed app; that instance is marked ``build=true`` in ``/.flatpak-info``."""
+    info = GLib.KeyFile()
+    try:
+        info.load_from_file(FLATPAK_INFO_PATH, GLib.KeyFileFlags.NONE)
+        return info.get_boolean("Instance", "build")
+    except GLib.Error:
+        return False
+
+
 def _default_data_dir() -> str:
     data_dir = os.environ.get("STREAKS_DATA_DIR")
     if not data_dir:
-        data_dir = os.path.join(GLib.get_user_data_dir(), "streaks")
+        # Builder normally uses the `.Devel` manifest, which has its own data dir. This guards
+        # against building the release manifest there instead: that shares the installed app's
+        # ID, and so its data dir, but must still never open the real database.
+        name = "streaks-devel" if _is_uninstalled_flatpak_build() else "streaks"
+        data_dir = os.path.join(GLib.get_user_data_dir(), name)
     return data_dir
 
 

@@ -7,6 +7,8 @@ import locale
 import gettext
 
 VERSION = '@VERSION@'
+APPLICATION_ID = '@APPLICATION_ID@'
+PROFILE = '@PROFILE@'
 pkgdatadir = '@pkgdatadir@'
 localedir = '@localedir@'
 
@@ -21,4 +23,4 @@ os.environ.setdefault('STREAKS_GRESOURCE', os.path.join(pkgdatadir, 'streaks.gre
 
 if __name__ == '__main__':
     from streaks import main
-    sys.exit(main.main(VERSION))
+    sys.exit(main.main(VERSION, APPLICATION_ID, PROFILE))

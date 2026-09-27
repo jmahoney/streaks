@@ -58,13 +58,13 @@ scripts/bootstrap.sh --install  # or: install it (apt, plus ruff and the Flatpak
 ### 2. Build and run
 
 ```bash
-meson setup _build
-meson compile -C _build
+meson setup builddir
+meson compile -C builddir
 scripts/run.sh          # run from the build tree (rebuilds first if needed)
 scripts/run.sh --seed   # start fresh with five sample streaks, with "today" pinned to 13 Sep 2026
 ```
 
-`scripts/run.sh` keeps its data in `_build/devdata/`, so development never touches the database
+`scripts/run.sh` keeps its data in `builddir/devdata/`, so development never touches the database
 of an installed copy of the app.
 
 ### 3. Or build it as a Flatpak
