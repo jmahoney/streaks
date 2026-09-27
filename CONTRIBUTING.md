@@ -4,13 +4,15 @@ Thanks for your interest! Please read this first, because it'll save us both som
 
 ## This is a hobby project
 
-I build Streaks in my spare time, for myself. There is no roadmap and no guaranteed response
-time. Sometimes I'll say no to a good idea just because it isn't what I want the app to be.
-That's not a judgement of you or your idea.
+I built Streaks for me, in my spare time. I think it's pretty much "done" for what I want. That said, there are likely  bugs or simple changes that make things better. So please feel free to suggest a feature or contribute some code. If I think it's worth including, then yay. If it changes things in a way that doesn't work for me (see the philosophy beind Streaks in the README), then I may not merge it. 
+
+## Forking is encouraged
+
+Feel free to fork the project and make whatever changes you want. Open source is great, eh? 
 
 ## Start with an issue
 
-All changes start from an issue at <https://github.com/jmahoney/streaks/issues>.
+If you do want to contribute, please create and issue at <https://github.com/jmahoney/streaks/issues>.
 
 - **Bugs:** say what you did, what you expected, and what happened instead. Include your
   distro/GNOME version and whether you're running the Flatpak or a source build.

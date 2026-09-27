@@ -2,16 +2,16 @@
 
 A native GNOME app for keeping track of things you want to do regularly: cutting your
 fingernails every couple of weeks, going to the gym five times a week, or getting through all 75
-days of 75 Hard. Streaks is a tracker, not a coach. It won't nag you and it won't cheer you on.
-You tell it what you did, and it keeps count.
+days of 75 Hard. 
 
-## What it does
+The philosophy behind Streaks is that **you know** if you're sticking to your habits or meeting your goals and streaks can help you track your progress. It deliberately doesn't integrate with Strava or Garmin or any other systems - it's about deliberately noting your progress.
+
+## Features
 
 - **Streaks on your schedule.** A streak can be daily, weekdays only, N times a week, or monthly.
 - **One goal or a checklist.** A streak can be a single thing ("Floss") or several goals that
   must all be done ("75 Hard": two workouts, a gallon of water, ten pages…).
-- **Today view.** A check-in card for every running streak, so you can tick things off as you
-  go.
+- **Today view.** A check-in card for every running streak, so you can tick things off as you go.
 - **Catch up on quiet days.** If you forget to open the app for a few days, one dialog lets you
   answer for every unconfirmed day at once.
 - **History.** Each streak has a heatmap, current and best runs, earlier runs, and a per-goal
@@ -38,8 +38,8 @@ More in [`docs/screenshots/`](docs/screenshots/).
 ## Project status
 
 This is a **hobby project**. I work on it in my spare time, when and as I feel like it. It
-works, I use it, and there is no roadmap or release schedule. Issues and small pull requests
-are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) first.
+works, I use it, and at this point it's feature complete for me. That said, any issues and small pull requests
+are very welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) first.
 
 ## Getting started
 
@@ -76,7 +76,7 @@ scripts/flatpak.sh run
 
 ## Running the tests
 
-`scripts/check.sh` runs everything CI would. That covers lint and formatting (Ruff), the
+`scripts/check.sh` runs the test suite. That covers lint and formatting (Ruff), the
 Blueprint and Meson build, template and translation checks, desktop-file/AppStream/GSettings
 validation, the unit tests, the GUI tests and the screenshot comparison tests.
 
@@ -90,7 +90,7 @@ scripts/check.sh --no-snapshots # everything except the screenshot comparison
 The GUI tests open real GTK windows, but inside a virtual X display (Xvfb), so nothing pops up
 on your desktop and a stuck test can't lock up your session.
 
-The **snapshot tests** render every screen and compare it pixel by pixel against the approved
+The **snapshot tests** render every screen and compare it against the 
 images in `tests/snapshots/`. If you change the UI on purpose, check the new renders with
 `scripts/screenshot.sh`, then accept them:
 
@@ -121,15 +121,12 @@ You don't need an AI assistant to work on Streaks, and the repo doesn't ship any
 configuration. If you use one, bring your own setup. `AGENTS.md`, `CLAUDE.md` and similar files
 are gitignored.
 
-## Known gaps
+## To-do
 
-- **Reminders are stored but never sent.** A streak's reminder time is saved, edited and
+- **Reminders** - Currently are stored but never sent.** A streak's reminder time is saved, edited and
   exported, but nothing schedules or delivers a notification yet. Hooking it up to
-  `Gio.Notification` or a scheduled background activation is future work.
-- **No narrow-window layout.** Only the desktop-width layout exists. The sidebar and the Today
-  card grid don't adapt to narrow windows.
-- **No in-app light/dark switch.** The dark style (amber accent and chart scale) always follows
-  the system setting.
+  `Gio.Notification` or a scheduled background activation is future work if it feels like
+  reminders are actually needed
 
 ## License
 

@@ -22,7 +22,7 @@ class StreaksApplication(Adw.Application):
     """Registers app actions and accelerators, opens the database, and shows the main window or
     a database-error dialog."""
 
-    def __init__(self, *, version: str = "0.1.0", **kwargs):
+    def __init__(self, *, version: str = "0.2.0", **kwargs):
         """Initialize the application."""
         kwargs.setdefault("application_id", "com.cheerschopper.Streaks")
         kwargs.setdefault("flags", Gio.ApplicationFlags.DEFAULT_FLAGS)
