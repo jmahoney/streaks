@@ -1,4 +1,4 @@
-"""One goal row in the streak history's "Per goal, this month" card (design-spec §4)."""
+"""One goal row in the streak history's "Per goal, all time" card (design-spec §4)."""
 
 from __future__ import annotations
 

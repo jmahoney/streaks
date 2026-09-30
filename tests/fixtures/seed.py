@@ -27,8 +27,8 @@ Five streaks, in sidebar order:
 Expected values, pinned by ``tests/unit/test_engine.py``:
 
 - 75 Hard: run lengths [28, 34, 51]; run 3 starts 25 Jul with no end, 47 confirmed periods and 4
-  unconfirmed, and is the best run; hit rate 94%; this month's goal bars are 9/9, 9/9, 6/9 (low),
-  8/9, 9/9; sidebar meta "Daily · 5 goals" at count 51; the banner reads "Four days without a
+  unconfirmed, and is the best run; hit rate 94%; all-time goal bars are 109/109, 109/109, 83/109,
+  99/109, 109/109; sidebar meta "Daily · 5 goals" at count 51; the banner reads "Four days without a
   check-in — 9 to 12 September"; catch-up lists Wednesday 9 through Saturday 12 September;
   marking today missed would end run 3 at 50 days.
 - No snoozing the alarm: count 12, sidebar meta "Mon–Fri", today's card is "Not today" with the

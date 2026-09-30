@@ -20,8 +20,8 @@ template $StreaksStreakView : Adw.Bin {
         homogeneous: true;
 
         $StreaksStatTile tile_running {}
-        $StreaksStatTile tile_unconfirmed {}
-        $StreaksStatTile tile_confirmed {}
+        $StreaksStatTile tile_longest {}
+        $StreaksStatTile tile_runs {}
         $StreaksStatTile tile_hit {}
       }
 
@@ -191,7 +191,7 @@ template $StreaksStreakView : Adw.Bin {
           styles ["card"]
 
           Gtk.Label {
-            label: _("Per goal, this month");
+            label: _("Per goal, all time");
             halign: start;
             xalign: 0;
             margin-start: 16;

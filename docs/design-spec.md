@@ -192,11 +192,12 @@ Content padding 24 28, gap 18:
 **Stat tiles** — 4 equal `card`s (padding 13 16): number bold 26 (`title-1`) + caption 11.5 at 50 %.
 | number | caption | colour |
 |---|---|---|
-| 51 | days running | `#1a68c7` (accent) |
-| 4 | unconfirmed | 55 % black |
-| 47 | confirmed kept | 85 % black |
-| 94% | goals hit | 85 % black |
-Captions: "days running" / "weeks running" / "months running" per period kind.
+| 51 | days running (the run shown) | `#1a68c7` (accent) |
+| 51 | days, longest run (all time, the open run included) | 85 % black |
+| 3 | runs (all time, the open run included) | 85 % black |
+| 94% | goals hit (all runs, finished kept/partial periods) | 85 % black |
+Captions: "days running" / "weeks running" / "months running" per period kind, and likewise "days, longest run".
+An ended streak's first tile reads "days, last run". Unconfirmed days show only in the catch-up link.
 
 **Chart card** (padding 16 18):
 - Title row (baseline, gap 12): bold 14 "Run 3 · since 25 July"; tag "BEST" bold 10.5 accent (only if this is the best
@@ -212,11 +213,12 @@ Captions: "days running" / "weeks running" / "months running" per period kind.
   Right: link button 12 `#1c71d8` "4 days unconfirmed — catch up" (hidden when 0) → Catch-up dialog.
 
 **Lower grid** (columns 1.1fr / 1fr, gap 18):
-- **Per goal, this month** card: header row padding 12 16 bold 13.5. Rows (padding 10 16): goal name 13 (ellipsized),
-  140×6 bar (track `#ebebe9`), ratio bold 12 at 60 % width 38 right-aligned "9/9". Bar colour accent `#1a68c7`, or
-  `#e5a50a` when the ratio is below 75 %. Fixture: Progress photo 9/9, 45 min outdoors 9/9, Second workout 6/9
-  (amber), Read 10 pages 8/9, Stick to the diet 9/9. Denominator = due days so far this month (excluding today
-  unless something was done today).
+- **Per goal, all time** card: header row padding 12 16 bold 13.5. Rows (padding 10 16): goal name 13 (ellipsized),
+  140×6 bar (track `#ebebe9`), ratio bold 12 at 60 % 7 chars wide right-aligned "109/109". Bar colour accent `#1a68c7`, or
+  `#e5a50a` when the ratio is below 75 %. Fixture: Progress photo 109/109, 45 min outdoors 109/109, Second workout
+  83/109, Read 10 pages 99/109, Stick to the diet 109/109. Denominator = every kept or partial period across all
+  time, today included once anything is ticked; numerator = those where the goal was done (a "Kept" answer counts
+  for every goal).
 - **Earlier runs** card: header "Earlier runs". One row per finished run, newest first (padding 12 16): bold 13 "Run 2",
   caption 11.5 "14 May – 16 Jun · 34 days", spacer, "›" 12 at 40 %; below, `StripWidget` (7×18, gap 2) one cell per day
   of the run using the chart scale. Fixture: Run 2 (14 May – 16 Jun · 34 days), Run 1 (2 Feb – 1 Mar · 28 days).

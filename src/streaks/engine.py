@@ -118,7 +118,7 @@ CELL_RATIO_LOW = 0.3  # below this ratio, a chart cell uses the "low" fill
 CELL_RATIO_MID = 0.6  # below this ratio, "mid"; below CELL_RATIO_FULL, "high"
 CELL_RATIO_FULL = 0.99
 
-GOAL_BAR_LOW_RATIO = 0.75  # below this ratio, a "Per goal, this month" bar is flagged low
+GOAL_BAR_LOW_RATIO = 0.75  # below this ratio, a "Per goal, all time" bar is flagged low
 
 
 @dataclass(frozen=True)
@@ -218,7 +218,7 @@ class LegendEntry:
 
 @dataclass(frozen=True)
 class GoalBar:
-    """One row of the "Per goal, this month" card."""
+    """One row of the "Per goal, all time" card."""
 
     name: str
     ratio: float
@@ -254,7 +254,7 @@ class History:
     day_labels: list[str]  # weekday letters above the chart's columns
     legend: list[LegendEntry]
     catch_up_link: str | None  # link text for unconfirmed days, or None to hide the link
-    goal_bars: list[GoalBar]  # "Per goal, this month" rows
+    goal_bars: list[GoalBar]  # "Per goal, all time" rows
     earlier_runs: list[EarlierRun]  # past runs listed below the chart
 
 
@@ -1003,18 +1003,29 @@ def _tile_caption(period_kind: PeriodKind) -> str:
 
 
 def _tile_caption_ended(period_kind: PeriodKind) -> str:
-    """The first stat tile's caption for an ended streak (design-spec §4): it reports the
-    streak's best run rather than a still-running count."""
+    """The first stat tile's caption for an ended streak: it reports the streak's final run
+    rather than a still-running count."""
     if period_kind == PeriodKind.N_PER_WEEK:
-        return _("weeks, best run")
+        return _("weeks, last run")
     if period_kind == PeriodKind.MONTHLY:
-        return _("months, best run")
-    return _("days, best run")
+        return _("months, last run")
+    return _("days, last run")
 
 
-def _goals_hit_percent(run: Run, today: date) -> int:
+def _tile_caption_longest(period_kind: PeriodKind) -> str:
+    if period_kind == PeriodKind.N_PER_WEEK:
+        return _("weeks, longest run")
+    if period_kind == PeriodKind.MONTHLY:
+        return _("months, longest run")
+    return _("days, longest run")
+
+
+def _goals_hit_percent(all_runs: list[Run], today: date) -> int:
+    """The share of goals done across every run, over the kept or partial periods that have
+    finished (the period still in progress doesn't count yet)."""
     eligible = [
         pr
+        for run in all_runs
         for pr in run.periods
         if pr.status in (Status.KEPT, Status.PARTIAL)
         and not (pr.period.start <= today <= pr.period.end)
@@ -1086,23 +1097,28 @@ def _legend(n_goals: int) -> list[LegendEntry]:
 
 
 def _goal_bars(streak: StreakData, today: date, settings: Settings) -> list[GoalBar]:
+    """One bar per active goal: of the periods checked in across all time (kept or partial,
+    including the one in progress once anything is done in it), how many had the goal done."""
     results = evaluate(streak, today, settings)
-    day_map = _day_result_map(results)
-    month_start = date(today.year, today.month, 1)
-    confirmed_days = [
-        d
-        for d in _daterange(month_start, today)
-        if d in day_map and day_map[d].status in (Status.KEPT, Status.PARTIAL)
-    ]
-    denom = len(confirmed_days)
-    checks_by_goal: dict[int, set[date]] = defaultdict(set)
-    for c in streak.checks:
-        checks_by_goal[c.goal_id].add(c.day)
+    answers_by_day = {a.day: a for a in streak.answers}
+    checks_by_goal = _checks_by_goal(streak)
+    counted = [pr for pr in results if pr.status in (Status.KEPT, Status.PARTIAL)]
     bars = []
     for g in sorted(streak.goals, key=lambda g: g.position):
-        if g.removed_on is not None and g.removed_on <= month_start:
+        if g.removed_on is not None:
             continue
-        numerator = sum(1 for d in confirmed_days if d in checks_by_goal.get(g.id, ()))
+        numerator = denom = 0
+        for pr in counted:
+            if g not in active_goals(streak, pr.period):
+                continue
+            denom += 1
+            answer = _find_answer(pr.period, answers_by_day)
+            if answer is not None and answer.status == Answer.KEPT:
+                numerator += 1
+                continue
+            done, total = _period_totals(streak, pr.period, (g,), checks_by_goal)
+            if total and done >= total:
+                numerator += 1
         ratio = numerator / denom if denom else 0.0
         bars.append(GoalBar(g.name, ratio, f"{numerator}/{denom}", ratio < GOAL_BAR_LOW_RATIO))
     return bars
@@ -1133,30 +1149,27 @@ def history(
     n_goals = sum(1 for g in streak.goals if g.removed_on is None)
     is_ended = streak.ended_on is not None
 
+    best = next((r for r in all_runs if r.is_best), None)
+    running_len = selected.length if selected else 0
     if is_ended:
-        best = best_run(streak, today, settings)
-        running_len = best.length if best else 0
         tile0_caption = _tile_caption_ended(streak.period_kind)
         header_subtitle = _("%(meta)s · ended %(date)s") % {
             "meta": sidebar_meta(streak),
             "date": words.fmt_day_short(streak.ended_on),
         }
     else:
-        running_len = selected.length if selected else 0
         tile0_caption = _tile_caption(streak.period_kind)
         header_subtitle = _("%(meta)s · run %(idx)d") % {
             "meta": sidebar_meta(streak),
             "idx": selected.index if selected else 0,
         }
 
-    unconfirmed = selected.unconfirmed if selected else 0
-    confirmed = selected.confirmed if selected else 0
-    hit_pct = _goals_hit_percent(selected, today) if selected else 0
+    n_runs = len(all_runs)
     tiles: list[Tile] = [
         Tile(str(running_len), tile0_caption, "accent"),
-        Tile(str(unconfirmed), _("unconfirmed"), "dim"),
-        Tile(str(confirmed), _("confirmed kept"), "strong"),
-        Tile(f"{hit_pct}%", _("goals hit"), "strong"),
+        Tile(str(best.length if best else 0), _tile_caption_longest(streak.period_kind), "strong"),
+        Tile(str(n_runs), ngettext("run", "runs", n_runs), "strong"),
+        Tile(f"{_goals_hit_percent(all_runs, today)}%", _("goals hit"), "strong"),
     ]
 
     if chart == "lifetime":

@@ -33,11 +33,11 @@ def test_75_hard_tiles(seeded_window, process_events):
     assert view.tile_running.caption_label.get_label() == "days running"
     assert view.tile_running.value_label.has_css_class("stat-accent")
 
-    assert view.tile_unconfirmed.value_label.get_label() == "4"
-    assert view.tile_unconfirmed.caption_label.get_label() == "unconfirmed"
+    assert view.tile_longest.value_label.get_label() == "51"
+    assert view.tile_longest.caption_label.get_label() == "days, longest run"
 
-    assert view.tile_confirmed.value_label.get_label() == "47"
-    assert view.tile_confirmed.caption_label.get_label() == "confirmed kept"
+    assert view.tile_runs.value_label.get_label() == "3"
+    assert view.tile_runs.caption_label.get_label() == "runs"
 
     assert view.tile_hit.value_label.get_label() == "94%"
     assert view.tile_hit.caption_label.get_label() == "goals hit"
@@ -117,16 +117,15 @@ def test_goal_bars(seeded_window, process_events):
         "Stick to the diet",
     ]
     ratios = [r.ratio_label.get_text() for r in rows]
-    assert ratios == ["9/9", "9/9", "6/9", "8/9", "9/9"]
+    assert ratios == ["109/109", "109/109", "83/109", "99/109", "109/109"]
     assert [r.bar.get_fraction() for r in rows] == [
         1.0,
         1.0,
-        6 / 9,
-        8 / 9,
+        83 / 109,
+        99 / 109,
         1.0,
     ]
-    assert rows[2].bar.has_css_class("low")
-    assert not rows[0].bar.has_css_class("low")
+    assert not any(r.bar.has_css_class("low") for r in rows)
 
 
 def test_earlier_runs_and_switching_charts(seeded_window, process_events):
@@ -197,9 +196,9 @@ def test_ended_streak_history(seeded_window, process_events):
     view = window.streak_view
 
     assert view.tile_running.value_label.get_label() == "31"
-    assert view.tile_running.caption_label.get_label() == "days, best run"
-    assert view.tile_unconfirmed.value_label.get_label() == "0"
-    assert view.tile_confirmed.value_label.get_label() == "31"
+    assert view.tile_running.caption_label.get_label() == "days, last run"
+    assert view.tile_longest.value_label.get_label() == "31"
+    assert view.tile_runs.value_label.get_label() == "1"
     assert view.tile_hit.value_label.get_label() == "100%"
 
     assert view.chart_title_label.get_label() == "Run 1 · 2 Feb – 4 Mar"

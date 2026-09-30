@@ -748,19 +748,75 @@ def test_fixture_75_hard_history(seeded, today, settings):
     h = history(hard, today, settings)
     assert h.tiles == [
         Tile("51", "days running", "accent"),
-        Tile("4", "unconfirmed", "dim"),
-        Tile("47", "confirmed kept", "strong"),
+        Tile("51", "days, longest run", "strong"),
+        Tile("3", "runs", "strong"),
         Tile("94%", "goals hit", "strong"),
     ]
     bars = {bar.name: (bar.ratio_text, bar.low) for bar in h.goal_bars}
-    assert bars["Progress photo"] == ("9/9", False)
-    assert bars["45 min outdoors"] == ("9/9", False)
-    assert bars["45 min second workout"] == ("6/9", True)
-    assert bars["Read 10 pages"] == ("8/9", False)
-    assert bars["Stick to the diet"] == ("9/9", False)
+    assert bars["Progress photo"] == ("109/109", False)
+    assert bars["45 min outdoors"] == ("109/109", False)
+    assert bars["45 min second workout"] == ("83/109", False)
+    assert bars["Read 10 pages"] == ("99/109", False)
+    assert bars["Stick to the diet"] == ("109/109", False)
 
     earlier_metas = [r.meta for r in h.earlier_runs]
     assert earlier_metas == ["14 May – 16 Jun · 34 days", "2 Feb – 1 Mar · 28 days"]
+
+
+def test_history_tiles_and_goal_bars_count_today_in_progress(settings):
+    """Three full days then one goal ticked today: the run and longest run both include today,
+    goals hit covers the finished days, and each goal bar counts today's ticks too."""
+    today = date(2026, 10, 1)
+    all_five = {0, 1, 2, 3, 4}
+    streak = _mk(
+        date(2026, 9, 28),
+        day_checks={
+            date(2026, 9, 28): all_five,
+            date(2026, 9, 29): all_five,
+            date(2026, 9, 30): all_five,
+            today: {1},
+        },
+        n_goals=5,
+    )
+    h = history(streak, today, settings)
+    assert h.tiles == [
+        Tile("4", "days running", "accent"),
+        Tile("4", "days, longest run", "strong"),
+        Tile("1", "run", "strong"),
+        Tile("100%", "goals hit", "strong"),
+    ]
+    assert [bar.ratio_text for bar in h.goal_bars] == ["3/4", "4/4", "3/4", "3/4", "3/4"]
+
+
+def test_history_tiles_span_every_run(settings):
+    """The longest run can be an earlier one, the run count includes the open run, and goals
+    hit and the goal bars cover every run, not just the one shown."""
+    today = date(2026, 9, 8)
+    streak = _mk(
+        date(2026, 9, 1),
+        day_checks={
+            date(2026, 9, 1): {0, 1},
+            date(2026, 9, 2): {0, 1},
+            date(2026, 9, 3): {0, 1},
+            date(2026, 9, 4): {0},
+            date(2026, 9, 6): {0, 1},
+            date(2026, 9, 7): {0, 1},
+            date(2026, 9, 8): {0, 1},
+        },
+        answers={date(2026, 9, 5): Answer.MISSED},
+    )
+    h = history(streak, today, settings)
+    assert h.tiles == [
+        Tile("3", "days running", "accent"),
+        Tile("4", "days, longest run", "strong"),
+        Tile("2", "runs", "strong"),
+        Tile("92%", "goals hit", "strong"),
+    ]
+    assert [bar.ratio_text for bar in h.goal_bars] == ["7/7", "6/7"]
+
+    earlier = history(streak, today, settings, run_index=1)
+    assert earlier.tiles[0] == Tile("4", "days running", "accent")
+    assert earlier.tiles[1:] == h.tiles[1:]
 
 
 def test_fixture_75_hard_sidebar_and_card(seeded, today, settings):
@@ -988,14 +1044,14 @@ def test_fixture_couch_to_5k(seeded, today, settings):
 
 
 def test_fixture_couch_to_5k_history_ended_streak(seeded, today, settings):
-    """For an ended streak the first tile reports the best run and the header subtitle says when
+    """For an ended streak the first tile reports the last run and the header subtitle says when
     it ended."""
     streak = _streaks()["Couch to 5K"]
     h = history(streak, today, settings)
     assert h.tiles == [
-        Tile("31", "days, best run", "accent"),
-        Tile("0", "unconfirmed", "dim"),
-        Tile("31", "confirmed kept", "strong"),
+        Tile("31", "days, last run", "accent"),
+        Tile("31", "days, longest run", "strong"),
+        Tile("1", "run", "strong"),
         Tile("100%", "goals hit", "strong"),
     ]
     assert h.header_subtitle == "Daily · ended 4 Mar"

@@ -40,8 +40,8 @@ class StreaksStreakView(Adw.Bin):
     }
 
     tile_running = Gtk.Template.Child()
-    tile_unconfirmed = Gtk.Template.Child()
-    tile_confirmed = Gtk.Template.Child()
+    tile_longest = Gtk.Template.Child()
+    tile_runs = Gtk.Template.Child()
     tile_hit = Gtk.Template.Child()
     chart_title_label = Gtk.Template.Child()
     best_label = Gtk.Template.Child()
@@ -98,7 +98,7 @@ class StreaksStreakView(Adw.Bin):
         chart = self.range_toggle.get_active_name()
         hist = engine.history(self._streak, today, settings, chart=chart, run_index=self._run_index)
 
-        tiles = (self.tile_running, self.tile_unconfirmed, self.tile_confirmed, self.tile_hit)
+        tiles = (self.tile_running, self.tile_longest, self.tile_runs, self.tile_hit)
         for tile, entry in zip(tiles, hist.tiles, strict=True):
             tile.configure(entry.value, entry.caption, entry.style)
 
