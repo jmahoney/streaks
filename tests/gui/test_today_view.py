@@ -57,8 +57,8 @@ def test_quiet_days_banner(seeded_state, seeded_window, process_events):
 
     assert banner.title_label.get_label() == expected[0].title
     assert banner.body_label.get_label() == expected[0].body
-    assert len(banner.strip._cells) == 24
-    outlined = [c.border == engine.CHART_UNCONFIRMED_BORDER for c in banner.strip._cells]
+    assert len(banner.strip.cells) == 24
+    outlined = [c.border == engine.CHART_UNCONFIRMED_BORDER for c in banner.strip.cells]
     # 9-12 Sep are the unconfirmed (outlined) days; today (13 Sep, the last cell) is still open,
     # not unconfirmed, so it renders solid.
     assert outlined[-5:-1] == [True, True, True, True]

@@ -8,7 +8,7 @@ cross-checked against ``engine.catch_up``/``catch_up_preview``.
 import json
 from datetime import date
 
-from helpers import sidebar_rows
+from helpers import catchup_goal_rows, catchup_rows, sidebar_rows
 
 from streaks import engine
 from streaks.catchup_dialog import StreaksCatchupDialog
@@ -35,11 +35,11 @@ def _open_dialog(state, window):
 
 
 def _row_by_day(dialog, day):
-    return next(r for r in dialog._rows if r.day == day)
+    return next(r for r in catchup_rows(dialog) if r.day == day)
 
 
 def _tick(row, index, active):
-    row._goal_checks[index][1].check.set_active(active)
+    catchup_goal_rows(row)[index][1].check.set_active(active)
 
 
 def _settings(state):
@@ -58,25 +58,27 @@ def test_initial_state(seeded_state, seeded_window, process_events):
         "stay unconfirmed."
     )
 
-    assert [r.day for r in dialog._rows] == [WED, THU, FRI, SAT]
+    rows = catchup_rows(dialog)
+    assert [r.day for r in rows] == [WED, THU, FRI, SAT]
     expected_dates = [
         "Wednesday 9 September",
         "Thursday 10 September",
         "Friday 11 September",
         "Saturday 12 September",
     ]
-    for row, expected in zip(dialog._rows, expected_dates, strict=True):
+    for row, expected in zip(rows, expected_dates, strict=True):
         assert row.date_label.get_label() == expected
         assert row.state_label.get_label() == "Unconfirmed"
-        assert len(row._goal_checks) == 5
-        assert all(not goal_row.check.get_active() for _gid, goal_row in row._goal_checks)
+        goal_rows = catchup_goal_rows(row)
+        assert len(goal_rows) == 5
+        assert all(not goal_row.check.get_active() for _gid, goal_row in goal_rows)
         assert "missed" not in row.get_css_classes()
         assert row.action_button.get_visible()
         assert row.action_button.get_label() == "Mark missed"
 
     assert not dialog.save_button.get_sensitive()
 
-    cells = dialog.result_strip._cells
+    cells = dialog.result_strip.cells
     assert len(cells) == 24
     bordered = [i for i, c in enumerate(cells) if c.border is not None]
     assert len(bordered) == 4
@@ -108,7 +110,7 @@ def test_ticking_all_goals_keeps_the_day(seeded_state, seeded_window, process_ev
     assert dialog.save_button.get_sensitive()
 
     # Every goal row is ticked (dimmed), and none is flagged missed on a fully-kept day.
-    for _gid, row in wed_row._goal_checks:
+    for _gid, row in catchup_goal_rows(wed_row):
         assert "ticked" in row.get_css_classes()
         assert "missed" not in row.get_css_classes()
 
@@ -118,12 +120,12 @@ def test_ticking_all_goals_keeps_the_day(seeded_state, seeded_window, process_ev
         _settings(seeded_state),
         {WED: (Answer.KEPT, ())},
     )
-    assert [(c.fill, c.border) for c in dialog.result_strip._cells] == [
+    assert [(c.fill, c.border) for c in dialog.result_strip.cells] == [
         (c.fill, c.border) for c in expected_preview.strip
     ]
     # The strip ends at today; Wednesday is 5th-from-last. "Kept" renders it as a full day.
-    assert dialog.result_strip._cells[-5].fill == engine.CHART_FULL
-    assert dialog.result_strip._cells[-5].border is None
+    assert dialog.result_strip.cells[-5].fill == engine.CHART_FULL
+    assert dialog.result_strip.cells[-5].border is None
 
 
 def test_ticking_some_goals_records_the_rest_missed(seeded_state, seeded_window, process_events):
@@ -151,7 +153,7 @@ def test_ticking_some_goals_records_the_rest_missed(seeded_state, seeded_window,
 
     # The unticked goal row is flagged missed (and dropped from ticked); the ticked ones are
     # flagged ticked (and not missed).
-    for i, (gid, row) in enumerate(fri_row._goal_checks):
+    for i, (gid, row) in enumerate(catchup_goal_rows(fri_row)):
         if i == 2:
             assert gid == goal2_id
             assert not row.check.get_active()
@@ -175,7 +177,7 @@ def test_goal_row_click_path_toggles_the_check_exactly_once(
     process_events()
 
     wed_row = _row_by_day(dialog, WED)
-    _gid, row = wed_row._goal_checks[0]
+    _gid, row = catchup_goal_rows(wed_row)[0]
     check = row.check
     assert row.get_activatable() is False
     assert row.get_focusable() is False
@@ -254,7 +256,7 @@ def test_ticking_a_goal_after_mark_missed_clears_the_mark(
     # explicit all-missed answer.
     assert fri_row.current_answer() == (
         Answer.MISSED,
-        tuple(gid for gid, _ in fri_row._goal_checks[1:]),
+        tuple(gid for gid, _ in catchup_goal_rows(fri_row)[1:]),
     )
     assert fri_row.state_label.get_label() == "1 of 5 kept · 4 missed"
     assert fri_row.action_button.get_visible() is False

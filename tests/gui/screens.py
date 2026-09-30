@@ -16,7 +16,7 @@ gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 
 from gi.repository import Adw, GLib, Gtk  # noqa: E402
-from helpers import select_streak  # noqa: E402
+from helpers import catchup_goal_rows, catchup_rows, listbox_rows, select_streak  # noqa: E402
 from render import configure_for_rendering, process_events  # noqa: E402
 
 from fixtures.db import bind_memory_db  # noqa: E402
@@ -151,7 +151,8 @@ def _build_edit_streak_goals(ctx: BuildContext) -> Gtk.Widget:
     dialog = StreaksStreakDialog.for_edit(streak)
     dialog.set_state(window.state)
     dialog.more_goals_button.emit("clicked")
-    dialog._goal_rows[1].entry.set_text("Haircut")
+    goal_rows = [row for row in listbox_rows(dialog.goals_list) if row is not dialog.add_goal_row]
+    goal_rows[1].entry.set_text("Haircut")
     dialog.name_row.set_text("Grooming")
 
     dialog.present(window)
@@ -209,18 +210,18 @@ def _build_catch_up_missed(ctx: BuildContext) -> Gtk.Widget:
     dialog.present(window)
     process_events()
 
-    rows = {row.day: row for row in dialog._rows}
+    rows = {row.day: row for row in catchup_rows(dialog)}
     # 9 September: every goal ticked -> kept. 10 September is left untouched (stays unconfirmed).
-    for _gid, goal_row in rows[date(2026, 9, 9)]._goal_checks:
+    for _gid, goal_row in catchup_goal_rows(rows[date(2026, 9, 9)]):
         goal_row.check.set_active(True)
 
     # 11 September: every goal ticked except "45 min second workout" (index 2) -> partial/missed.
     fri_row = rows[date(2026, 9, 11)]
-    for i, (_gid, goal_row) in enumerate(fri_row._goal_checks):
+    for i, (_gid, goal_row) in enumerate(catchup_goal_rows(fri_row)):
         goal_row.check.set_active(i != 2)
 
     # 12 September: every goal ticked -> kept.
-    for _gid, goal_row in rows[date(2026, 9, 12)]._goal_checks:
+    for _gid, goal_row in catchup_goal_rows(rows[date(2026, 9, 12)]):
         goal_row.check.set_active(True)
     process_events()
 

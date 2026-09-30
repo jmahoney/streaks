@@ -2,11 +2,16 @@
 
 from datetime import time
 
-from helpers import listbox_rows
+import gi
 
-from streaks.engine import Settings, evaluate
-from streaks.models import Goal, GoalCheck, Streak, load_streak_data
-from streaks.streak_dialog import StreaksStreakDialog
+gi.require_version("Gtk", "4.0")
+
+from gi.repository import GObject, Gtk  # noqa: E402
+from helpers import listbox_rows  # noqa: E402
+
+from streaks.engine import Settings, evaluate  # noqa: E402
+from streaks.models import Goal, GoalCheck, Streak, load_streak_data  # noqa: E402
+from streaks.streak_dialog import StreaksStreakDialog  # noqa: E402
 
 _EDIT_GOALS_DESCRIPTION = (
     "New goals apply from the current period. Earlier periods keep their recorded shade."
@@ -16,6 +21,43 @@ _EDIT_GOALS_DESCRIPTION = (
 def _goal_rows(dialog):
     """`dialog`'s goal rows, excluding the trailing add-goal row."""
     return [row for row in listbox_rows(dialog.goals_list) if row is not dialog.add_goal_row]
+
+
+def _weekday_buttons(dialog):
+    """`dialog`'s seven weekday toggles, Monday first (the `weekday_0..6` template children)."""
+    return tuple(getattr(dialog, f"weekday_{i}") for i in range(7))
+
+
+def _expand_to_multi(dialog):
+    dialog.more_goals_button.emit("clicked")
+
+
+def _is_multi(dialog) -> bool:
+    return dialog.goals_group.get_visible()
+
+
+def _drop_target_for(listbox: Gtk.ListBox) -> Gtk.DropTarget:
+    """The one `Gtk.DropTarget` controller `listbox` carries (see
+    `StreaksStreakDialog.__init__`)."""
+    controllers = listbox.observe_controllers()
+    for i in range(controllers.get_n_items()):
+        controller = controllers.get_item(i)
+        if isinstance(controller, Gtk.DropTarget):
+            return controller
+    raise AssertionError("no Gtk.DropTarget found")
+
+
+def _drop_row(dialog, source_row, target_row) -> bool:
+    """Drive the real drop path: emit `goals_list`'s `Gtk.DropTarget::drop` with a
+    `GObject.Value` boxing `source_row` (the same value shape `_on_goal_drag_prepare` builds for
+    a real drag), at a y inside `target_row`'s bounds."""
+    drop_target = _drop_target_for(dialog.goals_list)
+    value = GObject.Value()
+    value.init(GObject.TYPE_PYOBJECT)
+    value.set_boxed(source_row)
+    _, bounds = target_row.compute_bounds(dialog.goals_list)
+    y = bounds.get_y() + bounds.get_height() / 2
+    return drop_target.emit("drop", value, 0.0, y)
 
 
 def _new_dialog(state, window):
@@ -93,7 +135,7 @@ def test_period_switching(fresh_state, fresh_window, process_events):
     dialog.period_toggle.set_active_name("weekdays")
     process_events()
     assert dialog.weekday_box.get_sensitive()
-    assert [b.get_active() for b in dialog._weekday_buttons] == [
+    assert [b.get_active() for b in _weekday_buttons(dialog)] == [
         True,
         True,
         True,
@@ -198,7 +240,7 @@ def test_collapse_on_remove(fresh_state, fresh_window, process_events):
     rows[1].remove_button.emit("clicked")
     process_events()
 
-    assert not dialog._multi
+    assert not _is_multi(dialog)
     assert dialog.name_row.get_text() == "Floss"
     assert dialog.name_row.get_title() == "Name"
     assert not dialog.goals_group.get_visible()
@@ -213,7 +255,7 @@ def test_collapse_on_remove(fresh_state, fresh_window, process_events):
     rows[0].remove_button.emit("clicked")
     process_events()
 
-    assert not dialog._multi
+    assert not _is_multi(dialog)
     assert dialog.name_row.get_text() == "Goal two text"
 
 
@@ -232,7 +274,7 @@ def test_collapse_then_expand_round_trips(fresh_state, fresh_window, process_eve
 
     rows[1].remove_button.emit("clicked")
     process_events()
-    assert not dialog._multi
+    assert not _is_multi(dialog)
 
     dialog.more_goals_button.emit("clicked")
     process_events()
@@ -269,14 +311,14 @@ def test_save_new_streak(fresh_state, fresh_window, process_events):
     dialog = _new_dialog(fresh_state, window)
     process_events()
 
-    dialog._expand_to_multi()
+    _expand_to_multi(dialog)
     process_events()
     dialog.name_row.set_text("75 Hard")
     dialog.swatch_4.set_active(True)
     dialog.period_toggle.set_active_name("weekdays")
     process_events()
     for i, active in enumerate([True, False, True, False, True, False, False]):
-        dialog._weekday_buttons[i].set_active(active)
+        _weekday_buttons(dialog)[i].set_active(active)
     dialog.skip_row.set_active(True)
     dialog.reminder_popover.switch.set_active(True)
     dialog.reminder_popover.hour_spin.set_value(20)
@@ -317,7 +359,7 @@ def test_edit_single_prefill(seeded_state, seeded_window, process_events):
 
     assert dialog.get_title() == "Edit Streak"
     assert dialog.save_button.get_label() == "Save"
-    assert not dialog._multi
+    assert not _is_multi(dialog)
     assert dialog.name_row.get_text() == "Clip fingernails"
     assert dialog.name_row.get_title() == "Name"
     assert dialog.period_toggle.get_active_name() == "monthly"
@@ -394,7 +436,7 @@ def test_edit_collapse_keeps_surviving_goal(seeded_state, seeded_window, process
     weights_row.remove_button.emit("clicked")
     process_events()
 
-    assert not dialog._multi
+    assert not _is_multi(dialog)
     assert dialog.name_row.get_text() == "45 min session"
 
     dialog.save_button.emit("clicked")
@@ -412,7 +454,7 @@ def test_edit_multi_prefill(seeded_state, seeded_window, process_events):
     dialog = _edit_dialog(seeded_state, window, "75 Hard")
     process_events()
 
-    assert dialog._multi
+    assert _is_multi(dialog)
     assert dialog.name_row.get_title() == "Streak name"
     rows = _goal_rows(dialog)
     assert len(rows) == 5
@@ -433,13 +475,13 @@ def test_delete_row_opens_confirmation(seeded_state, seeded_window, process_even
 
 
 def test_reorder_goal_row_via_drop_handler(fresh_state, fresh_window, process_events):
-    """Dropping a goal row reorders the list. Drives ``_reorder_goal_row`` directly with
-    (row, index), the same entry point the drop handler uses."""
+    """Dropping a goal row reorders the list, driven through the real `Gtk.DropTarget::drop`
+    signal on `goals_list` (see `_drop_row`)."""
     window = fresh_window
 
     dialog = _new_dialog(fresh_state, window)
     process_events()
-    dialog._expand_to_multi()
+    _expand_to_multi(dialog)
     process_events()
 
     dialog.add_goal_row.emit("activated")
@@ -449,21 +491,12 @@ def test_reorder_goal_row_via_drop_handler(fresh_state, fresh_window, process_ev
         row.entry.set_text(text)
     process_events()
 
-    # Move the first row ("A") to the end.
-    moved = dialog._reorder_goal_row(rows[0], 2)
+    # Move the first row ("A") onto the last row ("C"): the drop handler treats a drop on the
+    # last row as "move to the end".
+    moved = _drop_row(dialog, rows[0], rows[2])
     process_events()
     assert moved is True
     assert [r.entry.get_text() for r in _goal_rows(dialog)] == ["B", "C", "A"]
-
-    # A no-op move returns False and leaves the order unchanged.
-    assert dialog._reorder_goal_row(rows[0], 2) is False
-    assert [r.entry.get_text() for r in _goal_rows(dialog)] == ["B", "C", "A"]
-
-    # Out-of-range indices clamp to the last position.
-    moved = dialog._reorder_goal_row(rows[1], 99)  # rows[1] == "B", currently first
-    process_events()
-    assert moved is True
-    assert [r.entry.get_text() for r in _goal_rows(dialog)] == ["C", "A", "B"]
 
     # Placeholders track position, not the row that originally held it.
     assert [r.entry.get_placeholder_text() for r in _goal_rows(dialog)] == [
@@ -485,7 +518,7 @@ def test_reorder_goal_row_keyboard_fallback(fresh_state, fresh_window, process_e
 
     dialog = _new_dialog(fresh_state, window)
     process_events()
-    dialog._expand_to_multi()
+    _expand_to_multi(dialog)
     process_events()
 
     rows = _goal_rows(dialog)
@@ -493,16 +526,16 @@ def test_reorder_goal_row_keyboard_fallback(fresh_state, fresh_window, process_e
         row.entry.set_text(text)
     process_events()
 
-    rows[1].activate_action("row.move-up")
+    rows[1].entry.activate_action("row.move-up", None)
     process_events()
     assert [r.entry.get_text() for r in _goal_rows(dialog)] == ["B", "A"]
 
-    rows[1].activate_action("row.move-down")
+    rows[1].entry.activate_action("row.move-down", None)
     process_events()
     assert [r.entry.get_text() for r in _goal_rows(dialog)] == ["A", "B"]
 
-    # A no-op move returns False and leaves the order unchanged.
-    rows[0].activate_action("row.move-up")
+    # A no-op move leaves the order unchanged.
+    rows[0].entry.activate_action("row.move-up", None)
     process_events()
     assert [r.entry.get_text() for r in _goal_rows(dialog)] == ["A", "B"]
 
@@ -513,7 +546,7 @@ def test_reorder_goal_row_persists_positions_on_save(fresh_state, fresh_window, 
 
     dialog = _new_dialog(fresh_state, window)
     process_events()
-    dialog._expand_to_multi()
+    _expand_to_multi(dialog)
     process_events()
 
     dialog.name_row.set_text("Order test")
@@ -522,7 +555,7 @@ def test_reorder_goal_row_persists_positions_on_save(fresh_state, fresh_window, 
         row.entry.set_text(text)
     process_events()
 
-    dialog._reorder_goal_row(rows[0], 1)
+    assert _drop_row(dialog, rows[0], rows[1]) is True
     process_events()
 
     dialog.save_button.emit("clicked")

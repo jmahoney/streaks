@@ -1,5 +1,5 @@
-"""Unit tests for the pure engine (``streaks.engine``) and its helpers (``streaks.clock``,
-``streaks.words``).
+"""Unit tests for the pure engine (``streaks.engine``); ``streaks.clock`` and ``streaks.words``
+have their own test modules.
 
 Two kinds of tests live here: parametrised tables against small, hand-built ``StreakData``
 values (no database involved), and literal-value checks against the design fixture
@@ -13,9 +13,6 @@ from __future__ import annotations
 import dataclasses
 from datetime import date, datetime, timedelta
 
-import pytest
-
-from streaks import clock, words
 from streaks.engine import (
     CHART_FULL,
     CHART_HIGH,
@@ -25,7 +22,6 @@ from streaks.engine import (
     CHART_MISSED,
     CHART_UNCONFIRMED_BORDER,
     CHART_UPCOMING,
-    CHART_ZERO,
     WEEKDAYS_MON_TO_FRI,
     Answer,
     AnswerData,
@@ -33,16 +29,10 @@ from streaks.engine import (
     GoalData,
     Period,
     PeriodKind,
-    PeriodResult,
     Settings,
     Status,
     StreakData,
     Tile,
-    _banner_title,
-    _cell_for_result,
-    _open_sentence,
-    _unconfirmed_sentence,
-    _upcoming_cell,
     active_goals,
     best_run,
     catch_up,
@@ -107,35 +97,6 @@ def _mk(
     )
     defaults.update(kwargs)
     return StreakData(goals=goals, checks=tuple(checks), answers=answer_data, **defaults)
-
-
-# ----------------------------------------------------------------------------------------------
-# clock.py
-# ----------------------------------------------------------------------------------------------
-
-
-@pytest.mark.parametrize(
-    "at,day_start_minutes,expected",
-    [
-        (datetime(2026, 9, 14, 3, 59), 240, date(2026, 9, 13)),
-        (datetime(2026, 9, 14, 4, 0), 240, date(2026, 9, 14)),
-        (datetime(2026, 9, 14, 0, 0), 0, date(2026, 9, 14)),
-        (datetime(2026, 9, 14, 23, 59), 0, date(2026, 9, 14)),
-    ],
-)
-def test_check_in_day(at, day_start_minutes, expected):
-    assert clock.check_in_day(at, day_start_minutes) == expected
-
-
-def test_now_honours_fake_today(monkeypatch):
-    monkeypatch.setenv("STREAKS_FAKE_TODAY", "2026-09-13")
-    monkeypatch.delenv("STREAKS_FAKE_NOW", raising=False)
-    assert clock.now() == datetime(2026, 9, 13, 21, 45)
-
-
-def test_now_honours_fake_now(monkeypatch):
-    monkeypatch.setenv("STREAKS_FAKE_NOW", "2026-09-13T08:30:00")
-    assert clock.now() == datetime(2026, 9, 13, 8, 30)
 
 
 # ----------------------------------------------------------------------------------------------
@@ -536,154 +497,156 @@ def test_history_header_subtitle_single_goal_monthly():
 
 
 # ----------------------------------------------------------------------------------------------
-# Chart cells / tooltips.
+# Chart cells / tooltips, via history()'s activity chart.
 # ----------------------------------------------------------------------------------------------
 
 
-@pytest.mark.parametrize(
-    "status,done,total,expected_fill",
-    [
-        (Status.KEPT, 0, 5, CHART_ZERO),  # answered kept, nothing done
-        (Status.PARTIAL, 1, 5, CHART_LOW),  # ratio 0.2 < 0.3
-        (Status.PARTIAL, 2, 5, CHART_MID),  # ratio 0.4, < 0.6
-        (Status.PARTIAL, 4, 5, CHART_HIGH),  # ratio 0.8, < 0.99
-        (Status.KEPT, 5, 5, CHART_FULL),  # ratio 1.0
-    ],
-)
-def test_cell_for_result_fill_by_ratio(status, done, total, expected_fill):
-    pr = PeriodResult(Period(date(2026, 1, 1), date(2026, 1, 1)), status, done, total)
-    cell = _cell_for_result(pr)
-    assert cell.fill == expected_fill
-    assert cell.border is None
+def _week_of(streak, today, settings=None):
+    """The one-week lifetime `history()` chart for a streak created on a Monday, flattened
+    Mon..Sun. Lifetime (not the default per-run chart) renders every evaluated day, including a
+    day whose miss ended its run — a run's own chart never does, since a hard miss is the
+    boundary between runs and belongs to neither."""
+    h = history(streak, today, settings or Settings(), chart="lifetime", weeks_shown=1)
+    assert len(h.weeks) == 1
+    return h.weeks[0]
 
 
-def test_cell_for_result_unconfirmed_and_open_zero():
-    unconfirmed = PeriodResult(Period(date(2026, 1, 1), date(2026, 1, 1)), Status.UNCONFIRMED, 0, 5)
-    cell = _cell_for_result(unconfirmed)
+def test_history_chart_fill_by_ratio_and_status():
+    """One week, Monday to Sunday: a ratio ladder (low/mid/high/full), an unconfirmed day, an
+    explicit miss, and (Sunday, after today) an upcoming day."""
+    monday = date(2026, 9, 1)
+    monday -= timedelta(days=monday.weekday())
+    today = monday + timedelta(days=5)  # Saturday
+    s = _mk(
+        monday,
+        day_checks={
+            monday: {0},  # 1/5 -> ratio 0.2 < 0.3
+            monday + timedelta(days=1): {0, 1},  # 2/5 -> ratio 0.4 < 0.6
+            monday + timedelta(days=2): {0, 1, 2, 3},  # 4/5 -> ratio 0.8 < 0.99
+            monday + timedelta(days=3): {0, 1, 2, 3, 4},  # 5/5 -> ratio 1.0
+            # monday + 4 (Friday): no checks, no answer -> unconfirmed.
+        },
+        answers={today: Answer.MISSED},  # Saturday (today), explicitly missed
+        n_goals=5,
+    )
+    week = _week_of(s, today)
+
+    assert week[0].fill == CHART_LOW
+    assert week[1].fill == CHART_MID
+    assert week[2].fill == CHART_HIGH
+    assert week[3].fill == CHART_FULL
+    assert week[3].border is None
+    assert week[3].tooltip == "5 of 5 goals"
+
+    friday = week[4]
+    assert friday.fill == CHART_HOLLOW
+    assert friday.border == CHART_UNCONFIRMED_BORDER
+    assert "unconfirmed" in friday.tooltip
+
+    saturday = week[5]
+    assert saturday.fill == CHART_MISSED
+    assert saturday.border is None
+    assert saturday.tooltip == "missed — run ended"
+
+    sunday = week[6]
+    assert sunday.fill == CHART_UPCOMING
+    assert sunday.border is None
+    assert sunday.tooltip == "upcoming"
+
+
+def test_history_chart_todays_cell_with_nothing_done_is_hollow():
+    """Today itself, checked in nothing yet, renders the same hollow/bordered cell as a past
+    unconfirmed day."""
+    today = date(2026, 1, 5)
+    s = _mk(today, n_goals=1)
+    cell = _week_of(s, today)[today.weekday()]
     assert cell.fill == CHART_HOLLOW
     assert cell.border == CHART_UNCONFIRMED_BORDER
-    assert "unconfirmed" in cell.tooltip
-
-    open_zero = PeriodResult(Period(date(2026, 1, 1), date(2026, 1, 1)), Status.OPEN, 0, 5)
-    cell = _cell_for_result(open_zero)
-    assert cell.fill == CHART_HOLLOW
-    assert cell.border == CHART_UNCONFIRMED_BORDER
-
-
-def test_cell_for_result_missed():
-    pr = PeriodResult(Period(date(2026, 1, 1), date(2026, 1, 1)), Status.MISSED, 0, 5)
-    cell = _cell_for_result(pr)
-    assert cell.fill == CHART_MISSED
-    assert cell.tooltip == "missed — run ended"
-
-
-def test_cell_tooltip_done_of_total():
-    pr = PeriodResult(Period(date(2026, 1, 1), date(2026, 1, 1)), Status.KEPT, 5, 5)
-    cell = _cell_for_result(pr)
-    assert cell.tooltip == "5 of 5 goals"
-
-
-def test_upcoming_cell():
-    cell = _upcoming_cell()
-    assert cell.fill == CHART_UPCOMING
-    assert cell.tooltip == "upcoming"
 
 
 # ----------------------------------------------------------------------------------------------
-# Banner wording.
+# Banner wording, via today_view()'s quiet-days banner.
 # ----------------------------------------------------------------------------------------------
+
+
+def _banner_for(streak, today):
+    tv = today_view([streak], today, Settings())
+    return next(b for b in tv.banners if b.streak_id == streak.id)
 
 
 def test_banner_title_single_day():
-    assert _banner_title(date(2026, 9, 12), date(2026, 9, 12)) == (
-        "One day without a check-in — 12 September"
-    )
+    created = date(2026, 9, 1)
+    today = date(2026, 9, 13)
+    checked = {created + timedelta(days=i): {0} for i in range((today - created).days) if i != 11}
+    s = _mk(created, day_checks=checked, n_goals=1)  # every day kept except 12 Sep; today open
+    assert _banner_for(s, today).title == "One day without a check-in — 12 September"
 
 
 def test_banner_title_same_month_range():
-    assert _banner_title(date(2026, 9, 9), date(2026, 9, 12)) == (
-        "Four days without a check-in — 9 to 12 September"
-    )
+    created = date(2026, 9, 1)
+    today = date(2026, 9, 13)
+    checked = {
+        created + timedelta(days=i): {0}
+        for i in range((today - created).days)
+        if i not in (8, 9, 10, 11)  # 9-12 Sep unconfirmed
+    }
+    s = _mk(created, day_checks=checked, n_goals=1)
+    assert _banner_for(s, today).title == "Four days without a check-in — 9 to 12 September"
 
 
 def test_banner_title_cross_month_range():
-    assert _banner_title(date(2026, 8, 30), date(2026, 9, 2)) == (
-        "Four days without a check-in — 30 August to 2 September"
+    created = date(2026, 8, 1)
+    today = date(2026, 9, 13)
+    gap = (date(2026, 8, 30), date(2026, 9, 2))  # 4 days, straddling the month boundary
+    checked = {
+        created + timedelta(days=i): {0}
+        for i in range((today - created).days)
+        if not (gap[0] <= created + timedelta(days=i) <= gap[1])
+    }
+    s = _mk(created, day_checks=checked, n_goals=1)
+    assert _banner_for(s, today).title == "Four days without a check-in — 30 August to 2 September"
+
+
+# ----------------------------------------------------------------------------------------------
+# Today-view subtitle wording, via today_view().
+# ----------------------------------------------------------------------------------------------
+
+
+def test_subtitle_no_check_ins_open():
+    today = date(2026, 1, 5)
+    s = _mk(today, day_checks={today: {0}}, n_goals=1)  # today already fully checked in
+    assert today_view([s], today, Settings()).subtitle == "No check-ins open"
+
+
+def test_subtitle_open_check_ins_counted():
+    today = date(2026, 1, 5)
+    open_streak = _mk(today, n_goals=1)  # created today, nothing checked yet -> open
+    assert today_view([open_streak], today, Settings()).subtitle == "1 check-in open"
+    assert today_view([open_streak, open_streak], today, Settings()).subtitle == "2 check-ins open"
+
+
+def test_subtitle_unconfirmed_days_counted():
+    created = date(2026, 9, 1)
+    today = date(2026, 9, 3)
+    # 1 Sep kept, 2 Sep unconfirmed, today (3 Sep) checked -> not open.
+    s = _mk(created, day_checks={created: {0}, today: {0}}, n_goals=1)
+    assert today_view([s], today, Settings()).subtitle == (
+        "No check-ins open · 1 earlier day unconfirmed"
     )
 
 
-# ----------------------------------------------------------------------------------------------
-# Today-view subtitle wording.
-# ----------------------------------------------------------------------------------------------
-
-
-@pytest.mark.parametrize(
-    "n,expected",
-    [
-        (0, "No check-ins open"),
-        (1, "1 check-in open"),
-        (2, "2 check-ins open"),
-    ],
-)
-def test_open_sentence(n, expected):
-    assert _open_sentence(n) == expected
-
-
-@pytest.mark.parametrize(
-    "n,expected",
-    [
-        (0, None),
-        (1, "1 earlier day unconfirmed"),
-        (4, "4 earlier days unconfirmed"),
-    ],
-)
-def test_unconfirmed_sentence(n, expected):
-    assert _unconfirmed_sentence(n) == expected
-
-
-# ----------------------------------------------------------------------------------------------
-# words.py
-# ----------------------------------------------------------------------------------------------
-
-
-@pytest.mark.parametrize(
-    "n,expected",
-    [
-        (0, "zero"),
-        (1, "one"),
-        (2, "two"),
-        (12, "twelve"),
-        (13, "13"),
-        (100, "100"),
-    ],
-)
-def test_number_word(n, expected):
-    assert words.number_word(n) == expected
-
-
-def test_number_word_capitalised():
-    assert words.sentence_number_word(2) == "Two"
-    assert words.sentence_number_word(13) == "13"
-
-
-def test_fmt_day():
-    assert words.fmt_day(date(2026, 9, 9)) == "9 September"
-
-
-def test_fmt_day_short():
-    assert words.fmt_day_short(date(2026, 3, 4)) == "4 Mar"
-
-
-def test_fmt_weekday_day():
-    assert words.fmt_weekday_day(date(2026, 9, 13)) == "Sunday 13 September"
-
-
-def test_fmt_range():
-    assert words.fmt_range(date(2026, 5, 14), date(2026, 6, 16)) == "14 May – 16 Jun"
-
-
-def test_time_hm():
-    assert words.time_hm(datetime(2026, 9, 13, 7, 12)) == "07:12"
+def test_subtitle_unconfirmed_days_pluralised():
+    created = date(2026, 9, 1)
+    today = date(2026, 9, 7)
+    # 2-5 Sep unconfirmed (4 days); 1 and 6 Sep kept; today (7 Sep) checked -> not open.
+    s = _mk(
+        created,
+        day_checks={created: {0}, date(2026, 9, 6): {0}, today: {0}},
+        n_goals=1,
+    )
+    assert today_view([s], today, Settings()).subtitle == (
+        "No check-ins open · 4 earlier days unconfirmed"
+    )
 
 
 # ================================================================================================
@@ -1090,7 +1053,7 @@ def test_ended_streak_has_no_catch_up_link_even_with_unconfirmed_periods(today, 
 
 def test_kept_answer_counts_as_all_goals_done(seeded, today, settings):
     """A day answered "Kept" (e.g. via catch-up) renders as a full cell and counts every goal."""
-    from streaks.engine import CHART_FULL, Answer, AnswerData, Status, _cell_for_result, evaluate
+    from streaks.engine import AnswerData
 
     hard = next(s for s in load_all() if s.name == "75 Hard")
     day = date(2026, 9, 10)
@@ -1101,7 +1064,11 @@ def test_kept_answer_counts_as_all_goals_done(seeded, today, settings):
     result = next(pr for pr in evaluate(with_answer, today, settings) if pr.period.start == day)
     assert result.status == Status.KEPT
     assert result.done == result.total == 5
-    assert _cell_for_result(result).fill == CHART_FULL
+
+    run = current_run(with_answer, today, settings)
+    monday0 = run.start - timedelta(days=run.start.weekday())
+    flat = [c for week in history(with_answer, today, settings).weeks for c in week]
+    assert flat[(day - monday0).days].fill == CHART_FULL
 
 
 def test_current_goals_skips_removed_and_orders_by_position():

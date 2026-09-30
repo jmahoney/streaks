@@ -187,7 +187,7 @@ def test_export_row_writes_full_json_dump(seeded_state, seeded_window, process_e
     process_events()
 
     out_path = tmp_path / "export.json"
-    dialog._export_to(out_path)
+    dialog.export_to(out_path)
 
     data = json.loads(out_path.read_text())
     assert data["version"] == 1

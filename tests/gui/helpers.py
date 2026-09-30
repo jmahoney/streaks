@@ -51,3 +51,13 @@ def select_streak(window: StreaksWindow, name: str):
             window.sidebar_list.select_row(row)
             return row
     raise AssertionError(f"no sidebar row named {name!r}")
+
+
+def catchup_rows(dialog) -> list:
+    """`dialog`'s day cards (`StreaksCatchupRow`), in display order."""
+    return box_children(dialog.days_box)
+
+
+def catchup_goal_rows(row) -> list[tuple[int, object]]:
+    """`row`'s `(goal_id, StreaksCatchupGoalRow)` pairs, in display order."""
+    return [(goal_row.goal_id, goal_row) for goal_row in listbox_rows(row.goals_list)]

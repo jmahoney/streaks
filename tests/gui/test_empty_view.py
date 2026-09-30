@@ -26,7 +26,7 @@ def test_empty_view_grid_cells(app, process_events):
     assert grid.gap == 5
     assert grid.radius == 4
 
-    cells = grid._cells
+    cells = grid.cells
     assert len(cells) == 28
     assert all(c.fill == engine.CHART_ZERO for c in cells[:-1])
     assert cells[-1].fill == theme.CHART_EMPTY_HINT

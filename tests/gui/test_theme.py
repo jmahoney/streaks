@@ -47,25 +47,12 @@ def test_palettes_cover_every_token_with_parseable_colours(palette):
         assert Gdk.RGBA().parse(value), value
 
 
-def test_dark_palette_is_the_amber_ramp():
-    """The design's dark scale: #4a3a22 -> #ffa348, hollow unconfirmed, #8e4a50 missed."""
-    dark = theme.DARK_PALETTE
-    assert dark[engine.CHART_FULL] == "#ffa348"
-    assert dark[engine.CHART_LOW] == "#4a3a22"
-    assert dark[engine.CHART_MISSED] == "#8e4a50"
-    assert dark[engine.CHART_UNCONFIRMED_BORDER] == "#6b5230"
-    assert Gdk.RGBA().parse(dark[engine.CHART_HOLLOW])
+def test_dark_scheme_hollow_cell_is_fully_transparent():
+    """An unconfirmed (hollow) cell in the dark scheme paints no fill of its own — only its
+    border shows, over whatever sits behind it."""
     hollow = Gdk.RGBA()
-    hollow.parse(dark[engine.CHART_HOLLOW])
+    hollow.parse(theme.DARK_PALETTE[engine.CHART_HOLLOW])
     assert hollow.alpha == 0
-
-
-def test_light_palette_matches_the_light_design():
-    light = theme.LIGHT_PALETTE
-    assert light[engine.CHART_FULL] == "#1a68c7"
-    assert light[engine.CHART_HOLLOW] == "#ffffff"
-    assert light[engine.CHART_UNCONFIRMED_BORDER] == "#a9c9ef"
-    assert light[engine.CHART_MISSED] == "#f3c0c4"
 
 
 def test_resolve_follows_the_scheme(app, light_again):

@@ -110,9 +110,9 @@ class StreaksPreferencesDialog(Adw.PreferencesDialog):
             return
         if file is None:
             return
-        self._export_to(Path(file.get_path()))
+        self.export_to(Path(file.get_path()))
 
-    def _export_to(self, path: Path) -> None:
+    def export_to(self, path: Path) -> None:
         """Write the whole database to ``path`` as JSON, split out from the async
         ``Gtk.FileDialog`` call that picks ``path``."""
         export.dump_json(str(path))

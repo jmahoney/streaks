@@ -35,7 +35,7 @@ class StreaksApplication(Adw.Application):
         self.version = version
         self.profile = profile
         self.window = None
-        self._db_error_dialog: Adw.AlertDialog | None = None
+        self.database_error_dialog: Adw.AlertDialog | None = None
         self.preferences_dialog: Adw.Dialog | None = None
 
         action = Gio.SimpleAction.new("quit", None)
@@ -97,7 +97,7 @@ class StreaksApplication(Adw.Application):
         dialog.set_default_response("quit")
         dialog.set_close_response("quit")
         dialog.connect("response", lambda *_args: self.quit())
-        self._db_error_dialog = dialog
+        self.database_error_dialog = dialog
         dialog.present(None)
 
     def _on_preferences(self, *args):

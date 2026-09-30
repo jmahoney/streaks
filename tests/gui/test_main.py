@@ -16,19 +16,23 @@ from streaks import models
 from streaks.main import StreaksApplication
 
 
-def test_show_database_error_presents_dialog_with_path_and_reason(process_events):
-    app = StreaksApplication(flags=Gio.ApplicationFlags.NON_UNIQUE)
-    exc = models.DatabaseInitError("/fake/data/streaks.db", "disk is full")
+def test_do_activate_shows_database_error_with_path_and_reason(monkeypatch, process_events):
+    def fake_init_db():
+        raise models.DatabaseInitError("/fake/data/streaks.db", "disk is full")
 
-    app._show_database_error(exc)
+    monkeypatch.setattr(models, "init_db", fake_init_db)
+    monkeypatch.setattr(models.db, "database", None)
+
+    app = StreaksApplication(flags=Gio.ApplicationFlags.NON_UNIQUE)
+    app.do_activate()
     process_events()
 
-    assert "/fake/data/streaks.db" in app._db_error_dialog.get_body()
-    assert "disk is full" in app._db_error_dialog.get_body()
+    assert "/fake/data/streaks.db" in app.database_error_dialog.get_body()
+    assert "disk is full" in app.database_error_dialog.get_body()
 
     quit_calls = []
     app.quit = lambda: quit_calls.append(True)  # noqa: E731 - overriding a bound method for the test
-    app._db_error_dialog.emit("response", "quit")
+    app.database_error_dialog.emit("response", "quit")
     process_events()
 
     assert quit_calls == [True]
@@ -46,8 +50,8 @@ def test_do_activate_shows_database_error_and_never_builds_a_window(monkeypatch,
     process_events()
 
     assert app.window is None
-    assert app._db_error_dialog is not None
-    assert "/fake/data/streaks.db" in app._db_error_dialog.get_body()
+    assert app.database_error_dialog is not None
+    assert "/fake/data/streaks.db" in app.database_error_dialog.get_body()
 
 
 def test_development_profile_marks_the_window_devel(app, process_events):

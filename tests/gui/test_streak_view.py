@@ -56,7 +56,7 @@ def test_75_hard_chart(seeded_window, process_events):
     )
     assert view.range_toggle.get_active_name() == "run"
 
-    cells = view.heatmap._cells
+    cells = view.heatmap.cells
     assert len(cells) % 7 == 0
     assert len(cells) == view.heatmap.columns * 7
 
@@ -89,7 +89,7 @@ def test_lifetime_toggle(seeded_window, process_events):
     view.range_toggle.set_active_name("lifetime")
     process_events()
 
-    cells = view.heatmap._cells
+    cells = view.heatmap.cells
     assert len(cells) == 30 * 7
 
     from datetime import date, timedelta
@@ -153,11 +153,11 @@ def test_earlier_runs_and_switching_charts(seeded_window, process_events):
 
     assert rows[0].title_label.get_label() == "Run 2"
     assert rows[0].meta_label.get_label() == "14 May – 16 Jun · 34 days"
-    assert len(rows[0].strip._cells) == 34
+    assert len(rows[0].strip.cells) == 34
 
     assert rows[1].title_label.get_label() == "Run 1"
     assert rows[1].meta_label.get_label() == "2 Feb – 1 Mar · 28 days"
-    assert len(rows[1].strip._cells) == 28
+    assert len(rows[1].strip.cells) == 28
 
     # Activating Run 2 switches the chart to that run.
     view.runs_list.emit("row-activated", rows[0])
@@ -168,7 +168,7 @@ def test_earlier_runs_and_switching_charts(seeded_window, process_events):
     assert view.range_toggle.get_active_name() == "run"
     run_toggle = view.range_toggle.get_toggle_by_name("run")
     assert run_toggle.get_label() == "Run 2"
-    assert len(view.heatmap._cells) == 6 * 7
+    assert len(view.heatmap.cells) == 6 * 7
 
     # Toggling away and back restores "This run".
     view.range_toggle.set_active_name("lifetime")
