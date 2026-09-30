@@ -2,7 +2,7 @@
 
 Each unconfirmed day is its own card; the user ticks the goals they completed and the day's
 answer follows from those ticks (see ``StreaksCatchupRow``). ``Save`` writes through
-``models.answer_day``.
+``models.answer_days``.
 """
 
 from __future__ import annotations
@@ -19,7 +19,7 @@ from gi.repository import Adw, Gtk
 from streaks import engine
 from streaks.catchup_row import StreaksCatchupRow  # noqa: F401  registers $StreaksCatchupRow
 from streaks.engine import Answer
-from streaks.models import Streak, answer_day, db
+from streaks.models import Streak, answer_days
 from streaks.state import AppState
 from streaks.widgets.grid_widgets import StripWidget  # noqa: F401  registers $StripWidget
 
@@ -49,7 +49,7 @@ class StreaksCatchupDialog(Adw.Dialog):
         super().__init__(**kwargs)
         self.state = state
         self.streak_id = streak_id
-        self._streak = next(s for s in state.streaks if s.id == streak_id)
+        self._streak = state.streak(streak_id)
         self._rows: list[StreaksCatchupRow] = []
         self._answers: dict[date, tuple[Answer, tuple[int, ...]]] = {}
 
@@ -71,9 +71,7 @@ class StreaksCatchupDialog(Adw.Dialog):
         cu = engine.catch_up(self._streak, today, settings)
         self.dialog_title.set_subtitle(cu.subtitle)
 
-        active_goals = sorted(
-            (g for g in self._streak.goals if g.removed_on is None), key=lambda g: g.position
-        )
+        active_goals = engine.current_goals(self._streak)
         for cu_day in cu.days:
             row = StreaksCatchupRow()
             row.configure(cu_day.day, active_goals)
@@ -119,8 +117,6 @@ class StreaksCatchupDialog(Adw.Dialog):
 
     def _on_save_clicked(self, _button: Gtk.Button) -> None:
         streak = Streak.get_by_id(self.streak_id)
-        with db.atomic():
-            for day, (status, missed_ids) in self._answers.items():
-                answer_day(streak, day, status, list(missed_ids))
+        answer_days(streak, self._answers)
         self.state.reload()
         self.close()

@@ -53,6 +53,7 @@ __all__ = [
     "update_streak",
     "toggle_goal_check",
     "answer_day",
+    "answer_days",
     "clear_answer",
     "end_streak",
     "delete_streak",
@@ -217,6 +218,23 @@ def _add_goal_added_on_column() -> None:
         migrate(migrator.add_column("goal", "added_on", Goal.added_on))
 
 
+def _validate_streak_fields(name: str, colour: str, goal_names: list[str]) -> tuple[str, list[str]]:
+    """Strip and validate a streak's name, colour and goal names, returning the cleaned name and
+    goal names. Blank goal names are dropped; a lone remaining goal takes the streak's name.
+    Raises ``ValueError`` on an empty name, an unknown colour or no goals."""
+    name = name.strip()
+    if not name:
+        raise ValueError("name must not be empty")
+    if colour not in COLOURS:
+        raise ValueError(f"invalid colour: {colour}")
+    cleaned = [g.strip() for g in goal_names if g.strip()]
+    if not cleaned:
+        raise ValueError("at least one goal is required")
+    if len(cleaned) == 1:
+        cleaned = [name]
+    return name, cleaned
+
+
 def create_streak(
     name: str,
     colour: str,
@@ -233,16 +251,7 @@ def create_streak(
 
     A one-goal streak stores its goal under the streak's name.
     """
-    name = name.strip()
-    if not name:
-        raise ValueError("name must not be empty")
-    goal_names = [g.strip() for g in goals if g.strip()]
-    if not goal_names:
-        raise ValueError("at least one goal is required")
-    if len(goal_names) == 1:
-        goal_names = [name]
-    if colour not in COLOURS:
-        raise ValueError(f"invalid colour: {colour}")
+    name, goal_names = _validate_streak_fields(name, colour, goals)
     with db.atomic():
         max_position = Streak.select(fn.MAX(Streak.position)).scalar()
         position = 0 if max_position is None else max_position + 1
@@ -279,16 +288,9 @@ def update_streak(
 
     A one-goal streak stores its goal under the streak's name.
     """
-    name = name.strip()
-    if not name:
-        raise ValueError("name must not be empty")
-    if colour not in COLOURS:
-        raise ValueError(f"invalid colour: {colour}")
-    goal_entries = [(gid, gname.strip()) for gid, gname in goals if gname.strip()]
-    if not goal_entries:
-        raise ValueError("at least one goal is required")
-    if len(goal_entries) == 1:
-        goal_entries = [(goal_entries[0][0], name)]
+    ids = [gid for gid, gname in goals if gname.strip()]
+    name, goal_names = _validate_streak_fields(name, colour, [gname for _gid, gname in goals])
+    goal_entries = list(zip(ids, goal_names, strict=True))
     with db.atomic():
         streak.name = name
         streak.colour = colour
@@ -341,6 +343,13 @@ def answer_day(
             answer.missed_goal_ids = json.dumps(list(missed_goal_ids))
             answer.save()
         return answer
+
+
+def answer_days(streak: Streak, answers: dict[date, tuple[Answer, tuple[int, ...]]]) -> None:
+    """Upsert every day's answer in ``answers`` in one transaction."""
+    with db.atomic():
+        for day, (status, missed_ids) in answers.items():
+            answer_day(streak, day, status, list(missed_ids))
 
 
 def clear_answer(streak: Streak, day: date) -> None:
@@ -432,24 +441,9 @@ def _build_streak_data(
     )
 
 
-def load_streak_data(streak: Streak) -> StreakData:
-    """Load one streak's plain-data snapshot for the engine."""
-    goals = list(Goal.select().where(Goal.streak == streak).order_by(Goal.position))
-    goal_ids = [g.id for g in goals]
-    checks_by_goal: dict[int, list[GoalCheck]] = defaultdict(list)
-    if goal_ids:
-        for check in GoalCheck.select().where(GoalCheck.goal_id.in_(goal_ids)):
-            checks_by_goal[check.goal_id].append(check)
-    answers = list(DayAnswer.select().where(DayAnswer.streak == streak))
-    return _build_streak_data(streak, goals, checks_by_goal, answers)
-
-
-def load_all() -> list[StreakData]:
-    """Load every streak's plain-data snapshot in at most 4 queries.
-
-    Running streaks come first (ordered by position), then ended streaks.
-    """
-    streaks = list(Streak.select())
+def _load_streaks_data(streaks: list[Streak]) -> list[StreakData]:
+    """Batch-load goals/checks/answers for several streaks in 3 queries total, however many
+    streaks are given."""
     streak_ids = [s.id for s in streaks]
 
     goals_by_streak: dict[int, list[Goal]] = defaultdict(list)
@@ -468,11 +462,25 @@ def load_all() -> list[StreakData]:
         for answer in DayAnswer.select().where(DayAnswer.streak_id.in_(streak_ids)):
             answers_by_streak[answer.streak_id].append(answer)
 
-    result = [
+    return [
         _build_streak_data(
             s, goals_by_streak.get(s.id, []), checks_by_goal, answers_by_streak.get(s.id, [])
         )
         for s in streaks
     ]
+
+
+def load_streak_data(streak: Streak) -> StreakData:
+    """Load one streak's plain-data snapshot for the engine."""
+    return _load_streaks_data([streak])[0]
+
+
+def load_all() -> list[StreakData]:
+    """Load every streak's plain-data snapshot in at most 4 queries.
+
+    Running streaks come first (ordered by position), then ended streaks.
+    """
+    streaks = list(Streak.select())
+    result = _load_streaks_data(streaks)
     result.sort(key=lambda sd: (sd.ended_on is not None, sd.position))
     return result

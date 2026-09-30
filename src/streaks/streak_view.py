@@ -63,6 +63,7 @@ class StreaksStreakView(Adw.Bin):
         self._streak: StreakData | None = None
         self._run_index: int | None = None
         self._legend: list[engine.LegendEntry] = []
+        self.header_subtitle = ""  # the meta line under the streak name, set by `_rebuild`
 
         # The legend swatches carry resolved colours, so repaint them when the scheme flips.
         theme.watch(self, lambda: self._rebuild_legend(self._legend))
@@ -94,6 +95,7 @@ class StreaksStreakView(Adw.Bin):
         settings = self.state.settings.to_engine()
         chart = self.range_toggle.get_active_name()
         hist = engine.history(self._streak, today, settings, chart=chart, run_index=self._run_index)
+        self.header_subtitle = hist.header_subtitle
 
         tiles = (self.tile_running, self.tile_longest, self.tile_runs, self.tile_hit)
         for tile, entry in zip(tiles, hist.tiles, strict=True):

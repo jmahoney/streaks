@@ -22,6 +22,7 @@ from streaks.models import (
     GoalCheck,
     Streak,
     answer_day,
+    answer_days,
     clear_answer,
     create_streak,
     database_path,
@@ -618,3 +619,17 @@ def test_init_db_adds_added_on_column_for_v2_database(tmp_path):
         db.init(":memory:", pragmas={"foreign_keys": 1})
         db.connect()
         db.create_tables(MODELS)
+
+
+def test_answer_days_upserts_every_day(today):
+    streak = create_streak("Walk", "#3584e4", PeriodKind.DAILY, ["Walk"], created_on=today)
+    answer_day(streak, date(2026, 9, 1), Answer.KEPT)
+    answer_days(
+        streak,
+        {date(2026, 9, 1): (Answer.MISSED, (7,)), date(2026, 9, 2): (Answer.KEPT, ())},
+    )
+    answers = {a.day: (a.status, a.missed_goal_ids) for a in load_streak_data(streak).answers}
+    assert answers == {
+        date(2026, 9, 1): (Answer.MISSED, (7,)),
+        date(2026, 9, 2): (Answer.KEPT, ()),
+    }

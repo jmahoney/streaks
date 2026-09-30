@@ -18,7 +18,7 @@ gi.require_version("Adw", "1")
 from gi.repository import Adw, Gdk, GLib, GObject, Gtk
 
 from streaks import theme
-from streaks.engine import PeriodKind, StreakData
+from streaks.engine import PeriodKind, StreakData, current_goals
 from streaks.goal_edit_row import StreaksGoalEditRow  # noqa: F401  registers $StreaksGoalEditRow
 from streaks.models import COLOURS, Streak, create_streak, update_streak
 from streaks.state import AppState
@@ -188,9 +188,7 @@ class StreaksStreakDialog(Adw.Dialog):
 
         self._clear_goal_rows()
 
-        active_goals = sorted(
-            (g for g in streak_data.goals if g.removed_on is None), key=lambda g: g.position
-        )
+        active_goals = current_goals(streak_data)
         if len(active_goals) == 1:
             self._single_goal_id = active_goals[0].id
             self._set_multi(False)

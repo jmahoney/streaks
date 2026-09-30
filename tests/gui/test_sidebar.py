@@ -152,3 +152,9 @@ def test_empty_state(fresh_window, process_events):
     assert empty_view.create_button.has_css_class("suggested-action")
     assert empty_view.create_button.has_css_class("pill")
     assert empty_view.create_button.get_action_name() == "win.new-streak"
+
+
+def test_state_streak_looks_up_by_id(seeded_state):
+    hard = next(s for s in seeded_state.streaks if s.name == "75 Hard")
+    assert seeded_state.streak(hard.id) is hard
+    assert seeded_state.streak(-1) is None

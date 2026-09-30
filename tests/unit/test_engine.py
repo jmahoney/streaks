@@ -47,6 +47,7 @@ from streaks.engine import (
     best_run,
     catch_up,
     catch_up_preview,
+    current_goals,
     current_run,
     due_periods,
     evaluate,
@@ -54,6 +55,7 @@ from streaks.engine import (
     is_due,
     mark_missed_preview,
     next_due_day,
+    open_count,
     period_for,
     period_label,
     runs,
@@ -1100,3 +1102,24 @@ def test_kept_answer_counts_as_all_goals_done(seeded, today, settings):
     assert result.status == Status.KEPT
     assert result.done == result.total == 5
     assert _cell_for_result(result).fill == CHART_FULL
+
+
+def test_current_goals_skips_removed_and_orders_by_position():
+    streak = _mk(date(2026, 9, 1), n_goals=3)
+    reordered = (
+        dataclasses.replace(streak.goals[0], position=2),
+        dataclasses.replace(streak.goals[1], removed_on=date(2026, 9, 5)),
+        dataclasses.replace(streak.goals[2], position=0),
+    )
+    streak = dataclasses.replace(streak, goals=reordered)
+    assert [g.name for g in current_goals(streak)] == ["g2", "g0"]
+
+
+def test_open_count_counts_streaks_with_unticked_goals_today():
+    today = date(2026, 9, 14)  # a Monday
+    untouched = _mk(date(2026, 9, 1))
+    done = _mk(date(2026, 9, 1), day_checks={today: {0, 1}})
+    half = _mk(date(2026, 9, 1), day_checks={today: {0}})
+    ended = _mk(date(2026, 9, 1), ended_on=date(2026, 9, 10))
+    weekend_only = _mk(date(2026, 9, 1), period_kind=PeriodKind.WEEKDAYS, weekdays_mask=0b1100000)
+    assert open_count([untouched, done, half, ended, weekend_only], today) == 2

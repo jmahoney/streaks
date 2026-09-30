@@ -114,6 +114,9 @@ class Period:
     start: date
     end: date
 
+    def contains(self, day: date) -> bool:
+        return self.start <= day <= self.end
+
 
 @dataclass(frozen=True)
 class PeriodResult:
@@ -160,11 +163,11 @@ class Card:
     colour: str
     meta: str
     kind: Literal["goals", "not_due", "monthly"]  # which check-in layout the card renders
-    goals: list[CardGoal]
-    progress: float | None
-    progress_text: str | None
-    show_footer: bool
-    body: str | None
+    goals: list[CardGoal] = dataclasses.field(default_factory=list)
+    progress: float | None = None
+    progress_text: str | None = None
+    show_footer: bool = False
+    body: str | None = None
     single: bool = False  # a one-goal streak's check-in card
 
 
@@ -310,6 +313,11 @@ def _month_periods(created_on: date, end: date) -> list[Period]:
     return periods
 
 
+def _due_on(mask: int, day: date) -> bool:
+    """Whether ``day``'s weekday is included in a WEEKDAYS streak's ``weekdays_mask``."""
+    return bool(mask & (1 << day.weekday()))
+
+
 def due_periods(streak: StreakData, today: date) -> list[Period]:
     """All periods due for this streak, from creation through today (or ``ended_on``)."""
     end = streak.ended_on or today
@@ -321,7 +329,7 @@ def due_periods(streak: StreakData, today: date) -> list[Period]:
         return [
             Period(d, d)
             for d in _daterange(streak.created_on, end)
-            if streak.weekdays_mask & (1 << d.weekday())
+            if _due_on(streak.weekdays_mask, d)
         ]
     if streak.period_kind == PeriodKind.N_PER_WEEK:
         return _week_periods(streak.created_on, end)
@@ -339,7 +347,7 @@ def period_for(streak: StreakData, day: date) -> Period | None:
     if streak.period_kind == PeriodKind.DAILY:
         return Period(day, day)
     if streak.period_kind == PeriodKind.WEEKDAYS:
-        if not (streak.weekdays_mask & (1 << day.weekday())):
+        if not _due_on(streak.weekdays_mask, day):
             return None
         return Period(day, day)
     if streak.period_kind == PeriodKind.N_PER_WEEK:
@@ -353,20 +361,14 @@ def period_for(streak: StreakData, day: date) -> Period | None:
 
 def is_due(streak: StreakData, day: date) -> bool:
     """Whether the streak has an active period covering ``day``."""
-    if day < streak.created_on:
-        return False
-    if streak.ended_on is not None and day > streak.ended_on:
-        return False
-    if streak.period_kind == PeriodKind.WEEKDAYS:
-        return bool(streak.weekdays_mask & (1 << day.weekday()))
-    return True
+    return period_for(streak, day) is not None
 
 
 def next_due_day(streak: StreakData, after: date) -> date:
     """The next day (after ``after``) the streak is due."""
     d = after + timedelta(days=1)
     if streak.period_kind == PeriodKind.WEEKDAYS:
-        while not (streak.weekdays_mask & (1 << d.weekday())):
+        while not _due_on(streak.weekdays_mask, d):
             d += timedelta(days=1)
     return d
 
@@ -387,6 +389,13 @@ def active_goals(streak: StreakData, period: Period) -> tuple[GoalData, ...]:
             ),
             key=lambda g: g.position,
         )
+    )
+
+
+def current_goals(streak: StreakData) -> tuple[GoalData, ...]:
+    """The streak's active (not yet removed) goals, in position order."""
+    return tuple(
+        sorted((g for g in streak.goals if g.removed_on is None), key=lambda g: g.position)
     )
 
 
@@ -471,7 +480,7 @@ def evaluate(streak: StreakData, today: date, settings: Settings) -> list[Period
             results.append(PeriodResult(period, status, done, total))
             continue
 
-        is_current = period.start <= today <= period.end
+        is_current = period.contains(today)
         if is_current:
             if done == 0:
                 status = Status.OPEN
@@ -556,6 +565,13 @@ def _finalize_run(periods_in_run: list[PeriodResult], index: int, ended: bool) -
 def runs(streak: StreakData, today: date, settings: Settings) -> list[Run]:
     """All runs for this streak, chronological, numbered from 1."""
     results = evaluate(streak, today, settings)
+    return _runs_from(streak, results, today, settings)
+
+
+def _runs_from(
+    streak: StreakData, results: list[PeriodResult], today: date, settings: Settings
+) -> list[Run]:
+    """``runs()``, given results already evaluated by the caller."""
     if not results:
         return []
 
@@ -583,22 +599,30 @@ def runs(streak: StreakData, today: date, settings: Settings) -> list[Run]:
     return run_list
 
 
-def current_run(streak: StreakData, today: date, settings: Settings) -> Run | None:
-    """The open run, if any. Ended streaks never have one."""
-    if streak.ended_on is not None:
-        return None
-    for r in runs(streak, today, settings):
+def _open_run(run_list: list[Run]) -> Run | None:
+    for r in run_list:
         if r.end is None:
             return r
     return None
 
 
-def best_run(streak: StreakData, today: date, settings: Settings) -> Run | None:
-    """The longest run so far, or ``None`` if the streak has no runs yet."""
-    for r in runs(streak, today, settings):
+def _best(run_list: list[Run]) -> Run | None:
+    for r in run_list:
         if r.is_best:
             return r
     return None
+
+
+def current_run(streak: StreakData, today: date, settings: Settings) -> Run | None:
+    """The open run, if any. Ended streaks never have one."""
+    if streak.ended_on is not None:
+        return None
+    return _open_run(runs(streak, today, settings))
+
+
+def best_run(streak: StreakData, today: date, settings: Settings) -> Run | None:
+    """The longest run so far, or ``None`` if the streak has no runs yet."""
+    return _best(runs(streak, today, settings))
 
 
 def sidebar_count(streak: StreakData, today: date, settings: Settings) -> int:
@@ -647,7 +671,7 @@ def period_label(streak: StreakData) -> str:
 def sidebar_meta(streak: StreakData) -> str:
     """The sidebar row's caption: the period label alone for a single-goal streak, else the
     period label plus a goal count."""
-    n = sum(1 for g in streak.goals if g.removed_on is None)
+    n = len(current_goals(streak))
     label = period_label(streak)
     if n == 1:
         return label
@@ -667,10 +691,16 @@ def sidebar_ended_meta(streak: StreakData, best: int) -> str:
 # --------------------------------------------------------------------------------------
 
 
+def _is_unconfirmed_like(pr: PeriodResult) -> bool:
+    """Whether the period reads as hollow/unconfirmed: no answer yet, or open with nothing
+    done."""
+    return pr.status == Status.UNCONFIRMED or (pr.status == Status.OPEN and pr.done == 0)
+
+
 def _tooltip_for(pr: PeriodResult) -> str:
     if pr.status == Status.MISSED:
         return _("missed — run ended")
-    if pr.status == Status.UNCONFIRMED or (pr.status == Status.OPEN and pr.done == 0):
+    if _is_unconfirmed_like(pr):
         return _("no check-in yet — unconfirmed")
     return ngettext("%(done)d of %(n)d goal", "%(done)d of %(n)d goals", pr.total) % {
         "done": pr.done,
@@ -678,11 +708,15 @@ def _tooltip_for(pr: PeriodResult) -> str:
     }
 
 
+def _hollow_cell(pr: PeriodResult) -> Cell:
+    return Cell(CHART_HOLLOW, CHART_UNCONFIRMED_BORDER, _tooltip_for(pr))
+
+
 def _cell_for_result(pr: PeriodResult) -> Cell:
     if pr.status == Status.MISSED:
         return Cell(CHART_MISSED, None, _tooltip_for(pr))
-    if pr.status == Status.UNCONFIRMED or (pr.status == Status.OPEN and pr.done == 0):
-        return Cell(CHART_HOLLOW, CHART_UNCONFIRMED_BORDER, _tooltip_for(pr))
+    if _is_unconfirmed_like(pr):
+        return _hollow_cell(pr)
     ratio = pr.ratio
     if ratio == 0:
         fill = CHART_ZERO
@@ -706,7 +740,7 @@ def _banner_strip(results: tuple[PeriodResult, ...]) -> list[Cell]:
     cells = []
     for pr in last:
         if pr.status == Status.UNCONFIRMED:
-            cells.append(Cell(CHART_HOLLOW, CHART_UNCONFIRMED_BORDER, _tooltip_for(pr)))
+            cells.append(_hollow_cell(pr))
         else:
             cells.append(Cell(CHART_FULL, None, _tooltip_for(pr)))
     return cells
@@ -734,9 +768,12 @@ def _banner_title(start: date, end: date) -> str:
     if n == 1:
         return _("One day without a check-in — %(day)s") % {"day": words.fmt_day(end)}
     if start.month == end.month:
-        range_str = f"{start.day} to {words.fmt_day(end)}"
+        range_str = _("%(start)s to %(end)s") % {"start": start.day, "end": words.fmt_day(end)}
     else:
-        range_str = f"{words.fmt_day(start)} to {words.fmt_day(end)}"
+        range_str = _("%(start)s to %(end)s") % {
+            "start": words.fmt_day(start),
+            "end": words.fmt_day(end),
+        }
     return _("%(n)s days without a check-in — %(range)s") % {
         "n": words.sentence_number_word(n),
         "range": range_str,
@@ -760,15 +797,18 @@ def _unconfirmed_span(run: Run) -> tuple[date, date] | None:
 
 def _result_for_period(results: list[PeriodResult], period: Period) -> PeriodResult | None:
     for pr in results:
-        if pr.period.start == period.start and pr.period.end == period.end:
+        if pr.period == period:
             return pr
     return None
 
 
-def _is_open_today(streak: StreakData, today: date) -> bool:
+def _checks_on(streak: StreakData, day: date) -> dict[int, datetime]:
+    """Each goal's check-in time on ``day``, keyed by goal id."""
+    return {c.goal_id: c.done_at for c in streak.checks if c.day == day}
+
+
+def _is_open_today(streak: StreakData, today: date, checked_today: dict[int, datetime]) -> bool:
     if streak.ended_on is not None:
-        return False
-    if streak.period_kind == PeriodKind.WEEKDAYS and not is_due(streak, today):
         return False
     period = period_for(streak, today)
     if period is None:
@@ -778,17 +818,35 @@ def _is_open_today(streak: StreakData, today: date) -> bool:
         if days_left >= MONTHLY_OPEN_WINDOW_DAYS:
             return False
     goals = active_goals(streak, period)
-    checked_today = {c.goal_id for c in streak.checks if c.day == today}
     return any(g.id not in checked_today for g in goals)
+
+
+def open_count(streaks: list[StreakData], today: date) -> int:
+    """How many non-ended streaks still have an open check-in today."""
+    return sum(
+        1 for s in streaks if s.ended_on is None and _is_open_today(s, today, _checks_on(s, today))
+    )
+
+
+def _days_left_text(n: int) -> str:
+    return ngettext("%(n)d day left", "%(n)d days left", n) % {"n": n}
+
+
+def _this_week_text(done: int, n: int) -> str:
+    return _("%(done)d of %(n)d this week") % {"done": done, "n": n}
+
+
+def _day_number(run: Run | None) -> int:
+    return run.length if run else 1
 
 
 def _single_status(
     streak: StreakData,
     today: date,
-    settings: Settings,
     pr: PeriodResult | None,
     period: Period | None,
     done_at: datetime | None,
+    run: Run | None,
 ) -> str:
     """The status half of a single-goal card's subtitle."""
     if done_at is not None:
@@ -797,25 +855,24 @@ def _single_status(
         if pr and pr.total and pr.done >= pr.total:
             return _("done this month")
         n = (period.end - today).days if period else 0
-        return ngettext("%(n)d day left", "%(n)d days left", n) % {"n": n}
+        return _days_left_text(n)
     if streak.period_kind == PeriodKind.N_PER_WEEK:
         done = pr.done if pr else 0
-        return _("%(done)d of %(n)d this week") % {"done": done, "n": streak.times_per_week}
-    run = current_run(streak, today, settings)
-    return _("day %(k)d") % {"k": run.length if run else 1}
+        return _this_week_text(done, streak.times_per_week)
+    return _("day %(k)d") % {"k": _day_number(run)}
 
 
 def _single_card(
     streak: StreakData,
     today: date,
-    settings: Settings,
     pr: PeriodResult | None,
     period: Period | None,
     goal: GoalData,
     done_at: datetime | None,
+    run: Run | None,
 ) -> Card:
     """The one-row check-in card for a streak with exactly one active goal."""
-    status = _single_status(streak, today, settings, pr, period, done_at)
+    status = _single_status(streak, today, pr, period, done_at, run)
     meta = _("%(period)s · %(status)s") % {"period": period_label(streak), "status": status}
     kind = "monthly" if streak.period_kind == PeriodKind.MONTHLY else "goals"
     return Card(
@@ -825,16 +882,16 @@ def _single_card(
         meta=meta,
         kind=kind,
         goals=[CardGoal(goal_id=goal.id, name=streak.name, done_at=done_at, trailing=None)],
-        progress=None,
-        progress_text=None,
-        show_footer=False,
-        body=None,
         single=True,
     )
 
 
 def _build_card(
-    streak: StreakData, today: date, settings: Settings, results: list[PeriodResult]
+    streak: StreakData,
+    today: date,
+    results: list[PeriodResult],
+    run: Run | None,
+    checks_today: dict[int, datetime],
 ) -> Card:
     if streak.period_kind == PeriodKind.WEEKDAYS and not is_due(streak, today):
         nxt = next_due_day(streak, today)
@@ -851,23 +908,18 @@ def _build_card(
             colour=streak.colour,
             meta=_("Not today"),
             kind="not_due",
-            goals=[],
-            progress=None,
-            progress_text=None,
-            show_footer=False,
             body=body,
         )
 
     period = period_for(streak, today)
     pr = _result_for_period(results, period) if period else None
     goals = active_goals(streak, period) if period else ()
-    checks_today = {c.goal_id: c.done_at for c in streak.checks if c.day == today}
     done = pr.done if pr else 0
     total = pr.total if pr else len(goals)
 
     if len(goals) == 1:
         goal = goals[0]
-        return _single_card(streak, today, settings, pr, period, goal, checks_today.get(goal.id))
+        return _single_card(streak, today, pr, period, goal, checks_today.get(goal.id), run)
 
     if streak.period_kind == PeriodKind.MONTHLY:
         meta = _("Done this month") if total and done >= total else _("Due this month")
@@ -877,8 +929,7 @@ def _build_card(
                 goal_id=g.id,
                 name=g.name,
                 done_at=checks_today.get(g.id),
-                trailing=ngettext("%(n)d day left", "%(n)d days left", days_left)
-                % {"n": days_left},
+                trailing=_days_left_text(days_left),
             )
             for g in goals
         ]
@@ -889,21 +940,15 @@ def _build_card(
             meta=meta,
             kind="monthly",
             goals=card_goals,
-            progress=None,
-            progress_text=None,
-            show_footer=False,
-            body=None,
         )
 
     if streak.period_kind == PeriodKind.N_PER_WEEK:
-        meta = _("%(done)d of %(n)d this week") % {"done": done, "n": streak.times_per_week}
+        meta = _this_week_text(done, streak.times_per_week)
     else:
-        run = current_run(streak, today, settings)
-        day_number = run.length if run else 1
         meta = _("%(done)d of %(n)d · day %(k)d") % {
             "done": done,
             "n": total,
-            "k": day_number,
+            "k": _day_number(run),
         }
 
     card_goals = [
@@ -923,7 +968,6 @@ def _build_card(
         if show_footer
         else None,
         show_footer=show_footer,
-        body=None,
     )
 
 
@@ -936,17 +980,15 @@ def today_view(streaks: list[StreakData], today: date, settings: Settings) -> To
     """The Today pane for every non-ended streak: its quiet-day banners and check-in cards."""
     banners: list[Banner] = []
     cards: list[Card] = []
-    open_count = 0
     unconfirmed_total = 0
 
     for streak in streaks:
         if streak.ended_on is not None:
             continue
         results = evaluate(streak, today, settings)
-        cards.append(_build_card(streak, today, settings, results))
-        if _is_open_today(streak, today):
-            open_count += 1
-        run = current_run(streak, today, settings)
+        run = _open_run(_runs_from(streak, results, today, settings))
+        checks_today = _checks_on(streak, today)
+        cards.append(_build_card(streak, today, results, run, checks_today))
         if run and run.unconfirmed > 0:
             unconfirmed_total += run.unconfirmed
             span = _unconfirmed_span(run)
@@ -964,13 +1006,12 @@ def today_view(streaks: list[StreakData], today: date, settings: Settings) -> To
 
     cards.sort(key=lambda c: _CARD_KIND_ORDER.get(c.kind, 99))
 
+    count = open_count(streaks, today)
     title = words.fmt_weekday_day(today)
     subtitle = " · ".join(
-        s for s in (_open_sentence(open_count), _unconfirmed_sentence(unconfirmed_total)) if s
+        s for s in (_open_sentence(count), _unconfirmed_sentence(unconfirmed_total)) if s
     )
-    return TodayView(
-        title=title, subtitle=subtitle, open_count=open_count, banners=banners, cards=cards
-    )
+    return TodayView(title=title, subtitle=subtitle, open_count=count, banners=banners, cards=cards)
 
 
 # --------------------------------------------------------------------------------------
@@ -1011,8 +1052,7 @@ def _goals_hit_percent(all_runs: list[Run], today: date) -> int:
         pr
         for run in all_runs
         for pr in run.periods
-        if pr.status in (Status.KEPT, Status.PARTIAL)
-        and not (pr.period.start <= today <= pr.period.end)
+        if pr.status in (Status.KEPT, Status.PARTIAL) and not pr.period.contains(today)
     ]
     total_total = sum(pr.total for pr in eligible)
     if total_total == 0:
@@ -1026,10 +1066,8 @@ def _day_result_map(
 ) -> dict[date, PeriodResult]:
     m: dict[date, PeriodResult] = {}
     for pr in results:
-        d = pr.period.start
-        while d <= pr.period.end:
+        for d in _daterange(pr.period.start, pr.period.end):
             m[d] = pr
-            d += timedelta(days=1)
     return m
 
 
@@ -1057,10 +1095,7 @@ def _run_weeks(run: Run, today: date) -> list[list[Cell]]:
     return _weeks_grid(day_map, run.start, grid_end, today)
 
 
-def _lifetime_weeks(
-    streak: StreakData, today: date, settings: Settings, weeks_shown: int
-) -> list[list[Cell]]:
-    results = evaluate(streak, today, settings)
+def _lifetime_weeks(results: list[PeriodResult], today: date, weeks_shown: int) -> list[list[Cell]]:
     day_map = _day_result_map(results)
     this_week_start = today - timedelta(days=today.weekday())
     grid_start = this_week_start - timedelta(days=7 * (weeks_shown - 1))
@@ -1080,17 +1115,14 @@ def _legend(n_goals: int) -> list[LegendEntry]:
     ]
 
 
-def _goal_bars(streak: StreakData, today: date, settings: Settings) -> list[GoalBar]:
+def _goal_bars(streak: StreakData, results: list[PeriodResult]) -> list[GoalBar]:
     """One bar per active goal: of the periods checked in across all time (kept or partial,
     including the one in progress once anything is done in it), how many had the goal done."""
-    results = evaluate(streak, today, settings)
     answers_by_day = {a.day: a for a in streak.answers}
     checks_by_goal = _checks_by_goal(streak)
     counted = [pr for pr in results if pr.status in (Status.KEPT, Status.PARTIAL)]
     bars = []
-    for g in sorted(streak.goals, key=lambda g: g.position):
-        if g.removed_on is not None:
-            continue
+    for g in current_goals(streak):
         numerator = denom = 0
         for pr in counted:
             if g not in active_goals(streak, pr.period):
@@ -1122,7 +1154,8 @@ def history(
     tiles, header and catch-up link describe (``None`` means the open run). ``chart="run"``
     draws that run's weeks; ``chart="lifetime"`` draws the last ``weeks_shown`` weeks across
     every run."""
-    all_runs = runs(streak, today, settings)
+    results = evaluate(streak, today, settings)
+    all_runs = _runs_from(streak, results, today, settings)
     if not all_runs:
         selected = None
     elif run_index is not None:
@@ -1130,7 +1163,7 @@ def history(
     else:
         selected = next((r for r in all_runs if r.end is None), all_runs[-1])
 
-    n_goals = sum(1 for g in streak.goals if g.removed_on is None)
+    n_goals = len(current_goals(streak))
     is_ended = streak.ended_on is not None
 
     best = next((r for r in all_runs if r.is_best), None)
@@ -1157,7 +1190,7 @@ def history(
     ]
 
     if chart == "lifetime":
-        weeks = _lifetime_weeks(streak, today, settings, weeks_shown)
+        weeks = _lifetime_weeks(results, today, weeks_shown)
         chart_title = _("Lifetime")
         is_best = False
     elif selected is not None:
@@ -1189,7 +1222,7 @@ def history(
             selected.unconfirmed,
         ) % {"n": selected.unconfirmed}
 
-    goal_bars = _goal_bars(streak, today, settings)
+    goal_bars = _goal_bars(streak, results)
 
     earlier_runs = []
     for r in reversed([r for r in all_runs if r.end is not None]):
@@ -1357,7 +1390,7 @@ def catch_up_preview(
     updated strip, whether saving would end the run, and a summary sentence."""
     cu = catch_up(streak, today, settings)
     unconfirmed_days = [d.day for d in cu.days]
-    n_goals_total = sum(1 for g in streak.goals if g.removed_on is None)
+    n_goals_total = len(current_goals(streak))
     row_state = _preview_row_states(unconfirmed_days, answers, n_goals_total)
 
     hypothetical = _with_answers(streak, answers)

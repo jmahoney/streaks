@@ -65,6 +65,10 @@ class AppState(GObject.Object):
         """Today's check-in day, honouring the configured day-start and the test clock."""
         return clock.today(self.settings.to_engine().day_start_minutes)
 
+    def streak(self, streak_id: int) -> StreakData | None:
+        """The loaded streak with this id, or ``None`` if it isn't (any more)."""
+        return next((s for s in self.streaks if s.id == streak_id), None)
+
     def reload(self) -> list[StreakData]:
         """Reload every streak from the database and notify subscribers."""
         self.streaks = models.load_all()

@@ -175,7 +175,7 @@ class StreaksTodayView(Adw.Bin):
     def _on_mark_missed(self, _card: StreaksCheckinCard, streak_id: int) -> None:
         if self.state is None:
             return
-        streak_data = next((s for s in self.state.streaks if s.id == streak_id), None)
+        streak_data = self.state.streak(streak_id)
         if streak_data is None:
             return
         today = self.state.today()
