@@ -181,28 +181,34 @@ class StreaksTodayView(Adw.Bin):
         if streak_data is None:
             return
         today = self.state.today()
+        day = self._shown_day or today
         settings = self.state.settings.to_engine()
-        body = engine.mark_missed_preview(streak_data, today, settings)
+        body = engine.mark_missed_preview(streak_data, day, today, settings)
+        heading = (
+            _("Mark today as missed?")
+            if day == today
+            else _("Mark %(day)s as missed?") % {"day": words.fmt_weekday_day(day)}
+        )
 
         self.missed_dialog = confirm_dialog(
             self,
-            heading=_("Mark today as missed?"),
+            heading=heading,
             body=body,
             confirm_id="missed",
             confirm_label=_("Mark missed"),
             destructive=True,
             on_response=lambda dialog, response: self._on_mark_missed_response(
-                dialog, response, streak_id
+                dialog, response, streak_id, day
             ),
         )
 
     def _on_mark_missed_response(
-        self, _dialog: Adw.AlertDialog, response: str, streak_id: int
+        self, _dialog: Adw.AlertDialog, response: str, streak_id: int, day: date
     ) -> None:
         if response != "missed" or self.state is None:
             return
         streak = Streak.get_by_id(streak_id)
-        answer_day(streak, self.state.today(), Answer.MISSED)
+        answer_day(streak, day, Answer.MISSED)
         self.state.reload()
 
     def _on_day_selected(self, calendar: Gtk.Calendar) -> None:

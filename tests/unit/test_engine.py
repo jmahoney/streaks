@@ -996,7 +996,16 @@ def test_catch_up_preview_summary_ends_day_skips_allow_skip_forgiven_miss():
 
 def test_fixture_75_hard_mark_missed_preview(seeded, today, settings):
     hard = _streaks()["75 Hard"]
-    assert mark_missed_preview(hard, today, settings) == "This ends run 3 at 50 days."
+    assert mark_missed_preview(hard, today, today, settings) == "This ends run 3 at 50 days."
+
+
+def test_mark_missed_preview_for_an_earlier_day_ends_the_run_before_it(settings):
+    today = date(2026, 9, 10)
+    streak = _mk(date(2026, 9, 1), day_checks={date(2026, 9, d): {0, 1} for d in range(1, 11)})
+    assert (
+        mark_missed_preview(streak, date(2026, 9, 9), today, settings)
+        == "This ends run 1 at 8 days."
+    )
 
 
 def test_fixture_no_snoozing(seeded, today, settings):

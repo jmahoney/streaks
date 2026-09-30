@@ -1399,12 +1399,15 @@ def catch_up_preview(
     return Preview(row_state=row_state, ends_run=ends_run, strip=strip, summary=summary)
 
 
-def mark_missed_preview(streak: StreakData, today: date, settings: Settings) -> str:
-    """Preview the effect of marking *today* missed (today itself excluded from the count)."""
-    hypothetical = _with_answers(streak, {today: (Answer.MISSED, ())})
+def mark_missed_preview(streak: StreakData, day: date, today: date, settings: Settings) -> str:
+    """Preview the effect of marking ``day`` missed: the run it ends and that run's length,
+    ``day`` itself excluded."""
+    hypothetical = _with_answers(streak, {day: (Answer.MISSED, ())})
     old_run = current_run(streak, today, settings)
     new_runs = runs(hypothetical, today, settings)
     ended = next((r for r in new_runs if old_run and r.start == old_run.start), None)
     length = ended.length if ended else 0
     idx = ended.index if ended else (old_run.index if old_run else 0)
-    return _("This ends run %(idx)d at %(len)d days.") % {"idx": idx, "len": length}
+    return ngettext(
+        "This ends run %(idx)d at %(len)d day.", "This ends run %(idx)d at %(len)d days.", length
+    ) % {"idx": idx, "len": length}

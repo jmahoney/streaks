@@ -322,6 +322,32 @@ def test_mark_day_missed(seeded_window, process_events):
     assert hard_row.count_label.get_label() == "0"
 
 
+def test_mark_day_missed_while_viewing_an_earlier_day_answers_that_day(
+    seeded_window, process_events
+):
+    window = seeded_window
+
+    today_view = _today_view(window)
+    today_view.show_day(date(2026, 9, 12))
+    process_events()
+    card = _card_by_name(today_view, "75 Hard")
+    hard_id = card.streak_id
+
+    card.missed_button.emit("clicked")
+    process_events()
+    assert today_view.missed_dialog.get_heading() == "Mark Saturday 12 September as missed?"
+    today_view.missed_dialog.emit("response", "missed")
+    process_events()
+
+    earlier = DayAnswer.get_or_none(DayAnswer.streak == hard_id, DayAnswer.day == date(2026, 9, 12))
+    assert earlier is not None
+    assert earlier.status == "missed"
+    assert (
+        DayAnswer.get_or_none(DayAnswer.streak == hard_id, DayAnswer.day == date(2026, 9, 13))
+        is None
+    )
+
+
 def test_no_quiet_days_variant(seeded_state, seeded_window, process_events):
     from streaks.engine import Answer
     from streaks.models import answer_day
