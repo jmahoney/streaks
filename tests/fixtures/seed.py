@@ -27,8 +27,8 @@ Five streaks, in sidebar order:
 
 Expected values, pinned by ``tests/unit/test_engine.py``:
 
-- 75 Hard: run lengths [28, 34, 51]; run 3 starts 25 Jul with no end, 47 confirmed periods and 4
-  unconfirmed, and is the best run; hit rate 94%; all-time goal bars are 109/109, 109/109, 83/109,
+- 75 Hard: run lengths [28, 34, 51]; run 3 starts 25 Jul with no end, 4 unconfirmed periods, and
+  is the best run; hit rate 94%; all-time goal bars are 109/109, 109/109, 83/109,
   99/109, 109/109; sidebar meta "Daily · 5 goals" at count 51; the banner reads "Four days without a
   check-in — 9 to 12 September"; catch-up lists Wednesday 9 through Saturday 12 September;
   marking today missed would end run 3 at 50 days.
@@ -222,8 +222,8 @@ def _seed_couch_to_5k() -> Streak:
 def seed(today: date = FIXTURE_TODAY) -> dict[str, Streak]:
     """Populate the (already-initialised) database with the design fixture.
 
-    Returns the created streaks keyed by name, in the order the design spec's sidebar shows
-    them (creation order also determines each streak's ``position``).
+    Returns the created streaks keyed by name, in sidebar order (creation order also determines
+    each streak's ``position``).
     """
     return {
         "75 Hard": _seed_75_hard(today),

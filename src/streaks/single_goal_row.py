@@ -1,4 +1,4 @@
-"""The Today view's single-goal check-in row (design-spec §3 "Single-goal card")."""
+"""The Today view's single-goal check-in row."""
 
 from __future__ import annotations
 
@@ -16,10 +16,8 @@ from streaks.engine import Card
 class StreaksSingleGoalRow(Gtk.ListBoxRow):
     """A single-goal streak's whole check-in row: colour dot, name, subtitle and a checkbox.
 
-    ``configure()`` places already-computed strings from an ``engine.Card`` whose ``single`` flag
-    is set. The row emits ``toggle-requested`` when its checkbox changes, whether from a direct
-    click or the owning card flipping it in response to row activation; the card decides what a
-    toggle means, writing a ``GoalCheck``.
+    The row emits ``toggle-requested`` when its checkbox changes, whether from a direct click or
+    the owning card flipping it in response to row activation.
     """
 
     __gtype_name__ = "StreaksSingleGoalRow"

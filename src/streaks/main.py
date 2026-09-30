@@ -14,10 +14,9 @@ from gi.repository import Adw, Gio, GLib, Gtk
 
 from streaks import models
 from streaks.resources import load_resources
+from streaks.settings import APPLICATION_ID
 
 _ = gettext.gettext
-
-APPLICATION_ID = "com.cheerschopper.Streaks"
 
 
 class StreaksApplication(Adw.Application):
@@ -33,7 +32,6 @@ class StreaksApplication(Adw.Application):
         kwargs.setdefault("application_id", APPLICATION_ID)
         kwargs.setdefault("flags", Gio.ApplicationFlags.DEFAULT_FLAGS)
         super().__init__(**kwargs)
-        self.resource_base_path = "/com/cheerschopper/Streaks"
         self.version = version
         self.profile = profile
         self.window = None

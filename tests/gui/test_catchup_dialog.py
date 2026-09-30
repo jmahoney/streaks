@@ -1,4 +1,4 @@
-"""Tests for the catch-up dialog (design-spec §5), against the seeded "75 Hard" streak.
+"""Tests for the catch-up dialog, against the seeded "75 Hard" streak.
 
 The unconfirmed days are Wed 9 - Sat 12 September 2026; the fixture's fake "today" is Sunday 13
 September 2026 (``tests/fixtures/seed.py::FIXTURE_TODAY``). Every string/number asserted here is

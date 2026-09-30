@@ -1,4 +1,4 @@
-"""Preferences dialog (design-spec §7): check-in, run and data settings.
+"""Preferences dialog: check-in, run and data settings.
 
 Every row binds straight to a ``Gio.Settings`` key via ``settings.bind()``; "Delete all data"
 writes through ``models.delete_all()``. ``AppState`` picks up every GSettings change itself (see
@@ -28,7 +28,7 @@ ngettext = gettext.ngettext
 
 @Gtk.Template(resource_path="/com/cheerschopper/Streaks/streaks/ui/preferences_dialog.ui")
 class StreaksPreferencesDialog(Adw.PreferencesDialog):
-    """The Preferences dialog (design-spec §7)."""
+    """The Preferences dialog."""
 
     __gtype_name__ = "StreaksPreferencesDialog"
 
@@ -118,8 +118,8 @@ class StreaksPreferencesDialog(Adw.PreferencesDialog):
         self._export_to(Path(file.get_path()))
 
     def _export_to(self, path: Path) -> None:
-        """Write the whole database to ``path`` as JSON. Split out so tests can call it directly
-        without going through the async ``Gtk.FileDialog``."""
+        """Write the whole database to ``path`` as JSON, split out from the async
+        ``Gtk.FileDialog`` call that picks ``path``."""
         export.dump_json(str(path))
 
     # -- delete all data ------------------------------------------------------------------

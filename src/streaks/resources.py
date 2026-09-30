@@ -1,4 +1,4 @@
-"""GResource and CSS loading, kept separate from any template class so it can run first."""
+"""GResource and CSS loading."""
 
 import gettext
 import os

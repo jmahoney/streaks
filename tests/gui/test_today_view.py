@@ -1,4 +1,4 @@
-"""Tests for the Today content pane (design-spec §3)."""
+"""Tests for the Today content pane."""
 
 from datetime import date, datetime
 

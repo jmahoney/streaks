@@ -1,4 +1,4 @@
-"""One goal row inside a check-in card (design-spec §3)."""
+"""One goal row inside a check-in card."""
 
 from __future__ import annotations
 
@@ -16,10 +16,8 @@ from streaks.engine import CardGoal
 class StreaksGoalRow(Gtk.ListBoxRow):
     """A single check-in goal: a checkbox, its name, and a trailing time/countdown caption.
 
-    ``configure()`` places already-computed strings from an ``engine.CardGoal``. The row emits
-    ``toggle-requested`` when its checkbox changes, whether from a direct click or the owning
-    card flipping it in response to row activation; the card decides what a toggle means, writing
-    a ``GoalCheck``.
+    The row emits ``toggle-requested`` when its checkbox changes, whether from a direct click or
+    the owning card flipping it in response to row activation.
     """
 
     __gtype_name__ = "StreaksGoalRow"

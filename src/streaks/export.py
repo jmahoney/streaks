@@ -1,9 +1,4 @@
-"""JSON export/import of the whole database.
-
-Used by the Preferences "Export everything" action and, in tests, to check that a dump/restore
-round-trips losslessly. No GTK here; ``main``/the preferences dialog own the file dialog and
-just call ``dump_json``.
-"""
+"""JSON export/import of the whole database."""
 
 from __future__ import annotations
 

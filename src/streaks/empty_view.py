@@ -1,8 +1,6 @@
-"""The empty-state view shown when there are no streaks yet (design-spec §8)."""
+"""The empty-state view shown when there are no streaks yet."""
 
 from __future__ import annotations
-
-import gettext
 
 import gi
 
@@ -14,8 +12,6 @@ from gi.repository import Adw, Gtk
 from streaks.engine import CHART_ZERO, Cell
 from streaks.theme import CHART_EMPTY_HINT
 from streaks.widgets.grid_widgets import EmptyGridWidget  # noqa: F401  registers $EmptyGridWidget
-
-_ = gettext.gettext
 
 _GRID_ROWS = 4
 _GRID_COLUMNS = 7
@@ -31,7 +27,7 @@ def _empty_grid_cells() -> list[Cell]:
 
 @Gtk.Template(resource_path="/com/cheerschopper/Streaks/streaks/ui/empty_view.ui")
 class StreaksEmptyView(Adw.Bin):
-    """The centred "no streaks yet" placeholder (design-spec §8)."""
+    """The centred "no streaks yet" placeholder."""
 
     __gtype_name__ = "StreaksEmptyView"
 

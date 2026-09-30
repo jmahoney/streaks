@@ -1,11 +1,4 @@
-"""Peewee data layer: SQLite-backed models and the functions that create, read and update them.
-``engine.py`` derives runs, statuses and history from the plain-data snapshots these functions
-load (``load_all()``/``load_streak_data()``).
-
-``Answer`` and ``PeriodKind`` are defined in ``engine.py`` (which has no dependencies) and
-re-exported here so both the database layer and the pure engine can share them without a
-circular import.
-"""
+"""Peewee data layer: SQLite-backed models and the functions that create, read and update them."""
 
 from __future__ import annotations
 
@@ -42,6 +35,7 @@ from streaks.engine import (
 )
 
 __all__ = [
+    # Re-exported so callers can import both enums from models without a circular import.
     "Answer",
     "PeriodKind",
     "COLOURS",
@@ -131,8 +125,7 @@ class DatabaseInitError(RuntimeError):
     """Raised by ``init_db()`` when the on-disk database can't be created or opened.
 
     Carries the path that was attempted (even if resolving/creating the data directory itself is
-    what failed), wrapping any ``OSError``/``peewee`` exception so ``main.py`` can show the path
-    and reason in a dialog before quitting.
+    what failed), wrapping any ``OSError``/``peewee`` exception.
     """
 
     def __init__(self, path: str, reason: str):
@@ -183,10 +176,9 @@ def database_path() -> str:
 def init_db(path: str | None = None) -> SqliteDatabase:
     """Initialise the module-level production database and create tables if needed.
 
-    Raises ``DatabaseInitError``, wrapping any ``OSError``/``peewee`` exception so ``main.py``
-    can show the path and reason in a dialog before quitting, if the path can't be resolved,
-    opened, or written to — e.g. a corrupt file or one sitting where the data directory should
-    be.
+    Raises ``DatabaseInitError``, wrapping any ``OSError``/``peewee`` exception, if the path
+    can't be resolved, opened, or written to — e.g. a corrupt file or one sitting where the data
+    directory should be.
     """
     if path is None:
         path = database_path()
@@ -368,7 +360,7 @@ def delete_streak(streak: Streak) -> None:
 
 
 def delete_all() -> None:
-    """Wipe every table. Used by the Preferences 'Delete all data' action and tests."""
+    """Wipe every table."""
     with db.atomic():
         DayAnswer.delete().execute()
         GoalCheck.delete().execute()

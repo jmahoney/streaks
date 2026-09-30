@@ -1,4 +1,4 @@
-"""Tests for the main window shell (design-spec §1, §2)."""
+"""Tests for the main window shell."""
 
 
 def test_window_defaults(fresh_window, process_events):
@@ -28,7 +28,7 @@ def test_empty_database_shows_empty_content_page(fresh_window, process_events):
     window = fresh_window
 
     assert window.content_stack.get_visible_child_name() == "empty"
-    # Design §1: the empty page has the primary menu only, titled "Streaks".
+    # The empty page has the primary menu only, titled "Streaks".
     assert not window.search_button.get_visible()
     assert window.menu_button.get_visible()
     assert window.content_title.get_title() == "Streaks"

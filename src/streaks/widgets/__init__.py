@@ -1,6 +1,6 @@
-"""Custom drawing widgets (design-spec §10): ``HeatmapWidget``, ``StripWidget``,
-``EmptyGridWidget``. See ``grid_widgets.py``. Also holds small view helpers shared across
-widgets: ``clear_children()`` and ``confirm_dialog()``.
+"""Custom drawing widgets: ``HeatmapWidget``, ``StripWidget``, ``EmptyGridWidget``. See
+``grid_widgets.py``. Also holds small view helpers shared across widgets: ``clear_children()``
+and ``confirm_dialog()``.
 """
 
 from __future__ import annotations

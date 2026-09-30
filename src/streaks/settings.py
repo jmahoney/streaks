@@ -1,8 +1,8 @@
 """``AppSettings``: a thin GObject wrapper over the app's GSettings schema.
 
-Keeps ``Gio.Settings`` details out of the views. Exposes the subset of keys the engine cares
-about as an ``engine.Settings`` dataclass (``to_engine()``), plus a ``changed`` signal so widgets
-can react to any GSettings key changing without each holding its own ``Gio.Settings`` handle.
+Exposes the subset of keys the engine cares about as an ``engine.Settings`` dataclass
+(``to_engine()``), plus a ``changed`` signal so widgets can react to any GSettings key changing
+without each holding its own ``Gio.Settings`` handle.
 """
 
 from __future__ import annotations
@@ -42,7 +42,7 @@ class AppSettings(GObject.Object):
         return self._gio
 
     def to_engine(self) -> engine.Settings:
-        """The subset of settings the pure engine needs, as an ``engine.Settings``."""
+        """The subset of settings the engine needs, as an ``engine.Settings``."""
         return engine.Settings(
             day_start_minutes=self._gio.get_int("day-start-minutes"),
             backfill_days=self._gio.get_int("backfill-days"),

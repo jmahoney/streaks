@@ -1,9 +1,4 @@
-"""A single row in the sidebar list: the Today row, a running streak, or an ended one.
-
-The caller (``window.py``) passes already-formatted strings and numbers (from
-``engine.sidebar_meta``/``sidebar_ended_meta``/``sidebar_count`` etc.); this module lays them out
-and applies the per-row colour dot.
-"""
+"""A single row in the sidebar list: the Today row, a running streak, or an ended one."""
 
 from __future__ import annotations
 
@@ -39,14 +34,8 @@ class StreaksSidebarRow(Gtk.ListBoxRow):
 
     streak_id = GObject.Property(type=int, default=0)
 
-    def __init__(self, **kwargs):
-        """Initialize the row."""
-        super().__init__(**kwargs)
-        self.colour: str | None = None
-
-    def _set_dot_class(self, css_class: str, colour: str | None = None) -> None:
+    def _set_dot_class(self, css_class: str) -> None:
         """Paint the dot via one CSS class (the stylesheet supplies light and dark hues)."""
-        self.colour = colour
         for old in (_TODAY_DOT_CLASS, _ENDED_DOT_CLASS, *theme.colour_classes()):
             self.dot.remove_css_class(old)
         self.dot.add_css_class(css_class)
@@ -67,7 +56,7 @@ class StreaksSidebarRow(Gtk.ListBoxRow):
     ) -> None:
         """Set up a row for a currently-running streak."""
         self.streak_id = streak_id
-        self._set_dot_class(theme.colour_class(colour), colour)
+        self._set_dot_class(theme.colour_class(colour))
         self.name_label.set_label(name)
         self.meta_label.set_label(meta)
         self.meta_label.set_visible(True)

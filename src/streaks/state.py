@@ -1,8 +1,6 @@
 """``AppState`` owns the database connection, the app's ``AppSettings``, and ``streaks`` — the
-last snapshot loaded from the database. Views read ``streaks``/``today()`` and subscribe to
-``changed`` to know when to rebuild. Whoever writes to the database (views call ``models.*``
-directly) calls ``reload()`` afterwards, which reloads the snapshot and emits ``changed``.
-Settings changes emit ``changed`` without a reload, since only derived values change.
+last snapshot loaded from the database. ``reload()`` reloads the snapshot and emits ``changed``;
+a settings change emits ``changed`` without a reload, since only derived values change.
 """
 
 from __future__ import annotations
@@ -72,10 +70,6 @@ class AppState(GObject.Object):
         self.streaks = models.load_all()
         self.emit("changed")
         return self.streaks
-
-    def set_selection(self, streak_id: int) -> None:
-        """Record the sidebar selection (0 = Today), persisting it to GSettings."""
-        self.selection = streak_id
 
     def _on_settings_changed(self, _settings: AppSettings, key: str) -> None:
         if key in _ENGINE_SETTINGS_KEYS:

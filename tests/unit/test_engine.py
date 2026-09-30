@@ -333,7 +333,6 @@ def test_runs_unconfirmed_days_do_not_end_the_run_by_default():
     assert run.length == 10
     assert run.end is None
     assert run.unconfirmed == 9  # every day except today (which is OPEN, not UNCONFIRMED)
-    assert run.confirmed == 0
 
 
 def test_runs_count_through_unconfirmed_false_ends_run_past_backfill_window():
@@ -665,25 +664,6 @@ def test_number_word_capitalised():
     assert words.sentence_number_word(13) == "13"
 
 
-@pytest.mark.parametrize(
-    "d,expected",
-    [
-        (date(2026, 9, 1), "1st"),
-        (date(2026, 9, 2), "2nd"),
-        (date(2026, 9, 3), "3rd"),
-        (date(2026, 9, 4), "4th"),
-        (date(2026, 9, 11), "11th"),
-        (date(2026, 9, 12), "12th"),
-        (date(2026, 9, 13), "13th"),
-        (date(2026, 9, 21), "21st"),
-        (date(2026, 9, 22), "22nd"),
-        (date(2026, 9, 23), "23rd"),
-    ],
-)
-def test_ordinal_day(d, expected):
-    assert words.ordinal_day(d) == expected
-
-
 def test_fmt_day():
     assert words.fmt_day(date(2026, 9, 9)) == "9 September"
 
@@ -722,7 +702,6 @@ def test_fixture_75_hard_runs(seeded, today, settings):
     run3 = result[-1]
     assert run3.start == date(2026, 7, 25)
     assert run3.end is None
-    assert run3.confirmed == 47
     assert run3.unconfirmed == 4
     assert run3.is_best is True
 
@@ -868,8 +847,8 @@ def test_fixture_75_hard_catch_up_preview_row_states(seeded, today, settings):
 
 def test_fixture_75_hard_catch_up_preview_summary_ends_with_following(seeded, today, settings):
     # 11 September partial (one goal missed) ends the run; 10 September is left unanswered.
-    # Note: the design mock's own arithmetic guessed 47/4 days for this fixture, but the engine
-    # (authoritative per its run-length rules) computes 48/2 — trust the engine here.
+    # Note: a naive day count gives 47/4 for this fixture, but the engine (authoritative per its
+    # run-length rules) computes 48/2 — trust the engine here.
     hard = _streaks()["75 Hard"]
     second_workout = next(g.id for g in hard.goals if g.name == "45 min second workout")
     answers = {

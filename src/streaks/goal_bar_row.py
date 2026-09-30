@@ -1,4 +1,4 @@
-"""One goal row in the streak history's "Per goal, all time" card (design-spec §4)."""
+"""One goal row in the streak history's "Per goal, all time" card."""
 
 from __future__ import annotations
 
@@ -13,10 +13,7 @@ _LOW_CLASS = "low"
 
 @Gtk.Template(resource_path="/com/cheerschopper/Streaks/streaks/ui/goal_bar_row.ui")
 class StreaksGoalBarRow(Gtk.ListBoxRow):
-    """One goal's this-month completion ratio: a name, a progress bar, and a ratio caption.
-
-    ``configure()`` places an already-computed entry of ``engine.History.goal_bars``.
-    """
+    """One goal's all-time completion ratio: a name, a progress bar, and a ratio caption."""
 
     __gtype_name__ = "StreaksGoalBarRow"
 

@@ -1,4 +1,4 @@
-"""Tests for the New/Edit streak dialog (design-spec §6)."""
+"""Tests for the New/Edit streak dialog."""
 
 from datetime import time
 

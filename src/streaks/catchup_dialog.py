@@ -1,15 +1,12 @@
-"""Catch-up dialog (design-spec §5): tick completed goals for every unconfirmed day at once.
+"""Catch-up dialog: tick completed goals for every unconfirmed day at once.
 
 Each unconfirmed day is its own card; the user ticks the goals they completed and the day's
-answer follows from those ticks (see ``StreaksCatchupRow``). Every caption, colour and sensitivity
-rule comes from ``engine.catch_up``/``engine.catch_up_preview``; ``Save`` writes through
-``models.answer_day``. Build it with ``StreaksCatchupDialog(state, streak_id)`` and
-``present(window)`` it, same as ``StreaksStreakDialog``.
+answer follows from those ticks (see ``StreaksCatchupRow``). ``Save`` writes through
+``models.answer_day``.
 """
 
 from __future__ import annotations
 
-import gettext
 from datetime import date
 
 import gi
@@ -26,9 +23,7 @@ from streaks.models import Streak, answer_day, db
 from streaks.state import AppState
 from streaks.widgets.grid_widgets import StripWidget  # noqa: F401  registers $StripWidget
 
-_ = gettext.gettext
-
-# Design-spec §5: the result strip is 9×20 with a 3px gap.
+# The result strip is 9×20 with a 3px gap.
 _RESULT_CELL_WIDTH = 9
 _RESULT_CELL_HEIGHT = 20
 _RESULT_GAP = 3

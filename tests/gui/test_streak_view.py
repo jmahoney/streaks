@@ -1,4 +1,4 @@
-"""Tests for the streak history content pane (design-spec §4)."""
+"""Tests for the streak history content pane."""
 
 from helpers import listbox_rows, select_streak, sidebar_rows
 

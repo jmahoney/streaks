@@ -1,4 +1,4 @@
-"""One stat tile in the streak history view (design-spec §4)."""
+"""One stat tile in the streak history view."""
 
 from __future__ import annotations
 
@@ -9,15 +9,11 @@ gi.require_version("Gtk", "4.0")
 from gi.repository import Gtk
 
 _ACCENT_CLASS = "stat-accent"
-_DIM_CLASS = "dim-label"
 
 
 @Gtk.Template(resource_path="/com/cheerschopper/Streaks/streaks/ui/stat_tile.ui")
 class StreaksStatTile(Gtk.Box):
-    """A single stat tile: a big number and a caption underneath.
-
-    ``configure()`` takes one ``engine.History.tiles`` entry: an ``engine.Tile``.
-    """
+    """A single stat tile: a big number and a caption underneath."""
 
     __gtype_name__ = "StreaksStatTile"
 
@@ -29,8 +25,5 @@ class StreaksStatTile(Gtk.Box):
         self.value_label.set_label(value)
         self.caption_label.set_label(caption)
         self.value_label.remove_css_class(_ACCENT_CLASS)
-        self.value_label.remove_css_class(_DIM_CLASS)
         if style == "accent":
             self.value_label.add_css_class(_ACCENT_CLASS)
-        elif style == "dim":
-            self.value_label.add_css_class(_DIM_CLASS)

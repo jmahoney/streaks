@@ -1,7 +1,5 @@
-"""The Today content pane: header, quiet-day banners, and per-streak check-in cards
-(design-spec §3).
+"""The Today content pane: header, quiet-day banners, and per-streak check-in cards.
 
-Every string and number displayed comes from ``engine.today_view``/``engine.mark_missed_preview``.
 This view makes two writes of its own: toggling a ``GoalCheck`` and recording a ``DayAnswer``.
 """
 
@@ -36,7 +34,7 @@ _logger = logging.getLogger(__name__)
 
 @Gtk.Template(resource_path="/com/cheerschopper/Streaks/streaks/ui/today_view.ui")
 class StreaksTodayView(Adw.Bin):
-    """The Today content pane (design-spec §3). Call ``set_state()`` before it renders anything."""
+    """The Today content pane. Call ``set_state()`` before it renders anything."""
 
     __gtype_name__ = "StreaksTodayView"
 

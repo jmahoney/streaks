@@ -1,8 +1,6 @@
-"""A single streak's check-in card in the Today view (design-spec §3)."""
+"""A single streak's check-in card in the Today view."""
 
 from __future__ import annotations
-
-import gettext
 
 import gi
 
@@ -17,17 +15,13 @@ from streaks.single_goal_row import (
     StreaksSingleGoalRow,  # noqa: F401  registers $StreaksSingleGoalRow
 )
 
-_ = gettext.gettext
-
 
 @Gtk.Template(resource_path="/com/cheerschopper/Streaks/streaks/ui/checkin_card.ui")
 class StreaksCheckinCard(Gtk.Box):
     """One streak's check-in card: header, goal rows, and an optional progress footer. A
     single-goal streak instead renders as one row (``single_list``), with no header or footer.
 
-    ``configure()`` places already-computed strings and numbers from an ``engine.Card``.
-    Interactions bubble up as signals for the owning view to act on, writing to the database via
-    ``models``.
+    Emits ``goal-toggled`` (goal id) and ``mark-missed`` (streak id).
     """
 
     __gtype_name__ = "StreaksCheckinCard"

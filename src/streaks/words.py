@@ -1,17 +1,8 @@
-"""Locale-independent word and date formatting helpers used by the engine.
-
-Names and formats are hard-coded English so behaviour never depends on the host locale;
-translators still get a shot at them via ``gettext`` (see the module-level ``_``/``ngettext``
-below), but tests can rely on the untranslated defaults being stable.
-"""
+"""Fixed English date/number formatting, so output never depends on host locale."""
 
 from __future__ import annotations
 
-import gettext
 from datetime import date, datetime
-
-_ = gettext.gettext
-ngettext = gettext.ngettext
 
 _ONES = (
     "zero",
@@ -90,16 +81,6 @@ def number_word(n: int) -> str:
 def sentence_number_word(n: int) -> str:
     """Sentence-initial capitalised spelling, e.g. ``sentence_number_word(2) == "Two"``."""
     return number_word(n).capitalize()
-
-
-def ordinal_day(d: date) -> str:
-    """Return the day-of-month with its ordinal suffix, e.g. ``"12th"``."""
-    n = d.day
-    if 11 <= (n % 100) <= 13:
-        suffix = "th"
-    else:
-        suffix = {1: "st", 2: "nd", 3: "rd"}.get(n % 10, "th")
-    return f"{n}{suffix}"
 
 
 def fmt_day(d: date) -> str:

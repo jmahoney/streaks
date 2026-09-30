@@ -1,5 +1,4 @@
-"""Tests for the Preferences dialog, the primary menu, sidebar search and window state
-(design-spec §7, §1, §2)."""
+"""Tests for the Preferences dialog, the primary menu, sidebar search and window state."""
 
 from __future__ import annotations
 

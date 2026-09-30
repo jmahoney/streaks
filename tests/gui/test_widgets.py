@@ -1,4 +1,4 @@
-"""Tests for the custom cell-grid drawing widgets (design-spec §10)."""
+"""Tests for the custom cell-grid drawing widgets."""
 
 from __future__ import annotations
 

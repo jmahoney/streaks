@@ -1,8 +1,7 @@
-"""One editable goal row inside the new/edit streak dialog (design-spec §6).
+"""One editable goal row inside the new/edit streak dialog.
 
 The row holds a name entry and a remove button, and reports drag/keyboard reorder requests via
-signals. The owning dialog (``streak_dialog.py``) decides what removing/renaming/adding/
-reordering means; it owns the row order, since that's what gets saved as goal position.
+signals.
 """
 
 from __future__ import annotations

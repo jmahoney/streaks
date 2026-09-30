@@ -1,4 +1,4 @@
-"""Main window: the sidebar/content shell (design-spec §1, §2)."""
+"""Main window: the sidebar/content shell."""
 
 from __future__ import annotations
 
@@ -179,7 +179,7 @@ class StreaksWindow(Adw.ApplicationWindow):
             return
         streak = Streak.get_by_id(streak_id)
         models.delete_streak(streak)
-        self.state.set_selection(0)
+        self.state.selection = 0
         self.state.reload()
 
     def _on_select_today(self, *_args) -> None:
@@ -231,10 +231,10 @@ class StreaksWindow(Adw.ApplicationWindow):
     # -- header ---------------------------------------------------------------------
 
     def _set_header_for_page(self, page: str) -> None:
-        """Show only the end-of-header controls that belong to ``page`` (design-spec §1).
+        """Show only the end-of-header controls that belong to ``page``.
 
-        An ended streak's page is read-only (design-spec §4): no "Check in" button, and the ⋯
-        menu offers only Delete… (see ``_build_more_menu``).
+        An ended streak's page is read-only: no "Check in" button, and the ⋯ menu offers only
+        Delete… (see ``_build_more_menu``).
         """
         is_streak = page == "streak"
         is_ended = is_streak and self._current_streak_ended
@@ -356,7 +356,7 @@ class StreaksWindow(Adw.ApplicationWindow):
         if row is None:
             return
         streak_id = row.streak_id
-        self.state.set_selection(streak_id)
+        self.state.selection = streak_id
 
         if streak_id == 0:
             self._current_streak_id = 0

@@ -1,8 +1,9 @@
-"""Tests for the sidebar list (design-spec §2)."""
+"""Tests for the sidebar list."""
 
 import pytest
 from helpers import sidebar_rows
 
+from streaks import theme
 from streaks.empty_view import StreaksEmptyView
 from streaks.models import Streak
 from streaks.window import StreaksWindow
@@ -31,7 +32,7 @@ def test_sidebar_rows_from_seed(seeded_window, process_events):
     hard_row = rows[1]
     assert hard_row.meta_label.get_label() == "Daily · 5 goals"
     assert hard_row.count_label.get_label() == "51"
-    assert hard_row.colour == "#3584e4"
+    assert theme.colour_class("#3584e4") in hard_row.dot.get_css_classes()
 
     no_snoozing_row = rows[2]
     assert no_snoozing_row.meta_label.get_label() == "Mon–Fri"

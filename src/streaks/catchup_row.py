@@ -1,12 +1,10 @@
-"""One unconfirmed day inside the catch-up dialog (design-spec §5).
+"""One unconfirmed day inside the catch-up dialog.
 
 The row is its own card: a date, a status caption, and one tick box per active goal. The user
 ticks the goals they completed; the row derives its own answer from those ticks (all ticked is
 kept, some ticked is partial/missed, none ticked is either unconfirmed or explicitly missed via
 the header's "Mark missed"/"Undo" link). It reports that raw state via ``current_answer()`` and
-``answer-changed``. The owning ``StreaksCatchupDialog`` feeds this through
-``engine.catch_up_preview`` and pushes the resulting caption back onto the row with
-``set_state_text()``.
+``answer-changed``.
 """
 
 from __future__ import annotations
@@ -26,7 +24,7 @@ from streaks.engine import Answer, GoalData
 
 _ = gettext.gettext
 
-# Design-spec §5: a per-goal tick row is a fixed height, regardless of the label's own metrics.
+# A per-goal tick row is a fixed height, regardless of the label's own metrics.
 _GOAL_ROW_HEIGHT = 38
 
 

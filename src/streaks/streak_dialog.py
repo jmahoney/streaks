@@ -1,4 +1,4 @@
-"""New/Edit streak dialog (design-spec §6). Opened by `win.new-streak` and `win.edit-streak`.
+"""New/Edit streak dialog. Opened by `win.new-streak` and `win.edit-streak`.
 
 Writes go through ``models.create_streak``/``models.update_streak``; everything else is plain
 widget wiring. Call ``set_state()`` before presenting so ``Save`` has an ``AppState`` to write
@@ -354,9 +354,8 @@ class StreaksStreakDialog(Adw.Dialog):
 
         This is the single place goal order actually changes — both the real drag-and-drop
         ``drop`` handler and the keyboard fallback (``row.move-up``/``row.move-down``) funnel
-        through it, and tests call it directly with a row and an index rather than driving actual
-        GTK drag/keyboard input. Returns ``False`` (no-op) if ``source_row`` isn't one of this
-        dialog's goal rows or ``target_index`` is already where it is/out of range.
+        through it. Returns ``False`` (no-op) if ``source_row`` isn't one of this dialog's goal
+        rows or ``target_index`` is already where it is/out of range.
         """
         if source_row not in self._goal_rows:
             return False
@@ -466,6 +465,6 @@ class StreaksStreakDialog(Adw.Dialog):
                 today=today,
             )
 
-        self.state.set_selection(streak.id)
+        self.state.selection = streak.id
         self.state.reload()
         self.close()

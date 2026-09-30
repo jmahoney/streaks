@@ -1,8 +1,6 @@
-"""The "quiet days" banner shown above the Today check-in cards (design-spec §3)."""
+"""The "quiet days" banner shown above the Today check-in cards."""
 
 from __future__ import annotations
-
-import gettext
 
 import gi
 
@@ -13,16 +11,12 @@ from gi.repository import GObject, Gtk
 from streaks.engine import Banner
 from streaks.widgets.grid_widgets import StripWidget  # noqa: F401  registers $StripWidget
 
-_ = gettext.gettext
-
 
 @Gtk.Template(resource_path="/com/cheerschopper/Streaks/streaks/ui/catchup_banner.ui")
 class StreaksCatchupBanner(Gtk.Box):
     """One streak's "days without a check-in" banner, with a catch-up shortcut.
 
-    ``configure()`` places already-computed strings and cells from an ``engine.Banner``. Clicking
-    "Catch up" emits ``catch-up`` with the streak id; the Today view opens the catch-up dialog
-    for it.
+    Clicking "Catch up" emits ``catch-up`` with the streak id.
     """
 
     __gtype_name__ = "StreaksCatchupBanner"

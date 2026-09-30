@@ -1,6 +1,6 @@
 """Custom cell-grid drawing widgets shared by the heatmap, strip and empty-state grid.
 
-All three (design-spec §10) share one drawing routine: a plain ``Gtk.Widget`` that lays a flat
+All three share one drawing routine: a plain ``Gtk.Widget`` that lays a flat
 list of ``engine.Cell`` values on a fixed grid and paints each cell as a rounded rectangle, with
 an optional 1px border and a per-cell tooltip. The caller supplies colours and tooltip text as
 plain strings via ``set_cells()``; colour tokens (``engine.CHART_*``) are resolved for the
@@ -158,7 +158,7 @@ class StripWidget(_CellGridWidget):
 
 
 class EmptyGridWidget(_CellGridWidget):
-    """Fixed 7 columns × 4 rows grid, cell 14, gap 5, radius 4 (design-spec §8)."""
+    """Fixed 7 columns × 4 rows grid, cell 14, gap 5, radius 4."""
 
     __gtype_name__ = "EmptyGridWidget"
     _major = "row"

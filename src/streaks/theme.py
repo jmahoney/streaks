@@ -1,10 +1,7 @@
 """Colour scheme support. The dark scheme uses an amber accent.
 
-Two things live here:
-
 * The chart palettes. The engine describes chart cells with scheme-agnostic tokens
-  (``engine.CHART_*``); ``resolve()`` turns a token into the hex for the current scheme, so the
-  drawing widgets stay free of colour logic.
+  (``engine.CHART_*``); ``resolve()`` turns a token into the hex for the current scheme.
 * The stored streak colours. Streaks are saved with their light-scheme hex (``models.COLOURS``);
   ``colour_class()`` names the CSS class that paints that colour in either scheme (the
   ``streak-*`` rules and their ``prefers-color-scheme: dark`` overrides in ``data/style.css``).
@@ -34,7 +31,7 @@ from streaks.engine import (
 )
 from streaks.models import COLOURS
 
-# The empty state's single "hint" cell (design-spec §8): light reuses the low chart step.
+# The empty state's single "hint" cell: light reuses the low chart step.
 CHART_EMPTY_HINT = "chart-empty-hint"
 
 LIGHT_PALETTE: dict[str, str] = {

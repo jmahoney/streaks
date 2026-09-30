@@ -1,10 +1,4 @@
-"""Pure engine: streak/run/history computation over plain data.
-
-No GTK, no Peewee. Everything here operates on the frozen dataclasses below, which the
-database layer (``models.py``) builds from its ORM rows. ``evaluate()`` is the single
-source of per-period truth for a streak; every other function either calls it once and
-reuses the result, or calls ``runs()`` (which itself calls ``evaluate()`` once).
-"""
+"""Streak/run/history computation over plain data."""
 
 from __future__ import annotations
 
@@ -22,12 +16,6 @@ from streaks import words
 
 _ = gettext.gettext
 ngettext = gettext.ngettext
-
-
-# --------------------------------------------------------------------------------------
-# Enums shared with the database layer (defined here, since this module has no
-# dependencies, and re-exported from models.py to avoid a circular import).
-# --------------------------------------------------------------------------------------
 
 
 class PeriodKind(StrEnum):
@@ -145,7 +133,6 @@ class Run:
     start: date
     end: date | None
     length: int
-    confirmed: int  # periods with a recorded answer
     unconfirmed: int  # periods past due with no answer yet
     is_best: bool
     periods: tuple[PeriodResult, ...]
@@ -178,7 +165,7 @@ class Card:
     progress_text: str | None
     show_footer: bool
     body: str | None
-    single: bool = False  # a one-goal streak's check-in card (design-spec §3 "Single-goal card")
+    single: bool = False  # a one-goal streak's check-in card
 
 
 @dataclass(frozen=True)
@@ -273,8 +260,7 @@ class Preview:
 
 
 # --------------------------------------------------------------------------------------
-# Chart colour tokens (design-spec "Chart cell colour scale"). The engine is scheme-agnostic:
-# these are names, resolved to light or dark hex by ``streaks.theme`` at draw time.
+# Chart colour tokens, resolved to light or dark hex by ``streaks.theme`` at draw time.
 # --------------------------------------------------------------------------------------
 
 CHART_ZERO = "chart-zero"
@@ -553,7 +539,6 @@ def _effective_missed(
 
 
 def _finalize_run(periods_in_run: list[PeriodResult], index: int, ended: bool) -> Run:
-    confirmed = sum(1 for pr in periods_in_run if pr.status in (Status.KEPT, Status.PARTIAL))
     unconfirmed = sum(1 for pr in periods_in_run if pr.status == Status.UNCONFIRMED)
     start = periods_in_run[0].period.start
     end_date = periods_in_run[-1].period.end if ended else None
@@ -562,7 +547,6 @@ def _finalize_run(periods_in_run: list[PeriodResult], index: int, ended: bool) -
         start=start,
         end=end_date,
         length=len(periods_in_run),
-        confirmed=confirmed,
         unconfirmed=unconfirmed,
         is_best=False,
         periods=tuple(periods_in_run),
@@ -806,7 +790,7 @@ def _single_status(
     period: Period | None,
     done_at: datetime | None,
 ) -> str:
-    """The status half of a single-goal card's subtitle (design-spec §3 "Single-goal card")."""
+    """The status half of a single-goal card's subtitle."""
     if done_at is not None:
         return _("done %(time)s") % {"time": words.time_hm(done_at)}
     if streak.period_kind == PeriodKind.MONTHLY:
@@ -830,7 +814,7 @@ def _single_card(
     goal: GoalData,
     done_at: datetime | None,
 ) -> Card:
-    """The one-row check-in card for a streak with exactly one active goal (design-spec §3)."""
+    """The one-row check-in card for a streak with exactly one active goal."""
     status = _single_status(streak, today, settings, pr, period, done_at)
     meta = _("%(period)s · %(status)s") % {"period": period_label(streak), "status": status}
     kind = "monthly" if streak.period_kind == PeriodKind.MONTHLY else "goals"
