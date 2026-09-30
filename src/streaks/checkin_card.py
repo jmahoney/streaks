@@ -69,9 +69,7 @@ class StreaksCheckinCard(Gtk.Box):
 
         # The (possibly hidden) multi-layout header still carries the card's name/colour, since
         # callers identify a card by its `name_label` regardless of layout.
-        for css_class in theme.colour_classes():
-            self.dot.remove_css_class(css_class)
-        self.dot.add_css_class(theme.colour_class(card.colour))
+        theme.set_colour_class(self.dot, card.colour)
         self.name_label.set_label(card.name)
         self.meta_label.set_label(card.meta)
 

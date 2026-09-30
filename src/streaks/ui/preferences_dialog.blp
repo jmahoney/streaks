@@ -1,57 +1,8 @@
 using Gtk 4.0;
 using Adw 1;
 
-Gtk.Popover day_start_popover {
-  child: Gtk.Box {
-    orientation: vertical;
-    spacing: 10;
-    margin-start: 12;
-    margin-end: 12;
-    margin-top: 12;
-    margin-bottom: 12;
-
-    Gtk.Label {
-      label: _("Day starts at");
-      halign: start;
-
-      styles ["heading"]
-    }
-
-    Gtk.Box {
-      orientation: horizontal;
-      spacing: 6;
-      halign: center;
-
-      Gtk.SpinButton day_start_hour_spin {
-        numeric: true;
-        wrap: true;
-        valign: center;
-
-        adjustment: Gtk.Adjustment {
-          lower: 0;
-          upper: 23;
-          step-increment: 1;
-        };
-      }
-
-      Gtk.Label {
-        label: ":";
-        valign: center;
-      }
-
-      Gtk.SpinButton day_start_minute_spin {
-        numeric: true;
-        wrap: true;
-        valign: center;
-
-        adjustment: Gtk.Adjustment {
-          lower: 0;
-          upper: 59;
-          step-increment: 1;
-        };
-      }
-    }
-  };
+$StreaksTimePopover day_start_popover {
+  heading: _("Day starts at");
 }
 
 template $StreaksPreferencesDialog : Adw.PreferencesDialog {

@@ -1,0 +1,69 @@
+using Gtk 4.0;
+
+template $StreaksTimePopover : Gtk.Popover {
+  child: Gtk.Box {
+    orientation: vertical;
+    spacing: 10;
+    margin-start: 12;
+    margin-end: 12;
+    margin-top: 12;
+    margin-bottom: 12;
+
+    Gtk.Label heading_label {
+      halign: start;
+      visible: false;
+
+      styles ["heading"]
+    }
+
+    Gtk.Box toggle_row {
+      orientation: horizontal;
+      spacing: 12;
+      visible: false;
+
+      Gtk.Label toggle_label_widget {
+        hexpand: true;
+        halign: start;
+      }
+
+      Gtk.Switch switch {
+        valign: center;
+      }
+    }
+
+    Gtk.Box {
+      orientation: horizontal;
+      spacing: 6;
+      halign: center;
+
+      Gtk.SpinButton hour_spin {
+        numeric: true;
+        wrap: true;
+        valign: center;
+
+        adjustment: Gtk.Adjustment {
+          lower: 0;
+          upper: 23;
+          step-increment: 1;
+        };
+      }
+
+      Gtk.Label {
+        label: ":";
+        valign: center;
+      }
+
+      Gtk.SpinButton minute_spin {
+        numeric: true;
+        wrap: true;
+        valign: center;
+
+        adjustment: Gtk.Adjustment {
+          lower: 0;
+          upper: 59;
+          step-increment: 1;
+        };
+      }
+    }
+  };
+}

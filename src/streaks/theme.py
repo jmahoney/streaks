@@ -93,6 +93,16 @@ def colour_classes() -> tuple[str, ...]:
     return tuple(_COLOUR_CLASSES.values())
 
 
+def set_colour_class(widget: Gtk.Widget, colour: str | None, *other_classes: str) -> None:
+    """Paint ``widget`` with the CSS class for ``colour``, clearing every streak colour class
+    (and every class in ``other_classes``, for a caller with its own non-streak dot classes)
+    first. ``colour=None`` clears without adding one."""
+    for old in (*colour_classes(), *other_classes):
+        widget.remove_css_class(old)
+    if colour is not None:
+        widget.add_css_class(colour_class(colour))
+
+
 def watch(widget: Gtk.Widget, callback: Callable[[], None]) -> None:
     """Run ``callback`` whenever the scheme flips while ``widget`` is realized.
 

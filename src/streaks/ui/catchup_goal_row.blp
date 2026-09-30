@@ -1,0 +1,17 @@
+using Gtk 4.0;
+
+template $StreaksCatchupGoalRow : Gtk.ListBoxRow {
+  height-request: 38;
+  // The checkbutton fills the row and handles its own clicks; leaving the row itself
+  // activatable would give a pointer click two paths to toggle the same checkbutton.
+  activatable: false;
+  // ...and shouldn't take keyboard focus either, or Tab would stop on a row that does
+  // nothing on Space/Enter before reaching the checkbutton that actually toggles.
+  focusable: false;
+
+  styles ["catchup-goal"]
+
+  child: Gtk.CheckButton check {
+    valign: center;
+  };
+}

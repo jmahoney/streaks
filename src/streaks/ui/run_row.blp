@@ -35,8 +35,11 @@ template $StreaksRunRow : Gtk.ListBoxRow {
       }
     }
 
-    Gtk.Box strip_slot {
+    $StripWidget strip {
       halign: start;
+      cell-width: 7;
+      cell-height: 18;
+      gap: 2;
     }
   };
 }

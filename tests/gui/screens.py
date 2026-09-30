@@ -88,9 +88,9 @@ def _build_new_streak(ctx: BuildContext) -> Gtk.Widget:
     dialog = StreaksStreakDialog.for_new()
     dialog.set_state(window.state)
     dialog.name_row.set_text("Floss")
-    dialog.reminder_switch.set_active(True)
-    dialog.hour_spin.set_value(21)
-    dialog.minute_spin.set_value(30)
+    dialog.reminder_popover.switch.set_active(True)
+    dialog.reminder_popover.hour_spin.set_value(21)
+    dialog.reminder_popover.minute_spin.set_value(30)
 
     dialog.present(window)
     process_events()
@@ -111,9 +111,9 @@ def _build_new_streak_goals(ctx: BuildContext) -> Gtk.Widget:
     dialog.name_row.set_text("Floss")
     dialog.more_goals_button.emit("clicked")
     dialog.name_row.set_text("Evening routine")
-    dialog.reminder_switch.set_active(True)
-    dialog.hour_spin.set_value(21)
-    dialog.minute_spin.set_value(30)
+    dialog.reminder_popover.switch.set_active(True)
+    dialog.reminder_popover.hour_spin.set_value(21)
+    dialog.reminder_popover.minute_spin.set_value(30)
 
     dialog.present(window)
     process_events()
@@ -211,17 +211,17 @@ def _build_catch_up_missed(ctx: BuildContext) -> Gtk.Widget:
 
     rows = {row.day: row for row in dialog._rows}
     # 9 September: every goal ticked -> kept. 10 September is left untouched (stays unconfirmed).
-    for _gid, check in rows[date(2026, 9, 9)]._goal_checks:
-        check.set_active(True)
+    for _gid, goal_row in rows[date(2026, 9, 9)]._goal_checks:
+        goal_row.check.set_active(True)
 
     # 11 September: every goal ticked except "45 min second workout" (index 2) -> partial/missed.
     fri_row = rows[date(2026, 9, 11)]
-    for i, (_gid, check) in enumerate(fri_row._goal_checks):
-        check.set_active(i != 2)
+    for i, (_gid, goal_row) in enumerate(fri_row._goal_checks):
+        goal_row.check.set_active(i != 2)
 
     # 12 September: every goal ticked -> kept.
-    for _gid, check in rows[date(2026, 9, 12)]._goal_checks:
-        check.set_active(True)
+    for _gid, goal_row in rows[date(2026, 9, 12)]._goal_checks:
+        goal_row.check.set_active(True)
     process_events()
 
     return _detach_dialog_content(dialog)

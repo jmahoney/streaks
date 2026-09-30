@@ -4,7 +4,11 @@
     <file>streaks/ui/window.ui</file>
     <file>streaks/ui/preferences_dialog.ui</file>
     <file>streaks/ui/catchup_row.ui</file>
+    <file>streaks/ui/catchup_goal_row.ui</file>
     <file>streaks/ui/catchup_dialog.ui</file>
+    <file>streaks/ui/legend_entry.ui</file>
+    <file>streaks/ui/section_header.ui</file>
+    <file>streaks/ui/time_popover.ui</file>
     <file>streaks/ui/run_row.ui</file>
     <file>streaks/ui/goal_bar_row.ui</file>
     <file>streaks/ui/streak_view.ui</file>

@@ -34,16 +34,11 @@ class StreaksSidebarRow(Gtk.ListBoxRow):
 
     streak_id = GObject.Property(type=int, default=0)
 
-    def _set_dot_class(self, css_class: str) -> None:
-        """Paint the dot via one CSS class (the stylesheet supplies light and dark hues)."""
-        for old in (_TODAY_DOT_CLASS, _ENDED_DOT_CLASS, *theme.colour_classes()):
-            self.dot.remove_css_class(old)
-        self.dot.add_css_class(css_class)
-
     def configure_today(self, open_count: int) -> None:
         """Set up the fixed "Today" row, badged with the number of open check-ins."""
         self.streak_id = 0
-        self._set_dot_class(_TODAY_DOT_CLASS)
+        theme.set_colour_class(self.dot, None, _TODAY_DOT_CLASS, _ENDED_DOT_CLASS)
+        self.dot.add_css_class(_TODAY_DOT_CLASS)
         self.name_label.set_label(_("Today"))
         self.meta_label.set_visible(False)
         self.count_label.set_visible(False)
@@ -56,7 +51,7 @@ class StreaksSidebarRow(Gtk.ListBoxRow):
     ) -> None:
         """Set up a row for a currently-running streak."""
         self.streak_id = streak_id
-        self._set_dot_class(theme.colour_class(colour))
+        theme.set_colour_class(self.dot, colour, _TODAY_DOT_CLASS, _ENDED_DOT_CLASS)
         self.name_label.set_label(name)
         self.meta_label.set_label(meta)
         self.meta_label.set_visible(True)
@@ -68,7 +63,8 @@ class StreaksSidebarRow(Gtk.ListBoxRow):
     def configure_ended(self, streak_id: int, name: str, meta: str) -> None:
         """Set up a row for an ended streak (dimmed, no count)."""
         self.streak_id = streak_id
-        self._set_dot_class(_ENDED_DOT_CLASS)
+        theme.set_colour_class(self.dot, None, _TODAY_DOT_CLASS, _ENDED_DOT_CLASS)
+        self.dot.add_css_class(_ENDED_DOT_CLASS)
         self.name_label.set_label(name)
         self.meta_label.set_label(meta)
         self.meta_label.set_visible(True)

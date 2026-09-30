@@ -23,11 +23,6 @@ from streaks.models import Streak, answer_days
 from streaks.state import AppState
 from streaks.widgets.grid_widgets import StripWidget  # noqa: F401  registers $StripWidget
 
-# The result strip is 9×20 with a 3px gap.
-_RESULT_CELL_WIDTH = 9
-_RESULT_CELL_HEIGHT = 20
-_RESULT_GAP = 3
-
 
 @Gtk.Template(resource_path="/com/cheerschopper/Streaks/streaks/ui/catchup_dialog.ui")
 class StreaksCatchupDialog(Adw.Dialog):
@@ -52,10 +47,6 @@ class StreaksCatchupDialog(Adw.Dialog):
         self._streak = state.streak(streak_id)
         self._rows: list[StreaksCatchupRow] = []
         self._answers: dict[date, tuple[Answer, tuple[int, ...]]] = {}
-
-        self.result_strip.cell_width = _RESULT_CELL_WIDTH
-        self.result_strip.cell_height = _RESULT_CELL_HEIGHT
-        self.result_strip.gap = _RESULT_GAP
 
         self.cancel_button.connect("clicked", self._on_cancel_clicked)
         self.save_button.connect("clicked", self._on_save_clicked)

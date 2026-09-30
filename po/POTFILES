@@ -44,6 +44,15 @@ src/streaks/ui/catchup_dialog.blp
 src/streaks/catchup_dialog.py
 src/streaks/ui/catchup_row.blp
 src/streaks/catchup_row.py
+src/streaks/ui/catchup_goal_row.blp
+src/streaks/catchup_goal_row.py
 src/streaks/ui/preferences_dialog.blp
 src/streaks/preferences_dialog.py
 src/streaks/ui/shortcuts.blp
+src/streaks/ui/legend_entry.blp
+src/streaks/legend_entry.py
+src/streaks/ui/section_header.blp
+src/streaks/section_header.py
+src/streaks/ui/time_popover.blp
+src/streaks/time_popover.py
+src/streaks/check_row.py

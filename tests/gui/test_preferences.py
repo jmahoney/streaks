@@ -128,9 +128,11 @@ def test_day_start_popover_sets_minutes_and_label(seeded_state, seeded_window, p
 
     dialog.day_start_row.emit("activated")
     process_events()
+    assert dialog.day_start_popover.heading_label.get_label() == "Day starts at"
+    assert not dialog.day_start_popover.toggle_row.get_visible()
 
-    dialog.day_start_hour_spin.set_value(2)
-    dialog.day_start_minute_spin.set_value(30)
+    dialog.day_start_popover.hour_spin.set_value(2)
+    dialog.day_start_popover.minute_spin.set_value(30)
     process_events()
 
     assert seeded_state.settings.gio.get_int("day-start-minutes") == 150

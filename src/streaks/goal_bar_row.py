@@ -8,6 +8,8 @@ gi.require_version("Gtk", "4.0")
 
 from gi.repository import GLib, Gtk
 
+from streaks.engine import GoalBar
+
 _LOW_CLASS = "low"
 
 
@@ -21,12 +23,12 @@ class StreaksGoalBarRow(Gtk.ListBoxRow):
     bar = Gtk.Template.Child()
     ratio_label = Gtk.Template.Child()
 
-    def configure(self, name: str, ratio: float, ratio_text: str, low: bool) -> None:
-        """Populate the row from one ``engine.History.goal_bars`` entry (an ``engine.GoalBar``)."""
-        self.name_label.set_label(name)
-        self.bar.set_fraction(ratio)
-        self.ratio_label.set_markup(f"<b>{GLib.markup_escape_text(ratio_text)}</b>")
-        if low:
+    def configure(self, bar: GoalBar) -> None:
+        """Populate the row from one ``engine.History.goal_bars`` entry."""
+        self.name_label.set_label(bar.name)
+        self.bar.set_fraction(bar.ratio)
+        self.ratio_label.set_markup(f"<b>{GLib.markup_escape_text(bar.ratio_text)}</b>")
+        if bar.low:
             self.bar.add_css_class(_LOW_CLASS)
         else:
             self.bar.remove_css_class(_LOW_CLASS)

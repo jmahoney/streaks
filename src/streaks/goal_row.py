@@ -8,7 +8,7 @@ gi.require_version("Gtk", "4.0")
 
 from gi.repository import GObject, Gtk
 
-from streaks import words
+from streaks import check_row, words
 from streaks.engine import CardGoal
 
 
@@ -35,13 +35,7 @@ class StreaksGoalRow(Gtk.ListBoxRow):
     def __init__(self, **kwargs):
         """Initialize the row."""
         super().__init__(**kwargs)
-        self._configuring = False
-        self.check.connect("toggled", self._on_check_toggled)
-
-    def _on_check_toggled(self, _check: Gtk.CheckButton) -> None:
-        if self._configuring:
-            return
-        self.emit("toggle-requested")
+        check_row.setup(self)
 
     def configure(self, goal: CardGoal) -> None:
         """Populate the row from an ``engine.CardGoal``."""
@@ -52,17 +46,13 @@ class StreaksGoalRow(Gtk.ListBoxRow):
         self.check.set_active(done)
         self._configuring = False
 
+        check_row.set_done_look(self.name_label, done)
         if done:
-            self.name_label.add_css_class("strike")
-            self.name_label.add_css_class("dim-label")
             self.time_label.set_label(words.time_hm(goal.done_at))
             self.time_label.set_visible(True)
+        elif goal.trailing:
+            self.time_label.set_label(goal.trailing)
+            self.time_label.set_visible(True)
         else:
-            self.name_label.remove_css_class("strike")
-            self.name_label.remove_css_class("dim-label")
-            if goal.trailing:
-                self.time_label.set_label(goal.trailing)
-                self.time_label.set_visible(True)
-            else:
-                self.time_label.set_label("")
-                self.time_label.set_visible(False)
+            self.time_label.set_label("")
+            self.time_label.set_visible(False)

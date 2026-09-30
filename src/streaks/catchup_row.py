@@ -20,12 +20,12 @@ gi.require_version("Gtk", "4.0")
 from gi.repository import GObject, Gtk
 
 from streaks import words
+from streaks.catchup_goal_row import (
+    StreaksCatchupGoalRow,  # noqa: F401  registers $StreaksCatchupGoalRow
+)
 from streaks.engine import Answer, GoalData
 
 _ = gettext.gettext
-
-# A per-goal tick row is a fixed height, regardless of the label's own metrics.
-_GOAL_ROW_HEIGHT = 38
 
 
 @Gtk.Template(resource_path="/com/cheerschopper/Streaks/streaks/ui/catchup_row.ui")
@@ -49,7 +49,7 @@ class StreaksCatchupRow(Gtk.Box):
         """Initialize the row. Call ``configure()`` before it renders anything useful."""
         super().__init__(**kwargs)
         self.day: date | None = None
-        self._goal_checks: list[tuple[int, Gtk.CheckButton]] = []
+        self._goal_checks: list[tuple[int, StreaksCatchupGoalRow]] = []
         self._marked_missed = False
 
         self.action_button.connect("clicked", self._on_action_clicked)
@@ -65,19 +65,13 @@ class StreaksCatchupRow(Gtk.Box):
         self.goals_list.remove_all()
         self._goal_checks.clear()
         for goal in goals:
-            check = Gtk.CheckButton(label=goal.name, active=False)
-            check.connect("toggled", self._on_goal_toggled)
-            self.goals_list.append(check)
-            row = check.get_parent()  # the list-supplied wrapper row around the checkbutton
-            row.add_css_class("catchup-goal")
-            row.set_size_request(-1, _GOAL_ROW_HEIGHT)
-            # The checkbutton fills the row and handles its own clicks; leaving the row itself
-            # activatable would give a pointer click two paths to toggle the same checkbutton.
-            row.set_activatable(False)
-            # ...and shouldn't take keyboard focus either, or Tab would stop on a row that does
-            # nothing on Space/Enter before reaching the checkbutton that actually toggles.
-            row.set_focusable(False)
-            self._goal_checks.append((goal.id, check))
+            row = StreaksCatchupGoalRow()
+            row.goal_id = goal.id
+            row.check.set_label(goal.name)
+            row.check.set_active(False)
+            row.check.connect("toggled", self._on_goal_toggled)
+            self.goals_list.append(row)
+            self._goal_checks.append((goal.id, row))
 
         self._update_visual()
 
@@ -87,12 +81,12 @@ class StreaksCatchupRow(Gtk.Box):
         """This row's answer as ``(status, missed_goal_ids)``, derived from its ticks, or
         ``None`` if unconfirmed."""
         total = len(self._goal_checks)
-        ticked = [gid for gid, check in self._goal_checks if check.get_active()]
+        ticked = [gid for gid, row in self._goal_checks if row.check.get_active()]
         if total and len(ticked) == total:
             return (Answer.KEPT, ())
         if not ticked:
             return (Answer.MISSED, ()) if self._marked_missed else None
-        missed_ids = tuple(gid for gid, check in self._goal_checks if not check.get_active())
+        missed_ids = tuple(gid for gid, row in self._goal_checks if not row.check.get_active())
         return (Answer.MISSED, missed_ids)
 
     # -- writing back the computed preview ---------------------------------------------
@@ -124,9 +118,8 @@ class StreaksCatchupRow(Gtk.Box):
         else:
             self.remove_css_class("missed")
 
-        for _gid, check in self._goal_checks:
-            row = check.get_parent()
-            ticked = check.get_active()
+        for _gid, row in self._goal_checks:
+            ticked = row.check.get_active()
             if ticked:
                 row.add_css_class("ticked")
             else:

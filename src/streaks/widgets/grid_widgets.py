@@ -14,7 +14,7 @@ import gi
 gi.require_version("Gtk", "4.0")
 gi.require_version("Gsk", "4.0")
 
-from gi.repository import Gdk, Graphene, Gsk, Gtk
+from gi.repository import Gdk, GObject, Graphene, Gsk, Gtk
 
 from streaks import theme
 from streaks.engine import Cell
@@ -32,6 +32,11 @@ class _CellGridWidget(Gtk.Widget):
 
     _major = "row"
 
+    cell_width = GObject.Property(type=int, default=0)
+    cell_height = GObject.Property(type=int, default=0)
+    gap = GObject.Property(type=int, default=0)
+    radius = GObject.Property(type=int, default=0)
+
     def __init__(self, cell_width: int, cell_height: int, gap: int, radius: int, **kwargs):
         super().__init__(**kwargs)
         self.cell_width = cell_width
@@ -41,6 +46,14 @@ class _CellGridWidget(Gtk.Widget):
         self._cells: list[Cell] = []
         self.set_has_tooltip(True)
         theme.watch(self, self.queue_draw)
+        for prop in ("cell-width", "cell-height", "gap"):
+            self.connect(f"notify::{prop}", lambda *_args: self.queue_resize())
+        self.connect("notify::radius", lambda *_args: self.queue_draw())
+
+    @property
+    def cells(self) -> list[Cell]:
+        """Copy of the cells currently drawn."""
+        return list(self._cells)
 
     def _rows_columns(self) -> tuple[int, int]:
         raise NotImplementedError

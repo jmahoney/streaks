@@ -1,67 +1,9 @@
 using Gtk 4.0;
 using Adw 1;
 
-Gtk.Popover reminder_popover {
-  child: Gtk.Box {
-    orientation: vertical;
-    spacing: 10;
-    margin-start: 12;
-    margin-end: 12;
-    margin-top: 12;
-    margin-bottom: 12;
-
-    Gtk.Box {
-      orientation: horizontal;
-      spacing: 12;
-
-      Gtk.Label {
-        label: _("Remind me");
-        hexpand: true;
-        halign: start;
-      }
-
-      Gtk.Switch reminder_switch {
-        valign: center;
-      }
-    }
-
-    Gtk.Box {
-      orientation: horizontal;
-      spacing: 6;
-      halign: center;
-
-      Gtk.SpinButton hour_spin {
-        numeric: true;
-        wrap: true;
-        valign: center;
-
-        adjustment: Gtk.Adjustment {
-          lower: 0;
-          upper: 23;
-          step-increment: 1;
-          value: 20;
-        };
-      }
-
-      Gtk.Label {
-        label: ":";
-        valign: center;
-      }
-
-      Gtk.SpinButton minute_spin {
-        numeric: true;
-        wrap: true;
-        valign: center;
-
-        adjustment: Gtk.Adjustment {
-          lower: 0;
-          upper: 59;
-          step-increment: 1;
-          value: 0;
-        };
-      }
-    }
-  };
+$StreaksTimePopover reminder_popover {
+  toggle-label: _("Remind me");
+  minutes: 1200;
 }
 
 template $StreaksStreakDialog : Adw.Dialog {

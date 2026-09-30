@@ -13,9 +13,10 @@ gi.require_version("Adw", "1")
 
 from gi.repository import Adw, GObject, Gtk
 
-from streaks import engine, theme
+from streaks import engine
 from streaks.engine import StreakData
 from streaks.goal_bar_row import StreaksGoalBarRow  # noqa: F401  registers $StreaksGoalBarRow
+from streaks.legend_entry import StreaksLegendEntry  # noqa: F401  registers $StreaksLegendEntry
 from streaks.run_row import StreaksRunRow  # noqa: F401  registers $StreaksRunRow
 from streaks.stat_tile import StreaksStatTile  # noqa: F401  registers $StreaksStatTile
 from streaks.state import AppState
@@ -62,11 +63,8 @@ class StreaksStreakView(Adw.Bin):
         self.state: AppState | None = None
         self._streak: StreakData | None = None
         self._run_index: int | None = None
-        self._legend: list[engine.LegendEntry] = []
         self.header_subtitle = ""  # the meta line under the streak name, set by `_rebuild`
 
-        # The legend swatches carry resolved colours, so repaint them when the scheme flips.
-        theme.watch(self, lambda: self._rebuild_legend(self._legend))
         self.range_toggle.connect("notify::active-name", self._on_range_changed)
         self.runs_list.connect("row-activated", self._on_run_activated)
         self.catch_up_link.connect("clicked", self._on_catch_up_clicked)
@@ -99,7 +97,7 @@ class StreaksStreakView(Adw.Bin):
 
         tiles = (self.tile_running, self.tile_longest, self.tile_runs, self.tile_hit)
         for tile, entry in zip(tiles, hist.tiles, strict=True):
-            tile.configure(entry.value, entry.caption, entry.style)
+            tile.configure(entry)
 
         self.chart_title_label.set_label(hist.chart_title)
         self.best_label.set_visible(hist.is_best)
@@ -133,42 +131,17 @@ class StreaksStreakView(Adw.Bin):
             widget.set_label(label)
 
     def _rebuild_legend(self, legend: list[engine.LegendEntry]) -> None:
-        self._legend = legend
         clear_children(self.legend_entries_box)
         for legend_entry in legend:
-            entry = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
-            entry.set_valign(Gtk.Align.CENTER)
-
-            swatch = Gtk.Box()
-            swatch.set_size_request(11, 11)
-            swatch.set_valign(Gtk.Align.CENTER)
-            swatch.add_css_class("chart-legend-swatch")
-            provider = Gtk.CssProvider()
-            border_css = (
-                f"border: 1px solid {theme.resolve(legend_entry.border)};"
-                if legend_entry.border
-                else "border: none;"
-            )
-            provider.load_from_string(
-                f"* {{ background-color: {theme.resolve(legend_entry.fill)}; {border_css} }}"
-            )
-            swatch.get_style_context().add_provider(
-                provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
-            )
-            entry.append(swatch)
-
-            caption = Gtk.Label(label=legend_entry.label)
-            caption.add_css_class("caption")
-            caption.add_css_class("dim-label")
-            entry.append(caption)
-
+            entry = StreaksLegendEntry()
+            entry.configure(legend_entry)
             self.legend_entries_box.append(entry)
 
     def _rebuild_goal_bars(self, goal_bars: list[engine.GoalBar]) -> None:
         self.goal_bars_list.remove_all()
         for bar in goal_bars:
             row = StreaksGoalBarRow()
-            row.configure(bar.name, bar.ratio, bar.ratio_text, bar.low)
+            row.configure(bar)
             self.goal_bars_list.append(row)
 
     def _rebuild_earlier_runs(self, earlier_runs: list[engine.EarlierRun]) -> None:
@@ -176,7 +149,7 @@ class StreaksStreakView(Adw.Bin):
         self.runs_card.set_visible(bool(earlier_runs))
         for run in earlier_runs:
             row = StreaksRunRow()
-            row.configure(run.title, run.meta, run.strip, run.index)
+            row.configure(run)
             self.runs_list.append(row)
 
     # -- interactions ---------------------------------------------------------------

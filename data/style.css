@@ -1,7 +1,7 @@
 /* Streaks custom styles: classes not covered by a libadwaita style class (colour-dot, today-dot,
  * badge, catchup-banner(+.title), catchup-day(.missed)(+.header, .date, .status), catchup-goal
  * (.ticked, .missed), colour-swatch, stat-accent, streak-blue/green/yellow/red/purple, ended-dot,
- * strike, goal-bar.low, chart-legend-swatch, chart-day-label, sidebar-footer, sidebar-empty,
+ * strike, goal-bar.low, chart-day-label, sidebar-footer, sidebar-empty,
  * checkin-card(+.footer), goal-row, caption-heading dim-label).
  *
  * Every colour is a CSS variable declared on :root and overridden once in the
@@ -134,12 +134,6 @@
 
 progressbar.low > trough > progress {
   background-color: var(--goal-bar-low-color);
-}
-
-.chart-legend-swatch {
-  min-width: 11px;
-  min-height: 11px;
-  border-radius: 3px;
 }
 
 .chart-day-label {

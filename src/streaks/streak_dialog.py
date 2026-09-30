@@ -17,11 +17,12 @@ gi.require_version("Adw", "1")
 
 from gi.repository import Adw, Gdk, GLib, GObject, Gtk
 
-from streaks import theme
+from streaks import theme, words
 from streaks.engine import PeriodKind, StreakData, current_goals
 from streaks.goal_edit_row import StreaksGoalEditRow  # noqa: F401  registers $StreaksGoalEditRow
 from streaks.models import COLOURS, Streak, create_streak, update_streak
 from streaks.state import AppState
+from streaks.time_popover import StreaksTimePopover  # noqa: F401  registers $StreaksTimePopover
 
 _ = gettext.gettext
 
@@ -63,9 +64,6 @@ class StreaksStreakDialog(Adw.Dialog):
     reminder_row = Gtk.Template.Child()
     reminder_label = Gtk.Template.Child()
     reminder_popover = Gtk.Template.Child()
-    reminder_switch = Gtk.Template.Child()
-    hour_spin = Gtk.Template.Child()
-    minute_spin = Gtk.Template.Child()
     skip_row = Gtk.Template.Child()
     name_group = Gtk.Template.Child()
     more_goals_button = Gtk.Template.Child()
@@ -125,9 +123,7 @@ class StreaksStreakDialog(Adw.Dialog):
         self.name_row.connect("notify::text", self._on_field_changed)
         self.period_toggle.connect("notify::active-name", self._on_period_changed)
         self.reminder_row.connect("activated", self._on_reminder_activated)
-        self.reminder_switch.connect("notify::active", self._update_reminder_label)
-        self.hour_spin.connect("value-changed", self._update_reminder_label)
-        self.minute_spin.connect("value-changed", self._update_reminder_label)
+        self.reminder_popover.connect("changed", self._update_reminder_label)
         self.cancel_button.connect("clicked", self._on_cancel_clicked)
         self.save_button.connect("clicked", self._on_save_clicked)
         self.add_goal_row.connect("activated", self._on_add_goal_activated)
@@ -179,11 +175,12 @@ class StreaksStreakDialog(Adw.Dialog):
         self.skip_row.set_active(streak_data.allow_skip)
 
         if streak_data.reminder_time is not None:
-            self.reminder_switch.set_active(True)
-            self.hour_spin.set_value(streak_data.reminder_time.hour)
-            self.minute_spin.set_value(streak_data.reminder_time.minute)
+            self.reminder_popover.active = True
+            self.reminder_popover.minutes = (
+                streak_data.reminder_time.hour * 60 + streak_data.reminder_time.minute
+            )
         else:
-            self.reminder_switch.set_active(False)
+            self.reminder_popover.active = False
         self._update_reminder_label()
 
         self._clear_goal_rows()
@@ -232,20 +229,17 @@ class StreaksStreakDialog(Adw.Dialog):
         self.reminder_popover.popup()
 
     def _update_reminder_label(self, *_args) -> None:
-        on = self.reminder_switch.get_active()
-        self.hour_spin.set_sensitive(on)
-        self.minute_spin.set_sensitive(on)
-        if on:
-            hour = int(self.hour_spin.get_value())
-            minute = int(self.minute_spin.get_value())
-            self.reminder_label.set_label(f"{hour:02d}:{minute:02d} ›")
-        else:
+        reminder = self._selected_reminder_time()
+        if reminder is None:
             self.reminder_label.set_label(_("Off ›"))
+        else:
+            self.reminder_label.set_label(f"{words.fmt_hm(reminder.hour, reminder.minute)} ›")
 
     def _selected_reminder_time(self) -> time | None:
-        if not self.reminder_switch.get_active():
+        if not self.reminder_popover.active:
             return None
-        return time(int(self.hour_spin.get_value()), int(self.minute_spin.get_value()))
+        minutes = self.reminder_popover.minutes
+        return time(minutes // 60, minutes % 60)
 
     # -- single/multi mode ---------------------------------------------------------------------
 

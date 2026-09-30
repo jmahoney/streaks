@@ -1,0 +1,19 @@
+using Gtk 4.0;
+
+template $StreaksLegendEntry : Gtk.Box {
+  orientation: horizontal;
+  spacing: 6;
+  valign: center;
+
+  $StripWidget swatch {
+    valign: center;
+    cell-width: 11;
+    cell-height: 11;
+    gap: 0;
+    radius: 3;
+  }
+
+  Gtk.Label caption_label {
+    styles ["caption", "dim-label"]
+  }
+}

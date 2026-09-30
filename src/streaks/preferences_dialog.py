@@ -18,8 +18,9 @@ gi.require_version("Gio", "2.0")
 
 from gi.repository import Adw, Gio, GLib, Gtk
 
-from streaks import export, models
+from streaks import export, models, words
 from streaks.state import AppState
+from streaks.time_popover import StreaksTimePopover  # noqa: F401  registers $StreaksTimePopover
 from streaks.widgets import confirm_dialog
 
 _ = gettext.gettext
@@ -36,8 +37,6 @@ class StreaksPreferencesDialog(Adw.PreferencesDialog):
     day_start_row = Gtk.Template.Child()
     day_start_label = Gtk.Template.Child()
     day_start_popover = Gtk.Template.Child()
-    day_start_hour_spin = Gtk.Template.Child()
-    day_start_minute_spin = Gtk.Template.Child()
     backfill_row = Gtk.Template.Child()
     backfill_label = Gtk.Template.Child()
     count_through_row = Gtk.Template.Child()
@@ -65,8 +64,7 @@ class StreaksPreferencesDialog(Adw.PreferencesDialog):
 
         self._load_day_start()
         self.day_start_row.connect("activated", self._on_day_start_activated)
-        self.day_start_hour_spin.connect("value-changed", self._on_day_start_spin_changed)
-        self.day_start_minute_spin.connect("value-changed", self._on_day_start_spin_changed)
+        self.day_start_popover.connect("changed", self._on_day_start_spin_changed)
 
         self.export_row.connect("activated", self._on_export_activated)
         self.delete_row.connect("activated", self._on_delete_activated)
@@ -84,20 +82,17 @@ class StreaksPreferencesDialog(Adw.PreferencesDialog):
 
     def _load_day_start(self) -> None:
         minutes = self._gio.get_int("day-start-minutes")
-        self.day_start_hour_spin.set_value(minutes // 60)
-        self.day_start_minute_spin.set_value(minutes % 60)
+        self.day_start_popover.minutes = minutes
         self._update_day_start_label(minutes)
 
     def _update_day_start_label(self, minutes: int) -> None:
-        self.day_start_label.set_label(f"{minutes // 60:02d}:{minutes % 60:02d}")
+        self.day_start_label.set_label(words.fmt_hm(minutes // 60, minutes % 60))
 
     def _on_day_start_activated(self, *_args) -> None:
         self.day_start_popover.popup()
 
-    def _on_day_start_spin_changed(self, *_args) -> None:
-        minutes = int(self.day_start_hour_spin.get_value()) * 60 + int(
-            self.day_start_minute_spin.get_value()
-        )
+    def _on_day_start_spin_changed(self, _popover: StreaksTimePopover) -> None:
+        minutes = self.day_start_popover.minutes
         self._gio.set_int("day-start-minutes", minutes)
         self._update_day_start_label(minutes)
 

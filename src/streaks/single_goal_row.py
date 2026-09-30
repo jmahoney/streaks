@@ -8,7 +8,7 @@ gi.require_version("Gtk", "4.0")
 
 from gi.repository import GObject, Gtk
 
-from streaks import theme
+from streaks import check_row, theme
 from streaks.engine import Card
 
 
@@ -36,13 +36,7 @@ class StreaksSingleGoalRow(Gtk.ListBoxRow):
     def __init__(self, **kwargs):
         """Initialize the row."""
         super().__init__(**kwargs)
-        self._configuring = False
-        self.check.connect("toggled", self._on_check_toggled)
-
-    def _on_check_toggled(self, _check: Gtk.CheckButton) -> None:
-        if self._configuring:
-            return
-        self.emit("toggle-requested")
+        check_row.setup(self)
 
     def configure(self, card: Card) -> None:
         """Populate the row from a single-goal ``engine.Card``."""
@@ -53,15 +47,7 @@ class StreaksSingleGoalRow(Gtk.ListBoxRow):
         self.check.set_active(goal.done_at is not None)
         self._configuring = False
 
-        for css_class in theme.colour_classes():
-            self.dot.remove_css_class(css_class)
-        self.dot.add_css_class(theme.colour_class(card.colour))
+        theme.set_colour_class(self.dot, card.colour)
         self.name_label.set_label(card.name)
         self.subtitle_label.set_label(card.meta)
-
-        if goal.done_at is not None:
-            self.name_label.add_css_class("strike")
-            self.name_label.add_css_class("dim-label")
-        else:
-            self.name_label.remove_css_class("strike")
-            self.name_label.remove_css_class("dim-label")
+        check_row.set_done_look(self.name_label, goal.done_at is not None)

@@ -14,13 +14,12 @@ import gi
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 
-from gi.repository import Adw, GLib, Gtk
+from gi.repository import Adw, GLib, GObject, Gtk
 
 from streaks import clock, engine, words
 from streaks.catchup_banner import (
     StreaksCatchupBanner,  # noqa: F401  registers $StreaksCatchupBanner
 )
-from streaks.catchup_dialog import StreaksCatchupDialog
 from streaks.checkin_card import StreaksCheckinCard  # noqa: F401  registers $StreaksCheckinCard
 from streaks.engine import Answer, Banner, Card
 from streaks.models import Goal, Streak, answer_day, toggle_goal_check
@@ -37,6 +36,10 @@ class StreaksTodayView(Adw.Bin):
     """The Today content pane. Call ``set_state()`` before it renders anything."""
 
     __gtype_name__ = "StreaksTodayView"
+
+    __gsignals__ = {
+        "catch-up": (GObject.SignalFlags.RUN_FIRST, None, (int,)),
+    }
 
     scrolled = Gtk.Template.Child()
     title_label = Gtk.Template.Child()
@@ -57,7 +60,6 @@ class StreaksTodayView(Adw.Bin):
         self.state: AppState | None = None
         self._shown_day: date | None = None
         self.missed_dialog: Adw.AlertDialog | None = None
-        self.catchup_dialog: StreaksCatchupDialog | None = None
 
         self.back_to_today_button.connect("clicked", lambda _b: self.show_day(None))
 
@@ -157,11 +159,7 @@ class StreaksTodayView(Adw.Bin):
     # -- interactions ---------------------------------------------------------------
 
     def _on_catch_up(self, _banner: StreaksCatchupBanner, streak_id: int) -> None:
-        if self.state is None:
-            return
-        dialog = StreaksCatchupDialog(self.state, streak_id)
-        self.catchup_dialog = dialog
-        dialog.present(self.get_root())
+        self.emit("catch-up", streak_id)
 
     def _on_goal_toggled(self, _card: StreaksCheckinCard, goal_id: int) -> None:
         if self.state is None:

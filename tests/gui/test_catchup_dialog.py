@@ -39,7 +39,7 @@ def _row_by_day(dialog, day):
 
 
 def _tick(row, index, active):
-    row._goal_checks[index][1].set_active(active)
+    row._goal_checks[index][1].check.set_active(active)
 
 
 def _settings(state):
@@ -69,7 +69,7 @@ def test_initial_state(seeded_state, seeded_window, process_events):
         assert row.date_label.get_label() == expected
         assert row.state_label.get_label() == "Unconfirmed"
         assert len(row._goal_checks) == 5
-        assert all(not check.get_active() for _gid, check in row._goal_checks)
+        assert all(not goal_row.check.get_active() for _gid, goal_row in row._goal_checks)
         assert "missed" not in row.get_css_classes()
         assert row.action_button.get_visible()
         assert row.action_button.get_label() == "Mark missed"
@@ -108,8 +108,7 @@ def test_ticking_all_goals_keeps_the_day(seeded_state, seeded_window, process_ev
     assert dialog.save_button.get_sensitive()
 
     # Every goal row is ticked (dimmed), and none is flagged missed on a fully-kept day.
-    for _gid, check in wed_row._goal_checks:
-        row = check.get_parent()
+    for _gid, row in wed_row._goal_checks:
         assert "ticked" in row.get_css_classes()
         assert "missed" not in row.get_css_classes()
 
@@ -152,15 +151,14 @@ def test_ticking_some_goals_records_the_rest_missed(seeded_state, seeded_window,
 
     # The unticked goal row is flagged missed (and dropped from ticked); the ticked ones are
     # flagged ticked (and not missed).
-    for i, (gid, check) in enumerate(fri_row._goal_checks):
-        row = check.get_parent()
+    for i, (gid, row) in enumerate(fri_row._goal_checks):
         if i == 2:
             assert gid == goal2_id
-            assert not check.get_active()
+            assert not row.check.get_active()
             assert "missed" in row.get_css_classes()
             assert "ticked" not in row.get_css_classes()
         else:
-            assert check.get_active()
+            assert row.check.get_active()
             assert "ticked" in row.get_css_classes()
             assert "missed" not in row.get_css_classes()
 
@@ -177,8 +175,8 @@ def test_goal_row_click_path_toggles_the_check_exactly_once(
     process_events()
 
     wed_row = _row_by_day(dialog, WED)
-    _gid, check = wed_row._goal_checks[0]
-    row = check.get_parent()
+    _gid, row = wed_row._goal_checks[0]
+    check = row.check
     assert row.get_activatable() is False
     assert row.get_focusable() is False
 
@@ -418,8 +416,8 @@ def test_open_from_today_banner(seeded_state, seeded_window, process_events):
     banner.catch_up_button.emit("clicked")
     process_events()
 
-    assert today_view.catchup_dialog is not None
-    assert today_view.catchup_dialog.dialog_title.get_subtitle() == "75 Hard · 4 days"
+    assert window.catchup_dialog is not None
+    assert window.catchup_dialog.dialog_title.get_subtitle() == "75 Hard · 4 days"
 
 
 def test_open_from_streak_view_link(seeded_state, seeded_window, process_events):

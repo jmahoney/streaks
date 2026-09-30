@@ -103,6 +103,11 @@ def fmt_range(a: date, b: date) -> str:
     return f"{fmt_day_short(a)} – {fmt_day_short(b)}"
 
 
+def fmt_hm(hour: int, minute: int) -> str:
+    """``"07:12"``."""
+    return f"{hour:02d}:{minute:02d}"
+
+
 def time_hm(dt: datetime) -> str:
     """``"07:12"``."""
-    return f"{dt.hour:02d}:{dt.minute:02d}"
+    return fmt_hm(dt.hour, dt.minute)

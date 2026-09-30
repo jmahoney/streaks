@@ -250,12 +250,17 @@ def test_reminder_popover_sets_label(fresh_state, fresh_window, process_events):
     dialog.reminder_row.emit("activated")
     process_events()
 
-    dialog.reminder_switch.set_active(True)
-    dialog.hour_spin.set_value(20)
-    dialog.minute_spin.set_value(0)
-    process_events()
+    assert dialog.reminder_label.get_label() == "Off ›"
+    assert not dialog.reminder_popover.hour_spin.get_sensitive()
 
+    dialog.reminder_popover.switch.set_active(True)
+    process_events()
     assert dialog.reminder_label.get_label() == "20:00 ›"
+    assert dialog.reminder_popover.hour_spin.get_sensitive()
+
+    dialog.reminder_popover.minute_spin.set_value(45)
+    process_events()
+    assert dialog.reminder_label.get_label() == "20:45 ›"
 
 
 def test_save_new_streak(fresh_state, fresh_window, process_events):
@@ -273,9 +278,9 @@ def test_save_new_streak(fresh_state, fresh_window, process_events):
     for i, active in enumerate([True, False, True, False, True, False, False]):
         dialog._weekday_buttons[i].set_active(active)
     dialog.skip_row.set_active(True)
-    dialog.reminder_switch.set_active(True)
-    dialog.hour_spin.set_value(20)
-    dialog.minute_spin.set_value(0)
+    dialog.reminder_popover.switch.set_active(True)
+    dialog.reminder_popover.hour_spin.set_value(20)
+    dialog.reminder_popover.minute_spin.set_value(0)
 
     rows = _goal_rows(dialog)
     rows[0].entry.set_text("A")

@@ -16,6 +16,7 @@ from streaks import engine, models, words
 from streaks.catchup_dialog import StreaksCatchupDialog
 from streaks.empty_view import StreaksEmptyView  # noqa: F401  registers $StreaksEmptyView
 from streaks.models import Streak
+from streaks.section_header import StreaksSectionHeader
 from streaks.sidebar_row import StreaksSidebarRow
 from streaks.state import AppState
 from streaks.streak_dialog import StreaksStreakDialog
@@ -70,7 +71,8 @@ class StreaksWindow(Adw.ApplicationWindow):
         self.sidebar_list.set_filter_func(self._filter_sidebar_row)
         self.sidebar_list.connect("row-selected", self._on_row_selected)
         self.checkin_button.connect("clicked", self._on_checkin_clicked)
-        self.streak_view.connect("catch-up", self._on_streak_catch_up)
+        self.streak_view.connect("catch-up", self._on_catch_up)
+        self.today_view.connect("catch-up", self._on_catch_up)
 
         self.search_bar.connect_entry(self.search_entry)
         self.search_bar.set_key_capture_widget(self)
@@ -192,7 +194,7 @@ class StreaksWindow(Adw.ApplicationWindow):
         if streak_id:
             self.today_view.scroll_to_streak(streak_id)
 
-    def _on_streak_catch_up(self, _view: StreaksStreakView, streak_id: int) -> None:
+    def _on_catch_up(self, _view: StreaksStreakView | StreaksTodayView, streak_id: int) -> None:
         dialog = StreaksCatchupDialog(self.state, streak_id)
         self.catchup_dialog = dialog
         dialog.present(self)
@@ -279,13 +281,8 @@ class StreaksWindow(Adw.ApplicationWindow):
         if section == prev_section:
             row.set_header(None)
             return
-        label = Gtk.Label(label=_("RUNNING") if section == "running" else _("ENDED"))
-        label.add_css_class("caption-heading")
-        label.add_css_class("dim-label")
-        label.set_halign(Gtk.Align.START)
-        label.set_margin_top(14)
-        label.set_margin_bottom(6)
-        label.set_margin_start(10)
+        label = StreaksSectionHeader()
+        label.set_label(_("RUNNING") if section == "running" else _("ENDED"))
         row.set_header(label)
 
     def _clear_sidebar(self) -> None:
