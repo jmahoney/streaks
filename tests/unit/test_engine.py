@@ -1021,6 +1021,16 @@ def test_fixture_gym(seeded, today, settings):
     assert card.meta == "2 of 3 this week"
     assert card.show_footer is False
 
+    h = history(streak, today, settings)
+    assert h.tiles == [
+        Tile("9", "weeks running", "accent"),
+        Tile("9", "weeks, longest run", "strong"),
+        Tile("1", "run", "strong"),
+        Tile("88%", "goals hit", "strong"),
+    ]
+    bars = {bar.name: (bar.ratio_text, bar.low) for bar in h.goal_bars}
+    assert bars == {"45 min session": ("8/9", False), "Log the weights": ("5/9", True)}
+
 
 def test_fixture_clip_fingernails(seeded, today, settings):
     streak = _streaks()["Clip fingernails"]

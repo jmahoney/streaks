@@ -43,7 +43,7 @@ def test_seed_check_counts_per_streak(seeded):
     expected_check_counts = {
         "75 Hard": 509,
         "No snoozing the alarm": 12,
-        "Gym, three times a week": 52,
+        "Gym, three times a week": 49,
         "Clip fingernails": 3,
         "Couch to 5K": 31,
     }
@@ -51,7 +51,7 @@ def test_seed_check_counts_per_streak(seeded):
         goal_ids = [g.id for g in Goal.select().where(Goal.streak == streak)]
         count = GoalCheck.select().where(GoalCheck.goal_id.in_(goal_ids)).count()
         assert count == expected_check_counts[name], name
-    assert GoalCheck.select().count() == 607
+    assert GoalCheck.select().count() == 604
 
 
 def test_seed_answer_counts(seeded):

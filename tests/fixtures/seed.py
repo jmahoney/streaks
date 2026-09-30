@@ -17,8 +17,9 @@ Five streaks, in sidebar order:
 2. **No snoozing the alarm** — weekdays (Mon-Fri), created 27 Aug 2026, one goal, checked every
    due day through 11 Sep.
 3. **Gym, three times a week** — three sessions a week, created 13 Jul 2026, two goals, both
-   checked on Mon/Wed/Fri every week through 4 Sep; this week only Monday and Wednesday are
-   checked, leaving Friday's session open.
+   checked on Mon/Wed/Fri every week through 4 Sep, except that the weights go unlogged on
+   Fridays 24 Jul, 7 Aug and 28 Aug; this week only Monday and Wednesday are checked, leaving
+   Friday's session open.
 4. **Clip fingernails** — monthly, created 1 Jun 2026, one goal, checked on the 5th of June,
    July and August.
 5. **Couch to 5K** — daily, created 2 Feb 2026, ended 4 Mar 2026, one goal checked every day of
@@ -34,7 +35,7 @@ Expected values, pinned by ``tests/unit/test_engine.py``:
 - No snoozing the alarm: count 12, sidebar meta "Mon–Fri", today's card is "Not today" with the
   next check-in on Monday 14 September, since the streak is due only on weekdays.
 - Gym, three times a week: count 9, sidebar meta "3× a week · 2 goals", today's card reads "2 of
-  3 this week".
+  3 this week"; goal bars are 45 min session 8/9 and Log the weights 5/9 (low); hit rate 88%.
 - Clip fingernails: count 4, sidebar meta "Monthly", today's card is one row, subtitle
   "Monthly · 17 days left".
 - Couch to 5K: ended, best run 31 days, sidebar meta "Ended 4 Mar · best 31".
@@ -176,10 +177,12 @@ def _seed_gym() -> Streak:
         created_on=date(2026, 7, 13),
     )
     session_goal, log_goal = _goals(streak)
+    unlogged = {date(2026, 7, 24), date(2026, 8, 7), date(2026, 8, 28)}
     for day in _daterange(date(2026, 7, 13), date(2026, 9, 4)):
         if day.weekday() in (0, 2, 4):  # Mon, Wed, Fri
             _check(session_goal, day, 18, 30)
-            _check(log_goal, day, 19, 20)
+            if day not in unlogged:
+                _check(log_goal, day, 19, 20)
     # This week: only Monday and Wednesday, not Friday.
     for day in (date(2026, 9, 7), date(2026, 9, 9)):
         _check(session_goal, day, 18, 30)

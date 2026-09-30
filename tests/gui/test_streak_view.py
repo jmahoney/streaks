@@ -128,6 +128,19 @@ def test_goal_bars(seeded_window, process_events):
     assert not any(r.bar.has_css_class("low") for r in rows)
 
 
+def test_goal_bars_flag_low_ratio(seeded_window, process_events):
+    window = seeded_window
+
+    _select_by_name(window, "Gym, three times a week", process_events)
+    view = window.streak_view
+
+    rows = listbox_rows(view.goal_bars_list)
+    assert [r.name_label.get_label() for r in rows] == ["45 min session", "Log the weights"]
+    assert [r.ratio_label.get_text() for r in rows] == ["8/9", "5/9"]
+    assert not rows[0].bar.has_css_class("low")
+    assert rows[1].bar.has_css_class("low")
+
+
 def test_earlier_runs_and_switching_charts(seeded_window, process_events):
     window = seeded_window
 
