@@ -23,7 +23,7 @@ class StreaksApplication(Adw.Application):
     """Registers app actions and accelerators, opens the database, and shows the main window or
     a database-error dialog."""
 
-    def __init__(self, *, version: str = "0.2.0", profile: str = "default", **kwargs):
+    def __init__(self, *, version: str = "0.3.0", profile: str = "default", **kwargs):
         """Initialize the application.
 
         ``profile`` is Meson's ``-Dprofile``: ``"development"`` builds (GNOME Builder) run as
