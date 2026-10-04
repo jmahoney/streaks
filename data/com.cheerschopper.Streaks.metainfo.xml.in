@@ -43,6 +43,12 @@
     <color type="primary" scheme_preference="dark">#5c3c00</color>
   </branding>
   <releases>
+    <release version="0.3.1" date="2026-10-04">
+      <description>
+        <p>Checking in for an earlier day stays on that day after ticking a goal.</p>
+        <p>Goals ticked in catch-up show as ticked when the day is viewed later.</p>
+      </description>
+    </release>
     <release version="0.3.0" date="2026-09-27">
       <description>
         <p>Initial release.</p>
