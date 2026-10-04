@@ -71,7 +71,7 @@ class StreaksTodayView(Adw.Bin):
         today = state.today()
         gdate = GLib.DateTime.new_local(today.year, today.month, today.day, 0, 0, 0)
         self.day_calendar.select_day(gdate)
-        self.day_calendar.connect("day-selected", self._on_day_selected)
+        self._day_selected_id = self.day_calendar.connect("day-selected", self._on_day_selected)
         state.connect("changed", self._on_state_changed)
         self._rebuild()
 
@@ -79,8 +79,13 @@ class StreaksTodayView(Adw.Bin):
         self._rebuild()
 
     def show_day(self, day: date | None) -> None:
-        """Show ``day`` (``None`` = today) in the content pane."""
+        """Show ``day`` (``None`` = today) in the content pane, with the calendar on that day."""
         self._shown_day = day
+        if self.state is not None:
+            shown = day or self.state.today()
+            gdate = GLib.DateTime.new_local(shown.year, shown.month, shown.day, 0, 0, 0)
+            with self.day_calendar.handler_block(self._day_selected_id):
+                self.day_calendar.select_day(gdate)
         self._rebuild()
 
     def scroll_to_streak(self, streak_id: int) -> None:

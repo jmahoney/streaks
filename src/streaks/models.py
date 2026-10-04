@@ -345,11 +345,25 @@ def answer_day(
         return answer
 
 
-def answer_days(streak: Streak, answers: dict[date, tuple[Answer, tuple[int, ...]]]) -> None:
-    """Upsert every day's answer in ``answers`` in one transaction."""
+def answer_days(
+    streak: Streak,
+    answers: dict[date, tuple[Answer, tuple[int, ...]]],
+    ticked: dict[date, tuple[int, ...]] | None = None,
+    done_time: time | None = None,
+) -> None:
+    """Upsert every day's answer in ``answers``, and a check for each goal id in ``ticked`` on
+    its day (stamped with that day at ``done_time``), in one transaction."""
+    done_time = done_time or time(0, 0)
     with db.atomic():
         for day, (status, missed_ids) in answers.items():
             answer_day(streak, day, status, list(missed_ids))
+        for day, goal_ids in (ticked or {}).items():
+            for goal_id in goal_ids:
+                GoalCheck.get_or_create(
+                    goal=goal_id,
+                    day=day,
+                    defaults={"done_at": datetime.combine(day, done_time)},
+                )
 
 
 def clear_answer(streak: Streak, day: date) -> None:

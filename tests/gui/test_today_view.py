@@ -3,7 +3,7 @@
 from datetime import date, datetime
 
 from gi.repository import GLib
-from helpers import box_children, listbox_rows, sidebar_rows
+from helpers import box_children, listbox_rows, select_streak, sidebar_rows
 
 from streaks import engine
 from streaks.models import DayAnswer, GoalCheck, Streak
@@ -280,6 +280,53 @@ def test_show_day_switches_to_an_earlier_day(seeded_window, process_events):
 
     assert today_view.title_label.get_label() == "Sunday 13 September"
     assert not today_view.back_to_today_button.get_visible()
+
+
+def test_ticking_a_goal_on_an_earlier_day_stays_on_that_day(seeded_window, process_events):
+    window = seeded_window
+
+    today_view = _today_view(window)
+    today_view.day_calendar.select_day(GLib.DateTime.new_local(2026, 9, 12, 0, 0, 0))
+    process_events()
+
+    card = _card_by_name(today_view, "75 Hard")
+    _goal_row_by_name(card, "Read 10 pages").check.set_active(True)
+    process_events()
+
+    assert today_view.title_label.get_label() == "Saturday 12 September"
+    assert today_view.back_to_today_button.get_visible()
+    card = _card_by_name(today_view, "75 Hard")
+    assert _goal_row_by_name(card, "Read 10 pages").check.get_active()
+
+
+def test_back_to_today_resets_the_calendar(seeded_window, process_events):
+    window = seeded_window
+
+    today_view = _today_view(window)
+    today_view.day_calendar.select_day(GLib.DateTime.new_local(2026, 9, 12, 0, 0, 0))
+    process_events()
+
+    today_view.back_to_today_button.emit("clicked")
+    process_events()
+
+    assert today_view.day_calendar.get_date().get_day_of_month() == 13
+    assert today_view.title_label.get_label() == "Sunday 13 September"
+    assert not today_view.back_to_today_button.get_visible()
+
+
+def test_leaving_today_and_returning_shows_today(seeded_window, process_events):
+    window = seeded_window
+
+    today_view = _today_view(window)
+    today_view.show_day(date(2026, 9, 12))
+    process_events()
+
+    select_streak(window, "75 Hard")
+    process_events()
+    window.sidebar_list.select_row(window.sidebar_list.get_row_at_index(0))
+    process_events()
+
+    assert today_view.title_label.get_label() == "Sunday 13 September"
 
 
 def test_calendar_limits_backfill_window(seeded_window, process_events):

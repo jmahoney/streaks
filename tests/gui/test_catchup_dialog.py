@@ -8,12 +8,12 @@ cross-checked against ``engine.catch_up``/``catch_up_preview``.
 import json
 from datetime import date
 
-from helpers import catchup_goal_rows, catchup_rows, sidebar_rows
+from helpers import box_children, catchup_goal_rows, catchup_rows, listbox_rows, sidebar_rows
 
 from streaks import engine
 from streaks.catchup_dialog import StreaksCatchupDialog
 from streaks.engine import Answer
-from streaks.models import DayAnswer, Goal, Streak
+from streaks.models import DayAnswer, Goal, GoalCheck, Streak
 
 WED, THU, FRI, SAT = date(2026, 9, 9), date(2026, 9, 10), date(2026, 9, 11), date(2026, 9, 12)
 
@@ -382,6 +382,51 @@ def test_save_writes_answers_and_refreshes_the_app(seeded_state, seeded_window, 
     # cover the open run, so no banner reappears.
     tv = engine.today_view(seeded_state.streaks, today, settings)
     assert [b for b in tv.banners if b.streak_id == streak.id] == []
+
+
+def test_save_records_ticked_goals_as_checks(seeded_state, seeded_window, process_events):
+    window = seeded_window
+
+    dialog = _open_dialog(seeded_state, window)
+    process_events()
+
+    goal_ids = _goal_ids(seeded_state)
+    wed_row = _row_by_day(dialog, WED)
+    for i in range(5):
+        _tick(wed_row, i, True)
+    fri_row = _row_by_day(dialog, FRI)
+    for i in range(3):
+        _tick(fri_row, i, True)
+    process_events()
+
+    dialog.save_button.emit("clicked")
+    process_events()
+
+    def checked(day):
+        return {
+            c.goal_id
+            for c in GoalCheck.select().where(GoalCheck.goal.in_(goal_ids), GoalCheck.day == day)
+        }
+
+    assert checked(WED) == set(goal_ids)
+    assert checked(FRI) == set(goal_ids[:3])
+    assert checked(THU) == set()
+
+    window.today_view.show_day(FRI)
+    process_events()
+    card = next(
+        c
+        for col in (window.today_view.column_left, window.today_view.column_right)
+        for c in box_children(col)
+        if c.name_label.get_label() == "75 Hard"
+    )
+    assert [r.check.get_active() for r in listbox_rows(card.goals_list)] == [
+        True,
+        True,
+        True,
+        False,
+        False,
+    ]
 
 
 def test_cancel_writes_nothing(seeded_state, seeded_window, process_events):

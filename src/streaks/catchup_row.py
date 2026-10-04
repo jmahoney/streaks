@@ -89,6 +89,10 @@ class StreaksCatchupRow(Gtk.Box):
         missed_ids = tuple(gid for gid, row in self._goal_checks if not row.check.get_active())
         return (Answer.MISSED, missed_ids)
 
+    def ticked_goal_ids(self) -> tuple[int, ...]:
+        """The ids of the goals ticked on this row."""
+        return tuple(gid for gid, row in self._goal_checks if row.check.get_active())
+
     # -- writing back the computed preview ---------------------------------------------
 
     def set_state_text(self, text: str) -> None:

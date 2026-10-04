@@ -1,8 +1,8 @@
 """Catch-up dialog: tick completed goals for every unconfirmed day at once.
 
 Each unconfirmed day is its own card; the user ticks the goals they completed and the day's
-answer follows from those ticks (see ``StreaksCatchupRow``). ``Save`` writes through
-``models.answer_days``.
+answer follows from those ticks (see ``StreaksCatchupRow``). ``Save`` writes the answers and
+the ticked goals' checks through ``models.answer_days``.
 """
 
 from __future__ import annotations
@@ -16,7 +16,7 @@ gi.require_version("Adw", "1")
 
 from gi.repository import Adw, Gtk
 
-from streaks import engine
+from streaks import clock, engine
 from streaks.catchup_row import StreaksCatchupRow  # noqa: F401  registers $StreaksCatchupRow
 from streaks.engine import Answer
 from streaks.models import Streak, answer_days
@@ -108,6 +108,7 @@ class StreaksCatchupDialog(Adw.Dialog):
 
     def _on_save_clicked(self, _button: Gtk.Button) -> None:
         streak = Streak.get_by_id(self.streak_id)
-        answer_days(streak, self._answers)
+        ticked = {row.day: row.ticked_goal_ids() for row in self._rows if row.day in self._answers}
+        answer_days(streak, self._answers, ticked, clock.now().time())
         self.state.reload()
         self.close()

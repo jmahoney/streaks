@@ -358,8 +358,11 @@ class StreaksWindow(Adw.ApplicationWindow):
             self._set_header_for_page("today")
             self.content_title.set_title(_("Today"))
             self.content_title.set_subtitle(words.fmt_weekday_day(self.state.today()))
+            # A sidebar rebuild re-selects Today while it is already showing; keep the day the
+            # user picked from the calendar. Arriving from another page starts on today.
+            if self.content_stack.get_visible_child_name() != "today":
+                self.today_view.show_day(None)
             self.content_stack.set_visible_child_name("today")
-            self.today_view.show_day(None)
             return
 
         streak = self.state.streak(streak_id)

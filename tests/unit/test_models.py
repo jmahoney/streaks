@@ -633,3 +633,19 @@ def test_answer_days_upserts_every_day(today):
         date(2026, 9, 1): (Answer.MISSED, (7,)),
         date(2026, 9, 2): (Answer.KEPT, ()),
     }
+
+
+def test_answer_days_records_ticked_goals_as_checks(today):
+    streak = create_streak(
+        "Hard", "#3584e4", PeriodKind.DAILY, ["Read", "Walk", "Water"], created_on=today
+    )
+    read, walk, water = (g.id for g in streak.goals.order_by(Goal.position))
+    day = date(2026, 9, 1)
+    answer_days(
+        streak,
+        {day: (Answer.MISSED, (water,))},
+        ticked={day: (read, walk)},
+        done_time=time(21, 45),
+    )
+    checks = {c.goal_id: c.done_at for c in load_streak_data(streak).checks}
+    assert checks == {read: datetime(2026, 9, 1, 21, 45), walk: datetime(2026, 9, 1, 21, 45)}
