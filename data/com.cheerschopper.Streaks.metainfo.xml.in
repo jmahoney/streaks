@@ -43,6 +43,11 @@
     <color type="primary" scheme_preference="dark">#5c3c00</color>
   </branding>
   <releases>
+    <release version="0.3.2" date="2026-10-11">
+      <description>
+        <p>Search and the main menu are in the sidebar header, following GNOME conventions.</p>
+      </description>
+    </release>
     <release version="0.3.1" date="2026-10-04">
       <description>
         <p>Checking in for an earlier day stays on that day after ticking a goal.</p>
