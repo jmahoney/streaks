@@ -193,7 +193,8 @@ def test_window_header_on_streak_page(seeded_window, process_events):
     assert window.checkin_button.get_visible()
     assert window.checkin_button.has_css_class("suggested-action")
     assert window.more_button.get_visible()
-    assert not window.search_button.get_visible()
+    # Search lives in the sidebar header, so it stays available on a streak's page.
+    assert window.search_button.get_visible()
 
     window.checkin_button.emit("clicked")
     process_events()

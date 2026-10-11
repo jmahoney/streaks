@@ -232,15 +232,15 @@ class StreaksWindow(Adw.ApplicationWindow):
     # -- header ---------------------------------------------------------------------
 
     def _set_header_for_page(self, page: str) -> None:
-        """Show only the end-of-header controls that belong to ``page``.
+        """Show only the header controls that belong to ``page``.
 
         An ended streak's page is read-only: no "Check in" button, and the ⋯ menu offers only
         Delete… (see ``_build_more_menu``).
         """
         is_streak = page == "streak"
         is_ended = is_streak and self._current_streak_ended
-        self.search_button.set_visible(page == "today")
-        self.menu_button.set_visible(not is_streak)
+        # Search filters the sidebar list, so it applies whenever there are streaks to filter.
+        self.search_button.set_visible(page != "empty")
         self.checkin_button.set_visible(is_streak and not is_ended)
         self.more_button.set_visible(is_streak)
 

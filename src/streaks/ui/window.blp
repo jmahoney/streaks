@@ -22,6 +22,20 @@ template $StreaksWindow : Adw.ApplicationWindow {
             title: _("Streaks");
           };
 
+          [start]
+          Gtk.ToggleButton search_button {
+            icon-name: "edit-find-symbolic";
+            tooltip-text: _("Search");
+          }
+
+          [end]
+          Gtk.MenuButton menu_button {
+            icon-name: "open-menu-symbolic";
+            tooltip-text: _("Main Menu");
+            primary: true;
+            menu-model: primary_menu;
+          }
+
           [end]
           Gtk.Button new_button {
             icon-name: "list-add-symbolic";
@@ -85,12 +99,6 @@ template $StreaksWindow : Adw.ApplicationWindow {
           };
 
           [end]
-          Gtk.MenuButton menu_button {
-            icon-name: "open-menu-symbolic";
-            menu-model: primary_menu;
-          }
-
-          [end]
           Gtk.MenuButton more_button {
             icon-name: "view-more-symbolic";
             visible: false;
@@ -102,11 +110,6 @@ template $StreaksWindow : Adw.ApplicationWindow {
             visible: false;
 
             styles ["suggested-action"]
-          }
-
-          [end]
-          Gtk.ToggleButton search_button {
-            icon-name: "edit-find-symbolic";
           }
         }
 
