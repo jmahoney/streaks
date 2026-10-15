@@ -55,6 +55,8 @@ __all__ = [
     "answer_day",
     "answer_days",
     "clear_answer",
+    "clear_answers",
+    "clear_explicit_miss",
     "end_streak",
     "delete_streak",
     "delete_all",
@@ -369,6 +371,24 @@ def answer_days(
 def clear_answer(streak: Streak, day: date) -> None:
     """Remove any answer recorded for ``day``."""
     DayAnswer.delete().where(DayAnswer.streak == streak, DayAnswer.day == day).execute()
+
+
+def clear_answers(streak: Streak, start: date, end: date) -> None:
+    """Remove every answer recorded for ``start``..``end`` (inclusive)."""
+    DayAnswer.delete().where(
+        DayAnswer.streak == streak, DayAnswer.day.between(start, end)
+    ).execute()
+
+
+def clear_explicit_miss(streak: Streak, start: date, end: date) -> None:
+    """Remove a whole-period "missed" answer in ``start``..``end`` (one with no per-goal
+    ``missed_goal_ids``), leaving kept and partially-missed answers alone."""
+    DayAnswer.delete().where(
+        DayAnswer.streak == streak,
+        DayAnswer.day.between(start, end),
+        DayAnswer.status == str(Answer.MISSED),
+        DayAnswer.missed_goal_ids == json.dumps([]),
+    ).execute()
 
 
 def end_streak(streak: Streak, on: date) -> None:

@@ -21,7 +21,10 @@ class StreaksCheckinCard(Gtk.Box):
     """One streak's check-in card: header, goal rows, and an optional progress footer. A
     single-goal streak instead renders as one row (``single_list``), with no header or footer.
 
-    Emits ``goal-toggled`` (goal id) and ``mark-missed`` (streak id).
+    Every due card has a footer with a "Mark … missed" button, which reads "Undo" once the shown
+    period is answered missed.
+
+    Emits ``goal-toggled`` (goal id), ``mark-missed`` and ``undo-missed`` (streak id).
     """
 
     __gtype_name__ = "StreaksCheckinCard"
@@ -29,6 +32,7 @@ class StreaksCheckinCard(Gtk.Box):
     __gsignals__ = {
         "goal-toggled": (GObject.SignalFlags.RUN_FIRST, None, (int,)),
         "mark-missed": (GObject.SignalFlags.RUN_FIRST, None, (int,)),
+        "undo-missed": (GObject.SignalFlags.RUN_FIRST, None, (int,)),
     }
 
     multi_box = Gtk.Template.Child()
@@ -44,6 +48,7 @@ class StreaksCheckinCard(Gtk.Box):
     single_list = Gtk.Template.Child()
 
     streak_id = GObject.Property(type=int, default=0)
+    missed = GObject.Property(type=bool, default=False)
 
     def __init__(self, **kwargs):
         """Initialize the card."""
@@ -56,7 +61,7 @@ class StreaksCheckinCard(Gtk.Box):
         row.check.set_active(not row.check.get_active())
 
     def _on_missed_clicked(self, _button: Gtk.Button) -> None:
-        self.emit("mark-missed", self.streak_id)
+        self.emit("undo-missed" if self.missed else "mark-missed", self.streak_id)
 
     def _on_goal_toggle_requested(self, row: StreaksGoalRow | StreaksSingleGoalRow) -> None:
         self.emit("goal-toggled", row.goal_id)
@@ -64,6 +69,8 @@ class StreaksCheckinCard(Gtk.Box):
     def configure(self, card: Card) -> None:
         """Populate the card from an ``engine.Card``."""
         self.streak_id = card.streak_id
+        self.missed = card.missed
+        self._configure_footer(card)
         self.multi_box.set_visible(not card.single)
         self.single_list.set_visible(card.single)
 
@@ -93,7 +100,13 @@ class StreaksCheckinCard(Gtk.Box):
         if is_not_due:
             self.body_label.set_label(card.body or "")
 
-        self.footer.set_visible(card.show_footer)
-        if card.show_footer:
+    def _configure_footer(self, card: Card) -> None:
+        self.footer.set_visible(card.kind != "not_due")
+        self.missed_button.set_label(card.missed_action)
+        self.progress.set_visible(card.show_progress)
+        self.progress_label.set_visible(card.show_progress)
+        # Without the progress bar to fill the row, the button expands to sit at the end.
+        self.missed_button.set_hexpand(not card.show_progress)
+        if card.show_progress:
             self.progress.set_fraction(card.progress or 0.0)
             self.progress_label.set_label(card.progress_text or "")

@@ -116,7 +116,10 @@ def test_gym_card(seeded_window, process_events):
     card = _card_by_name(today_view, "Gym, three times a week")
     rows = listbox_rows(card.goals_list)
     assert len(rows) == 2
-    assert not card.footer.get_visible()
+    # No progress bar for a times-a-week streak, but the footer still offers to mark it missed.
+    assert card.footer.get_visible()
+    assert not card.progress.get_visible()
+    assert card.missed_button.get_label() == "Mark week missed"
 
 
 def test_no_snoozing_card(seeded_window, process_events):
@@ -367,6 +370,85 @@ def test_mark_day_missed(seeded_window, process_events):
     # Run 3 ended on today's missed answer, and no new due period has started yet, so there's
     # no open run to count.
     assert hard_row.count_label.get_label() == "0"
+
+
+def test_marked_missed_card_shows_missed_and_undo_clears_it(seeded_window, process_events):
+    window = seeded_window
+
+    today_view = _today_view(window)
+    card = _card_by_name(today_view, "75 Hard")
+    hard_id = card.streak_id
+    assert card.missed_button.get_label() == "Mark day missed"
+
+    card.missed_button.emit("clicked")
+    process_events()
+    today_view.missed_dialog.emit("response", "missed")
+    process_events()
+
+    card = _card_by_name(today_view, "75 Hard")
+    assert card.meta_label.get_label() == "Missed"
+    assert card.missed_button.get_label() == "Undo"
+
+    card.missed_button.emit("clicked")
+    process_events()
+
+    assert (
+        DayAnswer.get_or_none(DayAnswer.streak == hard_id, DayAnswer.day == date(2026, 9, 13))
+        is None
+    )
+    card = _card_by_name(today_view, "75 Hard")
+    assert card.meta_label.get_label() == "3 of 5 · day 51"
+    assert card.missed_button.get_label() == "Mark day missed"
+
+
+def test_ticking_a_goal_clears_a_marked_miss(seeded_window, process_events):
+    from streaks.engine import Answer
+    from streaks.models import answer_day
+
+    window = seeded_window
+    hard = Streak.get(Streak.name == "75 Hard")
+    answer_day(hard, date(2026, 9, 13), Answer.MISSED)
+    window.state.reload()
+    process_events()
+
+    today_view = _today_view(window)
+    card = _card_by_name(today_view, "75 Hard")
+    assert card.meta_label.get_label() == "Missed"
+
+    _goal_row_by_name(card, "Read 10 pages").check.set_active(True)
+    process_events()
+
+    assert (
+        DayAnswer.get_or_none(DayAnswer.streak == hard.id, DayAnswer.day == date(2026, 9, 13))
+        is None
+    )
+    card = _card_by_name(today_view, "75 Hard")
+    assert card.meta_label.get_label() == "4 of 5 · day 51"
+
+
+def test_single_goal_card_can_be_marked_missed(seeded_window, process_events):
+    window = seeded_window
+
+    today_view = _today_view(window)
+    card = _card_by_name(today_view, "Clip fingernails")
+    assert card.footer.get_visible()
+    assert card.missed_button.get_label() == "Mark month missed"
+
+    card.missed_button.emit("clicked")
+    process_events()
+    assert today_view.missed_dialog.get_heading() == "Mark this month as missed?"
+    today_view.missed_dialog.emit("response", "missed")
+    process_events()
+
+    card = _card_by_name(today_view, "Clip fingernails")
+    row = listbox_rows(card.single_list)[0]
+    assert row.subtitle_label.get_label() == "Monthly · missed"
+    assert card.missed_button.get_label() == "Undo"
+
+
+def test_not_due_card_has_no_missed_button(seeded_window, process_events):
+    card = _card_by_name(_today_view(seeded_window), "No snoozing the alarm")
+    assert not card.footer.get_visible()
 
 
 def test_mark_day_missed_while_viewing_an_earlier_day_answers_that_day(

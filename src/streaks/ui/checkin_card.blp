@@ -64,41 +64,42 @@ template $StreaksCheckinCard : Gtk.Box {
 
       styles ["caption", "dim-label"]
     }
-
-    Gtk.Box footer {
-      orientation: horizontal;
-      spacing: 10;
-      margin-start: 16;
-      margin-end: 16;
-      margin-top: 11;
-      margin-bottom: 11;
-      visible: false;
-
-      styles ["footer"]
-
-      Gtk.ProgressBar progress {
-        hexpand: true;
-        valign: center;
-      }
-
-      Gtk.Label progress_label {
-        valign: center;
-
-        styles ["caption", "dim-label"]
-      }
-
-      Gtk.Button missed_button {
-        label: _("Mark day missed");
-        valign: center;
-
-        styles ["flat", "accent"]
-      }
-    }
   }
 
   Gtk.ListBox single_list {
     selection-mode: none;
     activate-on-single-click: true;
     visible: false;
+  }
+
+  Gtk.Box footer {
+    orientation: horizontal;
+    spacing: 10;
+    margin-start: 16;
+    margin-end: 16;
+    margin-top: 11;
+    margin-bottom: 11;
+    visible: false;
+
+    styles ["footer"]
+
+    Gtk.ProgressBar progress {
+      hexpand: true;
+      valign: center;
+    }
+
+    Gtk.Label progress_label {
+      valign: center;
+
+      styles ["caption", "dim-label"]
+    }
+
+    Gtk.Button missed_button {
+      label: _("Mark day missed");
+      halign: end;
+      valign: center;
+
+      styles ["flat", "accent"]
+    }
   }
 }

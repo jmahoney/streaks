@@ -24,6 +24,8 @@ from streaks.models import (
     answer_day,
     answer_days,
     clear_answer,
+    clear_answers,
+    clear_explicit_miss,
     create_streak,
     database_path,
     delete_all,
@@ -297,6 +299,26 @@ def test_clear_answer_removes_it():
     answer_day(streak, day, Answer.KEPT)
     clear_answer(streak, day)
     assert DayAnswer.select().count() == 0
+
+
+def test_clear_answers_removes_only_those_in_range():
+    streak = create_streak("A", COLOURS[0], PeriodKind.DAILY, ["g1"], created_on=date(2026, 1, 1))
+    for d in (1, 2, 3, 4):
+        answer_day(streak, date(2026, 1, d), Answer.MISSED)
+    clear_answers(streak, date(2026, 1, 2), date(2026, 1, 3))
+    assert sorted(a.day.day for a in DayAnswer.select()) == [1, 4]
+
+
+def test_clear_explicit_miss_keeps_kept_and_partial_answers():
+    streak = create_streak(
+        "A", COLOURS[0], PeriodKind.DAILY, ["g1", "g2"], created_on=date(2026, 1, 1)
+    )
+    g1 = Goal.get(Goal.name == "g1")
+    answer_day(streak, date(2026, 1, 1), Answer.MISSED)
+    answer_day(streak, date(2026, 1, 2), Answer.MISSED, [g1.id])
+    answer_day(streak, date(2026, 1, 3), Answer.KEPT)
+    clear_explicit_miss(streak, date(2026, 1, 1), date(2026, 1, 3))
+    assert sorted(a.day.day for a in DayAnswer.select()) == [2, 3]
 
 
 def test_end_streak_sets_ended_on():

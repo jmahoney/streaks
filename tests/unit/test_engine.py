@@ -13,6 +13,8 @@ from __future__ import annotations
 import dataclasses
 from datetime import date, datetime, timedelta
 
+import pytest
+
 from streaks.engine import (
     CHART_FULL,
     CHART_HIGH,
@@ -43,6 +45,7 @@ from streaks.engine import (
     evaluate,
     history,
     is_due,
+    mark_missed_heading,
     mark_missed_preview,
     next_due_day,
     open_count,
@@ -428,7 +431,7 @@ def test_single_card_daily_unticked():
     assert card.meta == "Daily · day 5"
     assert len(card.goals) == 1
     assert card.goals[0].name == "T"
-    assert card.show_footer is False
+    assert card.show_progress is False
 
 
 def test_single_card_daily_ticked_shows_done_time():
@@ -476,6 +479,55 @@ def test_single_card_n_per_week():
     assert card.meta == "3× a week · 1 of 3 this week"
 
 
+def test_card_for_a_missed_day_says_missed_and_offers_undo():
+    today = date(2026, 1, 5)
+    s = _mk(date(2026, 1, 1), day_checks={today: {0}}, answers={today: Answer.MISSED})
+    card = today_view([s], today, Settings()).cards[0]
+    assert card.missed is True
+    assert card.meta == "Missed"
+    assert card.missed_action == "Undo"
+
+
+def test_single_card_for_a_missed_day():
+    today = date(2026, 1, 5)
+    s = _mk(date(2026, 1, 1), n_goals=1, answers={today: Answer.MISSED})
+    card = today_view([s], today, Settings()).cards[0]
+    assert card.meta == "Daily · missed"
+    assert card.missed_action == "Undo"
+
+
+@pytest.mark.parametrize(
+    ("kind", "label"),
+    [
+        (PeriodKind.DAILY, "Mark day missed"),
+        (PeriodKind.N_PER_WEEK, "Mark week missed"),
+        (PeriodKind.MONTHLY, "Mark month missed"),
+    ],
+)
+def test_card_missed_action_names_the_period(kind, label):
+    for n_goals in (1, 2):
+        s = _mk(date(2026, 1, 1), n_goals=n_goals, period_kind=kind)
+        card = today_view([s], date(2026, 1, 14), Settings()).cards[0]
+        assert card.missed is False
+        assert card.missed_action == label
+
+
+def test_mark_missed_heading():
+    today = date(2026, 1, 14)  # Wednesday
+    daily = _mk(date(2026, 1, 1))
+    weekly = _mk(date(2026, 1, 1), period_kind=PeriodKind.N_PER_WEEK)
+    monthly = _mk(date(2025, 12, 1), period_kind=PeriodKind.MONTHLY)
+    assert mark_missed_heading(daily, today, today) == "Mark today as missed?"
+    assert (
+        mark_missed_heading(daily, date(2026, 1, 12), today) == "Mark Monday 12 January as missed?"
+    )
+    assert mark_missed_heading(weekly, today, today) == "Mark this week as missed?"
+    assert mark_missed_heading(monthly, today, today) == "Mark this month as missed?"
+    assert (
+        mark_missed_heading(monthly, date(2025, 12, 20), today) == "Mark 1 Dec – 31 Dec as missed?"
+    )
+
+
 def test_single_goal_not_due_keeps_not_today_card():
     s = _mk(
         date(2026, 1, 5),  # Monday
@@ -503,9 +555,7 @@ def test_history_header_subtitle_single_goal_monthly():
 
 def _week_of(streak, today, settings=None):
     """The one-week lifetime `history()` chart for a streak created on a Monday, flattened
-    Mon..Sun. Lifetime (not the default per-run chart) renders every evaluated day, including a
-    day whose miss ended its run — a run's own chart never does, since a hard miss is the
-    boundary between runs and belongs to neither."""
+    Mon..Sun. Lifetime renders every evaluated day, in or between runs."""
     h = history(streak, today, settings or Settings(), chart="lifetime", weeks_shown=1)
     assert len(h.weeks) == 1
     return h.weeks[0]
@@ -552,6 +602,24 @@ def test_history_chart_fill_by_ratio_and_status():
     assert sunday.fill == CHART_UPCOMING
     assert sunday.border is None
     assert sunday.tooltip == "upcoming"
+
+
+def test_run_chart_ends_with_the_miss_that_ended_it():
+    monday = date(2026, 1, 5)
+    today = monday + timedelta(days=2)  # Wednesday, explicitly missed
+    s = _mk(
+        monday,
+        day_checks={monday: {0}, monday + timedelta(days=1): {0}},
+        answers={today: Answer.MISSED},
+        n_goals=1,
+    )
+    h = history(s, today, Settings())  # no open run, so the chart shows run 1
+    assert h.chart_title == "Run 1 · 5 Jan – 6 Jan"
+    week = h.weeks[0]
+    assert [c.fill for c in week[:2]] == [CHART_FULL, CHART_FULL]
+    assert week[2].fill == CHART_MISSED
+    assert week[2].tooltip == "missed — run ended"
+    assert week[3].fill == CHART_UPCOMING
 
 
 def test_history_chart_todays_cell_with_nothing_done_is_hollow():
@@ -972,7 +1040,7 @@ def test_fixture_gym(seeded, today, settings):
     tv = today_view(list(load_all()), today, settings)
     card = next(c for c in tv.cards if c.name == "Gym, three times a week")
     assert card.meta == "2 of 3 this week"
-    assert card.show_footer is False
+    assert card.show_progress is False
 
     h = history(streak, today, settings)
     assert h.tiles == [

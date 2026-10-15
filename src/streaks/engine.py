@@ -166,9 +166,11 @@ class Card:
     goals: list[CardGoal] = dataclasses.field(default_factory=list)
     progress: float | None = None
     progress_text: str | None = None
-    show_footer: bool = False
+    show_progress: bool = False  # the footer's progress bar, for multi-goal daily check-ins
     body: str | None = None
     single: bool = False  # a one-goal streak's check-in card
+    missed: bool = False  # the shown day's period is answered missed
+    missed_action: str = ""  # the footer button: "Mark day missed", ..., or "Undo" once missed
 
 
 @dataclass(frozen=True)
@@ -840,6 +842,17 @@ def _day_number(run: Run | None) -> int:
     return run.length if run else 1
 
 
+def _missed_action(streak: StreakData, missed: bool) -> str:
+    """The check-in card's footer button label: undo a miss, or mark the period missed."""
+    if missed:
+        return _("Undo")
+    if streak.period_kind == PeriodKind.N_PER_WEEK:
+        return _("Mark week missed")
+    if streak.period_kind == PeriodKind.MONTHLY:
+        return _("Mark month missed")
+    return _("Mark day missed")
+
+
 def _single_status(
     streak: StreakData,
     today: date,
@@ -849,6 +862,8 @@ def _single_status(
     run: Run | None,
 ) -> str:
     """The status half of a single-goal card's subtitle."""
+    if pr is not None and pr.status == Status.MISSED:
+        return _("missed")
     if done_at is not None:
         return _("done %(time)s") % {"time": words.time_hm(done_at)}
     if streak.period_kind == PeriodKind.MONTHLY:
@@ -875,6 +890,7 @@ def _single_card(
     status = _single_status(streak, today, pr, period, done_at, run)
     meta = _("%(period)s · %(status)s") % {"period": period_label(streak), "status": status}
     kind = "monthly" if streak.period_kind == PeriodKind.MONTHLY else "goals"
+    missed = pr is not None and pr.status == Status.MISSED
     return Card(
         streak_id=streak.id,
         name=streak.name,
@@ -883,6 +899,8 @@ def _single_card(
         kind=kind,
         goals=[CardGoal(goal_id=goal.id, name=streak.name, done_at=done_at, trailing=None)],
         single=True,
+        missed=missed,
+        missed_action=_missed_action(streak, missed),
     )
 
 
@@ -916,13 +934,19 @@ def _build_card(
     goals = active_goals(streak, period) if period else ()
     done = pr.done if pr else 0
     total = pr.total if pr else len(goals)
+    missed = pr is not None and pr.status == Status.MISSED
 
     if len(goals) == 1:
         goal = goals[0]
         return _single_card(streak, today, pr, period, goal, checks_today.get(goal.id), run)
 
     if streak.period_kind == PeriodKind.MONTHLY:
-        meta = _("Done this month") if total and done >= total else _("Due this month")
+        if missed:
+            meta = _("Missed")
+        elif total and done >= total:
+            meta = _("Done this month")
+        else:
+            meta = _("Due this month")
         days_left = (period.end - today).days if period else 0
         card_goals = [
             CardGoal(
@@ -940,9 +964,13 @@ def _build_card(
             meta=meta,
             kind="monthly",
             goals=card_goals,
+            missed=missed,
+            missed_action=_missed_action(streak, missed),
         )
 
-    if streak.period_kind == PeriodKind.N_PER_WEEK:
+    if missed:
+        meta = _("Missed")
+    elif streak.period_kind == PeriodKind.N_PER_WEEK:
         meta = _this_week_text(done, streak.times_per_week)
     else:
         meta = _("%(done)d of %(n)d · day %(k)d") % {
@@ -955,7 +983,7 @@ def _build_card(
         CardGoal(goal_id=g.id, name=g.name, done_at=checks_today.get(g.id), trailing=None)
         for g in goals
     ]
-    show_footer = streak.period_kind in (PeriodKind.DAILY, PeriodKind.WEEKDAYS) and total > 1
+    show_progress = streak.period_kind in (PeriodKind.DAILY, PeriodKind.WEEKDAYS) and total > 1
     return Card(
         streak_id=streak.id,
         name=streak.name,
@@ -963,11 +991,13 @@ def _build_card(
         meta=meta,
         kind="goals",
         goals=card_goals,
-        progress=(done / total) if show_footer and total else None,
+        progress=(done / total) if show_progress and total else None,
         progress_text=(_("%(done)d of %(n)d") % {"done": done, "n": total})
-        if show_footer
+        if show_progress
         else None,
-        show_footer=show_footer,
+        show_progress=show_progress,
+        missed=missed,
+        missed_action=_missed_action(streak, missed),
     )
 
 
@@ -1089,10 +1119,17 @@ def _weeks_grid(
     return weeks
 
 
-def _run_weeks(run: Run, today: date) -> list[list[Cell]]:
-    day_map = _day_result_map(run.periods)
+def _run_weeks(run: Run, results: list[PeriodResult], today: date) -> list[list[Cell]]:
+    """The run's weeks, closed by the miss that ended it (if one did): that period belongs to
+    no run, but the chart shows it as the run's "missed — run ended" cell."""
+    periods = list(run.periods)
     grid_end = run.end if run.end is not None else today
-    return _weeks_grid(day_map, run.start, grid_end, today)
+    if run.end is not None:
+        ending = next((pr for pr in results if pr.period.start > run.end), None)
+        if ending is not None:
+            periods.append(ending)
+            grid_end = ending.period.end
+    return _weeks_grid(_day_result_map(periods), run.start, grid_end, today)
 
 
 def _lifetime_weeks(results: list[PeriodResult], today: date, weeks_shown: int) -> list[list[Cell]]:
@@ -1194,7 +1231,7 @@ def history(
         chart_title = _("Lifetime")
         is_best = False
     elif selected is not None:
-        weeks = _run_weeks(selected, today)
+        weeks = _run_weeks(selected, results, today)
         if selected.end is None:
             chart_title = _("Run %(idx)d · since %(date)s") % {
                 "idx": selected.index,
@@ -1414,6 +1451,20 @@ def catch_up_preview(
     summary = _preview_summary(new_run, following, ends_run, end_day, unanswered_after)
 
     return Preview(row_state=row_state, ends_run=ends_run, strip=strip, summary=summary)
+
+
+def mark_missed_heading(streak: StreakData, day: date, today: date) -> str:
+    """The "mark missed" confirmation's heading for the period containing ``day``."""
+    period = period_for(streak, day)
+    if period is None or period.start == period.end:
+        if day == today:
+            return _("Mark today as missed?")
+        return _("Mark %(day)s as missed?") % {"day": words.fmt_weekday_day(day)}
+    if period.contains(today):
+        if streak.period_kind == PeriodKind.MONTHLY:
+            return _("Mark this month as missed?")
+        return _("Mark this week as missed?")
+    return _("Mark %(range)s as missed?") % {"range": words.fmt_range(period.start, period.end)}
 
 
 def mark_missed_preview(streak: StreakData, day: date, today: date, settings: Settings) -> str:

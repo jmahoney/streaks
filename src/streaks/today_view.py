@@ -22,7 +22,14 @@ from streaks.catchup_banner import (
 )
 from streaks.checkin_card import StreaksCheckinCard  # noqa: F401  registers $StreaksCheckinCard
 from streaks.engine import Answer, Banner, Card
-from streaks.models import Goal, Streak, answer_day, toggle_goal_check
+from streaks.models import (
+    Goal,
+    Streak,
+    answer_day,
+    clear_answers,
+    clear_explicit_miss,
+    toggle_goal_check,
+)
 from streaks.state import AppState
 from streaks.widgets import clear_children, confirm_dialog
 
@@ -154,6 +161,7 @@ class StreaksTodayView(Adw.Bin):
             widget.configure(card)
             widget.connect("goal-toggled", self._on_goal_toggled)
             widget.connect("mark-missed", self._on_mark_missed)
+            widget.connect("undo-missed", self._on_undo_missed)
             if left_rows <= right_rows:
                 self.column_left.append(widget)
                 left_rows += len(card.goals)
@@ -173,6 +181,27 @@ class StreaksTodayView(Adw.Bin):
         display_day = self._shown_day or self.state.today()
         done_at = datetime.combine(display_day, clock.now().time())
         toggle_goal_check(goal, display_day, done_at)
+        # Ticking (or unticking) a goal clears a whole-period "Mark missed", as in catch-up.
+        period = self._period_shown(goal.streak_id)
+        if period is not None:
+            clear_explicit_miss(goal.streak, period.start, period.end)
+        self.state.reload()
+
+    def _period_shown(self, streak_id: int) -> engine.Period | None:
+        """The period of ``streak_id`` containing the shown day."""
+        assert self.state is not None
+        streak_data = self.state.streak(streak_id)
+        if streak_data is None:
+            return None
+        return engine.period_for(streak_data, self._shown_day or self.state.today())
+
+    def _on_undo_missed(self, _card: StreaksCheckinCard, streak_id: int) -> None:
+        if self.state is None:
+            return
+        period = self._period_shown(streak_id)
+        if period is None:
+            return
+        clear_answers(Streak.get_by_id(streak_id), period.start, period.end)
         self.state.reload()
 
     def _on_mark_missed(self, _card: StreaksCheckinCard, streak_id: int) -> None:
@@ -185,11 +214,7 @@ class StreaksTodayView(Adw.Bin):
         day = self._shown_day or today
         settings = self.state.settings.to_engine()
         body = engine.mark_missed_preview(streak_data, day, today, settings)
-        heading = (
-            _("Mark today as missed?")
-            if day == today
-            else _("Mark %(day)s as missed?") % {"day": words.fmt_weekday_day(day)}
-        )
+        heading = engine.mark_missed_heading(streak_data, day, today)
 
         self.missed_dialog = confirm_dialog(
             self,
