@@ -1204,13 +1204,19 @@ def history(
     is_ended = streak.ended_on is not None
 
     best = next((r for r in all_runs if r.is_best), None)
-    running_len = selected.length if selected else 0
+    # With no run picked and none open (the last one ended in a miss and nothing has been kept
+    # since), the chart still shows the last run, but nothing is running.
+    nothing_running = not is_ended and run_index is None and _open_run(all_runs) is None
+    running_len = selected.length if selected and not nothing_running else 0
     if is_ended:
         tile0_caption = _tile_caption_ended(streak.period_kind)
         header_subtitle = _("%(meta)s · ended %(date)s") % {
             "meta": sidebar_meta(streak),
             "date": words.fmt_day_short(streak.ended_on),
         }
+    elif nothing_running:
+        tile0_caption = _tile_caption(streak.period_kind)
+        header_subtitle = sidebar_meta(streak)
     else:
         tile0_caption = _tile_caption(streak.period_kind)
         header_subtitle = _("%(meta)s · run %(idx)d") % {

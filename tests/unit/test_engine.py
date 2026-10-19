@@ -831,6 +831,26 @@ def test_history_tiles_span_every_run(settings):
     assert earlier.tiles[1:] == h.tiles[1:]
 
 
+def test_history_with_no_open_run_shows_nothing_running(settings):
+    """A run ended by a miss, with every day since missed too: nothing is running, so the first
+    tile reads 0 and the header names no run, while the chart still shows the last run."""
+    today = date(2026, 9, 6)
+    streak = _mk(
+        date(2026, 9, 1),
+        day_checks={d: {0, 1} for d in (date(2026, 9, 1), date(2026, 9, 2), date(2026, 9, 3))},
+        answers={d: Answer.MISSED for d in (date(2026, 9, 4), date(2026, 9, 5), today)},
+    )
+    h = history(streak, today, settings)
+    assert h.tiles == [
+        Tile("0", "days running", "accent"),
+        Tile("3", "days, longest run", "strong"),
+        Tile("1", "run", "strong"),
+        Tile("100%", "goals hit", "strong"),
+    ]
+    assert h.header_subtitle == "Daily · 2 goals"
+    assert h.chart_title == "Run 1 · 1 Sep – 3 Sep"
+
+
 def test_fixture_75_hard_sidebar_and_card(seeded, today, settings):
     hard = _streaks()["75 Hard"]
     assert sidebar_meta(hard) == "Daily · 5 goals"
