@@ -43,6 +43,11 @@
     <color type="primary" scheme_preference="dark">#5c3c00</color>
   </branding>
   <releases>
+    <release version="0.3.5" date="2026-10-20">
+      <description>
+        <p>Streaks now follows your system accent colour in both light and dark styles, including the charts. Missed days show as a grey square with a red outline.</p>
+      </description>
+    </release>
     <release version="0.3.4" date="2026-10-19">
       <description>
         <p>A streak's page no longer counts a finished run as still running: once a run ends, it shows 0 running until a new run starts.</p>
