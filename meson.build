@@ -1,4 +1,4 @@
-project('streaks', version: '0.3.5', license: 'MIT', meson_version: '>= 1.0.0', default_options: ['warning_level=2'])
+project('streaks', version: '0.3.6', license: 'MIT', meson_version: '>= 1.0.0', default_options: ['warning_level=2'])
 i18n = import('i18n')
 gnome = import('gnome')
 

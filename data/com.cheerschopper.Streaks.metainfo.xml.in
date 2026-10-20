@@ -43,6 +43,11 @@
     <color type="primary" scheme_preference="dark">#5c3c00</color>
   </branding>
   <releases>
+    <release version="0.3.6" date="2026-10-20">
+      <description>
+        <p>Every goal's all-time progress bar now uses your accent colour, rather than turning amber below 75 %.</p>
+      </description>
+    </release>
     <release version="0.3.5" date="2026-10-20">
       <description>
         <p>Streaks now follows your system accent colour in both light and dark styles, including the charts. Missed days show as a grey square with a red outline.</p>
