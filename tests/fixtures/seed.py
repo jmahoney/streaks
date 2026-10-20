@@ -35,7 +35,7 @@ Expected values, pinned by ``tests/unit/test_engine.py``:
 - No snoozing the alarm: count 12, sidebar meta "Mon–Fri", today's card is "Not today" with the
   next check-in on Monday 14 September, since the streak is due only on weekdays.
 - Gym, three times a week: count 9, sidebar meta "3× a week · 2 goals", today's card reads "2 of
-  3 this week"; goal bars are 45 min session 8/9 and Log the weights 5/9 (low); hit rate 88%.
+  3 this week"; goal bars are 45 min session 8/9 and Log the weights 5/9; hit rate 88%.
 - Clip fingernails: count 4, sidebar meta "Monthly", today's card is one row, subtitle
   "Monthly · 17 days left".
 - Couch to 5K: ended, best run 31 days, sidebar meta "Ended 4 Mar · best 31".

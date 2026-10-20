@@ -59,7 +59,6 @@ change of scheme *or* accent, so neither needs a data reload.
 | Catch-up banner bg / border / title | accent 6 % / 30 % over the card bg / accent text | accent 6 % / 30 % over the card bg / accent text |
 | Check-in card footer | `#fcfcfc` | `#35353a` |
 | Stat tile accent number | system accent text | system accent text |
-| Goal bar "low" fill | `#e5a50a` | `#c9822c` |
 | Catch-up missed day header bg / border / text | `#fdf2f2` / `#f0d7d9` / `#a51d2d` | `#3a2224` / `#5a2f33` / `#ff938a` |
 
 Chart cell scale per scheme (`streaks.theme.chart_palette(accent, dark)`; ratio thresholds unchanged). Mix is plain sRGB
@@ -216,8 +215,8 @@ An ended streak's first tile reads "days, last run". Unconfirmed days show only 
 
 **Lower grid** (columns 1.1fr / 1fr, gap 18):
 - **Per goal, all time** card: header row padding 12 16 bold 13.5. Rows (padding 10 16): goal name 13 (ellipsized),
-  140×6 bar (track `#ebebe9`), ratio bold 12 at 60 % 7 chars wide right-aligned "109/109". Bar colour accent, or
-  `#e5a50a` when the ratio is below 75 %. Fixture: Progress photo 109/109, 45 min outdoors 109/109, Second workout
+  140×6 bar (track `#ebebe9`), ratio bold 12 at 60 % 7 chars wide right-aligned "109/109". Bar colour accent at every
+  ratio (no "low" warning colour). Fixture: Progress photo 109/109, 45 min outdoors 109/109, Second workout
   83/109, Read 10 pages 99/109, Stick to the diet 109/109. Denominator = every kept or partial period across all
   time, today included once anything is ticked; numerator = those where the goal was done (a "Kept" answer counts
   for every goal).
@@ -358,7 +357,7 @@ Only these classes; everything else must be a libadwaita style class:
 colour on dots and swatches — `theme.colour_class(stored_hex)`; never an inline provider, so the dark hues apply),
 `badge` (pill count), `catchup-banner` (+ `.title`), `catchup-day` (+ `.missed`, `.header`, `.date`, `.status`),
 `catchup-goals`, `catchup-goal` (+ `.ticked`, `.missed`), `colour-swatch` (+ `:checked` ring), `stat-accent`
-(accent number), `strike` (strike-through label), `goal-bar.low` (amber), `chart-legend-swatch`, `sidebar-footer`.
+(accent number), `strike` (strike-through label), `chart-legend-swatch`, `sidebar-footer`.
 Cards use `card`; section headings use `caption-heading dim-label`.
 Every colour in the stylesheet is a `:root` CSS variable with its dark value in the
 `@media (prefers-color-scheme: dark)` block at the end — add new colours the same way.

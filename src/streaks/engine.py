@@ -106,8 +106,6 @@ CELL_RATIO_LOW = 0.3  # below this ratio, a chart cell uses the "low" fill
 CELL_RATIO_MID = 0.6  # below this ratio, "mid"; below CELL_RATIO_FULL, "high"
 CELL_RATIO_FULL = 0.99
 
-GOAL_BAR_LOW_RATIO = 0.75  # below this ratio, a "Per goal, all time" bar is flagged low
-
 
 @dataclass(frozen=True)
 class Period:
@@ -215,7 +213,6 @@ class GoalBar:
     name: str
     ratio: float
     ratio_text: str
-    low: bool
 
 
 @dataclass(frozen=True)
@@ -1174,7 +1171,7 @@ def _goal_bars(streak: StreakData, results: list[PeriodResult]) -> list[GoalBar]
             if total and done >= total:
                 numerator += 1
         ratio = numerator / denom if denom else 0.0
-        bars.append(GoalBar(g.name, ratio, f"{numerator}/{denom}", ratio < GOAL_BAR_LOW_RATIO))
+        bars.append(GoalBar(g.name, ratio, f"{numerator}/{denom}"))
     return bars
 
 

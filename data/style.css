@@ -1,7 +1,7 @@
 /* Streaks custom styles: classes not covered by a libadwaita style class (colour-dot, today-dot,
  * badge, catchup-banner(+.title), catchup-day(.missed)(+.header, .date, .status), catchup-goal
  * (.ticked, .missed), colour-swatch, stat-accent, streak-blue/green/yellow/red/purple, ended-dot,
- * strike, goal-bar.low, chart-day-label, sidebar-footer, sidebar-empty,
+ * strike, chart-day-label, sidebar-footer, sidebar-empty,
  * checkin-card(+.footer), goal-row, caption-heading dim-label).
  *
  * Every colour is a CSS variable declared on :root and overridden once in the
@@ -21,8 +21,6 @@
   --ended-dot-color: #c0bfbc;
 
   --checkin-footer-bg-color: #fcfcfc;
-
-  --goal-bar-low-color: #e5a50a;
 
   --catchup-missed-bg-color: #fdf2f2;
   --catchup-missed-border-color: #f0d7d9;
@@ -127,10 +125,6 @@
   color: var(--accent-color);
 }
 
-progressbar.low > trough > progress {
-  background-color: var(--goal-bar-low-color);
-}
-
 .chart-day-label {
   font-size: 10px;
   opacity: 0.4;
@@ -199,8 +193,6 @@ progressbar.low > trough > progress {
     --ended-dot-color: #5c5c63;
 
     --checkin-footer-bg-color: #35353a;
-
-    --goal-bar-low-color: #c9822c;
 
     --catchup-missed-bg-color: #3a2224;
     --catchup-missed-border-color: #5a2f33;

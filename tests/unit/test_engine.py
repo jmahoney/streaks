@@ -766,12 +766,12 @@ def test_fixture_75_hard_history(seeded, today, settings):
         Tile("3", "runs", "strong"),
         Tile("94%", "goals hit", "strong"),
     ]
-    bars = {bar.name: (bar.ratio_text, bar.low) for bar in h.goal_bars}
-    assert bars["Progress photo"] == ("109/109", False)
-    assert bars["45 min outdoors"] == ("109/109", False)
-    assert bars["45 min second workout"] == ("83/109", False)
-    assert bars["Read 10 pages"] == ("99/109", False)
-    assert bars["Stick to the diet"] == ("109/109", False)
+    bars = {bar.name: bar.ratio_text for bar in h.goal_bars}
+    assert bars["Progress photo"] == "109/109"
+    assert bars["45 min outdoors"] == "109/109"
+    assert bars["45 min second workout"] == "83/109"
+    assert bars["Read 10 pages"] == "99/109"
+    assert bars["Stick to the diet"] == "109/109"
 
     earlier_metas = [r.meta for r in h.earlier_runs]
     assert earlier_metas == ["14 May – 16 Jun · 34 days", "2 Feb – 1 Mar · 28 days"]
@@ -1071,8 +1071,8 @@ def test_fixture_gym(seeded, today, settings):
         Tile("1", "run", "strong"),
         Tile("88%", "goals hit", "strong"),
     ]
-    bars = {bar.name: (bar.ratio_text, bar.low) for bar in h.goal_bars}
-    assert bars == {"45 min session": ("8/9", False), "Log the weights": ("5/9", True)}
+    bars = {bar.name: bar.ratio_text for bar in h.goal_bars}
+    assert bars == {"45 min session": "8/9", "Log the weights": "5/9"}
 
 
 def test_fixture_clip_fingernails(seeded, today, settings):
