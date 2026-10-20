@@ -1,8 +1,7 @@
 # Streaks — design specification
 
-The UI/behaviour spec the app was built against, originally extracted from an HTML design mock.
-It is the reference for layout, wording and colours; the golden snapshots in `tests/snapshots/`
-are the visual source of truth for what actually ships. Code comments cite its sections as
+The UI/behaviour spec the app was built against. It is the reference for layout, wording and colours; the golden
+snapshots in `tests/snapshots/` are the visual source of truth for what actually ships. Code comments cite its sections as
 `design-spec §N`. Every quoted string below is exact and must be wrapped in `_()` in code. The fixture date is **Sunday
 13 September 2026**.
 
@@ -16,7 +15,7 @@ unless the class is listed in §9):
 | Sidebar bg / content bg | `#eceae8` / `#fafafa` | sidebar/window bg (automatic) |
 | Card | white, 1px `rgba(0,0,0,.08)` border, radius 12 | `styles ["card"]` |
 | Card row height | 46 | `Gtk.ListBox` row, default Adw row height |
-| Accent blue | `#3584e4` (`#1a68c7` for chart "all done") | `accent`, `suggested-action` |
+| Accent | the system accent (`Adw.StyleManager:accent-color-rgba`; GNOME default blue `#3584e4`) | `accent`, `suggested-action` |
 | Error red | `#c01c28` / text `#a51d2d` / tint `#fdf2f2` | `error`, `destructive-action` |
 | Warning amber | `#e5a50a` | `warning` |
 | Section heading | bold 10.5–11px, 0.05em letter-spacing, 45 % black, uppercase | `caption-heading` + `dim-label` (Adw.PreferencesGroup title) |
@@ -27,59 +26,62 @@ unless the class is listed in §9):
 | Meta/caption | 11–12px, 50 % black | `caption` + `dim-label` |
 | Streak colours (5 swatches) | `#3584e4` blue, `#2ec27e` green, `#e5a50a` yellow, `#e01b24` red, `#9141ac` purple | stored as hex |
 
-Chart cell colour scale (from the design's script), by fraction of goals done that day:
+Chart cell colour scale, by fraction of goals done that day. Accent-derived fills are the system accent mixed with the
+scheme base (light `#ffffff`, dark `#2c2c30`) at the weight shown; the example column is the default blue `#3584e4`
+in light:
 
-| Status / ratio | Fill | Border |
-|---|---|---|
-| ratio 0 (nothing done, answered kept) | `#e9e9e7` | — |
-| < 0.3 | `#cfe2f8` | — |
-| < 0.6 | `#92bdf0` | — |
-| < 0.99 | `#4b8fdb` | — |
-| 1.0 ("all five") | `#1a68c7` | — |
-| unconfirmed (no check-in, no answer) | `#ffffff` | `#a9c9ef` 1px |
-| missed | `#f3c0c4` | — |
-| upcoming (future) | `#f4f4f2` | — |
+| Status / ratio | Fill | Example | Border |
+|---|---|---|---|
+| ratio 0 (nothing done, answered kept) | fixed `#e9e9e7` | `#e9e9e7` | — |
+| < 0.3 | accent × 0.25 | `#cde0f8` | — |
+| < 0.6 | accent × 0.5 | `#9ac2f2` | — |
+| < 0.99 | accent × 0.75 | `#68a3eb` | — |
+| 1.0 ("all five") | accent × 1.0 | `#3584e4` | — |
+| unconfirmed (no check-in, no answer) | `#ffffff` | `#ffffff` | accent × 0.4, 1px (`#aecef4`) |
+| missed | the ZERO fill (`#e9e9e7`) | `#e9e9e7` | `#c01c28` 1px |
+| upcoming (future) | `#f4f4f2` | `#f4f4f2` | — |
 
 Cells: 13×13, radius `max(2, round(13/4))` = 3, gap 4. Strips (banner, earlier runs, catch-up result): 8×22 gap 3
 (banner), 7×18 gap 2 (earlier runs), 9×20 gap 3 (catch-up result), radius 2.
 
-### Dark scheme ("Dark variant — amber accent")
+### Dark scheme
 
-Same six views in Adwaita dark; **only colours change, never layout**. Blue at 13px on a `#1e1e20` ground goes muddy
-and the chart scale collapses, so dark runs on **amber**: `#ffa348` for fills, buttons and the top of the chart scale,
-with dark ink (`#2a1c09`) on the fills rather than white, and `#ffbe6f` for accent-coloured text (flat `accent`
-buttons, banner title, catch-up link). Implemented as an accent override in `data/style.css` under
-`@media (prefers-color-scheme: dark)` (`--accent-bg-color` / `--accent-fg-color` / `--accent-color`), so every
-libadwaita `accent`/`suggested-action`/check/switch picks it up.
+Same six views in Adwaita dark; **only colours change, never layout**. There is no dark-specific accent: both schemes
+follow the system accent. The accent comes from `Adw.StyleManager:accent-color-rgba`, so every libadwaita
+`accent`/`suggested-action`/check/switch picks it up with no override in `data/style.css`. The chart ramps mix that
+accent with the scheme base (see the table below), and `theme.watch()` repaints grid widgets and the streak view on a
+change of scheme *or* accent, so neither needs a data reload.
 
 | Token | Light | Dark |
 |---|---|---|
-| Streak colours (stored hex stays the light value) | `#3584e4` `#2ec27e` `#e5a50a` `#e01b24` `#9141ac` | `#ffa348` `#8ff0a4` `#f9f06b` `#e01b24` `#dc8add` |
+| Streak colours (stored hex stays the light value) | `#3584e4` `#2ec27e` `#e5a50a` `#e01b24` `#9141ac` | `#99c1f1` `#8ff0a4` `#f9f06b` `#e01b24` `#dc8add` |
 | Today dot / ended dot | `rgba(0,0,0,.55)` / `#c0bfbc` | `rgba(255,255,255,.61)` / `#5c5c63` |
-| Catch-up banner bg / border / title | `#f4f8fe` / `#bcd4f2` / `#1a5fb4` | `#332a1c` / `#5e4a2b` / `#ffbe6f` |
+| Catch-up banner bg / border / title | accent 6 % / 30 % over the card bg / accent text | accent 6 % / 30 % over the card bg / accent text |
 | Check-in card footer | `#fcfcfc` | `#35353a` |
-| Stat tile accent number | `#1a68c7` | `#ffa348` |
+| Stat tile accent number | system accent text | system accent text |
 | Goal bar "low" fill | `#e5a50a` | `#c9822c` |
 | Catch-up missed day header bg / border / text | `#fdf2f2` / `#f0d7d9` / `#a51d2d` | `#3a2224` / `#5a2f33` / `#ff938a` |
 
-Chart cell scale in dark (`streaks.theme.DARK_PALETTE`; ratio thresholds unchanged):
+Chart cell scale per scheme (`streaks.theme.chart_palette(accent, dark)`; ratio thresholds unchanged). Mix is plain sRGB
+per channel, `int(c_accent*t + c_base*(1-t) + 0.5)`, alpha ignored, base `#ffffff` light / `#2c2c30` dark. Examples are
+for the default blue `#3584e4`:
 
-| Status / ratio | Light | Dark |
-|---|---|---|
-| ratio 0 | `#e9e9e7` | `#2c2c30` |
-| < 0.3 | `#cfe2f8` | `#4a3a22` |
-| < 0.6 | `#92bdf0` | `#8a5f22` |
-| < 0.99 | `#4b8fdb` | `#c9822c` |
-| 1.0 | `#1a68c7` | `#ffa348` |
-| unconfirmed | `#ffffff` + `#a9c9ef` border | hollow (transparent) + `#6b5230` border |
-| missed | `#f3c0c4` | `#8e4a50` |
-| upcoming | `#f4f4f2` | `#232326` |
-| empty-state hint cell (§8) | `#cfe2f8` | `#7a4d18` |
+| Status / ratio | Weight (light / dark) | Light example | Dark example |
+|---|---|---|---|
+| ratio 0 | fixed | `#e9e9e7` | `#2c2c30` |
+| < 0.3 | 0.25 | `#cde0f8` | `#2e425d` |
+| < 0.6 | 0.5 | `#9ac2f2` | `#31588a` |
+| < 0.99 | 0.75 | `#68a3eb` | `#336eb7` |
+| 1.0 | 1.0 | `#3584e4` | `#3584e4` |
+| unconfirmed | 0.4 / 0.45 border | `#ffffff` + `#aecef4` border | hollow (transparent) + `#305481` border |
+| missed | ZERO fill + fixed border | `#e9e9e7` + `#c01c28` border | `#2c2c30` + `#ff938a` border |
+| upcoming | fixed | `#f4f4f2` | `#232326` |
+| empty-state hint cell (§8) | 0.25 / 0.5 | `#cde0f8` | `#31588a` |
 
 The engine never sees hex: it emits the tokens `engine.CHART_*` (plus `theme.CHART_EMPTY_HINT`) and
 `streaks.theme.resolve()` picks the palette for the active scheme when a grid widget or legend swatch paints. Grid
-widgets and the streak view repaint on `Adw.StyleManager:dark` (`theme.watch()`), so a live scheme switch needs no
-data reload. Dialog backgrounds and everything else not listed here are libadwaita's own dark colours.
+widgets and the streak view repaint on `notify::dark` or `notify::accent-color-rgba` (`theme.watch()`), so a live scheme
+or accent switch needs no data reload. Dialog backgrounds and everything else not listed here are libadwaita's own dark colours.
 
 ---
 
@@ -143,10 +145,10 @@ Header bar: `Adw.WindowTitle` title "Today", subtitle "Sunday 13 September" (`%A
 - Right: `Gtk.Button` "Check in for another day" (bordered, bold 12.5).
 
 **Quiet-days banner** (only when the selected/any running streak has unconfirmed days; one banner per streak with quiet
-days, 75 Hard in the fixture): box, bg `#f4f8fe`, border `#bcd4f2`, radius 12, padding 14 16, gap 16.
-- Text: bold 13.5 `#1a5fb4` "Four days without a check-in — 9 to 12 September"; below, 12 at 60 %: "The 51-day run
+days, 75 Hard in the fixture): box, bg accent 6 % over the card bg, border accent 30 %, radius 12, padding 14 16, gap 16.
+- Text: bold 13.5 accent text "Four days without a check-in — 9 to 12 September"; below, 12 at 60 %: "The 51-day run
   continues. Unconfirmed days do not end a run."
-- Middle: `StripWidget` of the last 24 due days (8×22, gap 3): kept days `#1a68c7`, unconfirmed white w/ `#a9c9ef` border.
+- Middle: `StripWidget` of the last 24 due days (8×22, gap 3): kept days full accent, unconfirmed white w/ accent × 0.4 border.
 - Right: `Gtk.Button` "Catch up" `suggested-action` → opens Catch-up dialog (§5) for that streak.
 
 **Check-in cards**: two columns (grid `repeat(2, minmax(0,1fr))`, gap 18, align start). Each card is appended to the
@@ -192,7 +194,7 @@ Content padding 24 28, gap 18:
 **Stat tiles** — 4 equal `card`s (padding 13 16): number bold 26 (`title-1`) + caption 11.5 at 50 %.
 | number | caption | colour |
 |---|---|---|
-| 51 | days running (the run shown) | `#1a68c7` (accent) |
+| 51 | days running (the run shown) | accent |
 | 51 | days, longest run (all time, the open run included) | 85 % black |
 | 3 | runs (all time, the open run included) | 85 % black |
 | 94% | goals hit (all runs, finished kept/partial periods) | 85 % black |
@@ -208,13 +210,13 @@ An ended streak's first tile reads "days, last run". Unconfirmed days show only 
   padded with `upcoming`-coloured blanks before the start); "Lifetime" shows the last `weeksShown` (30) weeks ending this
   week. The last 3 cells (future days of this week) use `upcoming`. Tooltip per cell: "{done} of {n} goals",
   "no check-in yet — unconfirmed", "missed — run ended", "upcoming".
-- Legend (margin-top 14, gap 16): 11×11 radius 3 squares + 11px captions: `#1a68c7` "all five" (word for goal count;
-  "all {n}" → "all five", "done" when 1 goal), `#92bdf0` "some", outlined "unconfirmed", `#f3c0c4` "missed". Spacer.
+- Legend (margin-top 14, gap 16): 11×11 radius 3 squares + 11px captions: full accent "all five" (word for goal count;
+  "all {n}" → "all five", "done" when 1 goal), accent × 0.5 "some", outlined "unconfirmed", grey with red border "missed". Spacer.
   Right: link button 12 `#1c71d8` "4 days unconfirmed — catch up" (hidden when 0) → Catch-up dialog.
 
 **Lower grid** (columns 1.1fr / 1fr, gap 18):
 - **Per goal, all time** card: header row padding 12 16 bold 13.5. Rows (padding 10 16): goal name 13 (ellipsized),
-  140×6 bar (track `#ebebe9`), ratio bold 12 at 60 % 7 chars wide right-aligned "109/109". Bar colour accent `#1a68c7`, or
+  140×6 bar (track `#ebebe9`), ratio bold 12 at 60 % 7 chars wide right-aligned "109/109". Bar colour accent, or
   `#e5a50a` when the ratio is below 75 %. Fixture: Progress photo 109/109, 45 min outdoors 109/109, Second workout
   83/109, Read 10 pages 99/109, Stick to the diet 109/109. Denominator = every kept or partial period across all
   time, today included once anything is ticked; numerator = those where the goal was done (a "Kept" answer counts
@@ -342,7 +344,7 @@ for Today).
 
 Sidebar: caption "No streaks yet" (see §2). Content: centred vertical box (gap 16, horizontal padding 80):
 - `EmptyGridWidget`: 7 columns × 4 rows of 14×14 cells, radius 4, gap 5, all `#e9e9e7` except the last (bottom-right)
-  `#cfe2f8` (`#2c2c30` / `#7a4d18` in dark).
+  accent × 0.25 (`#cde0f8` for the default blue; accent × 0.5 on `#2c2c30` in dark).
 - Title bold 19 "No streaks yet" (margin-top 8) → `title-2`.
 - Body 13.5/1.6 at 55 %, max width 420, centred: "A streak is a set of goals repeated on a schedule."
 - `Gtk.Button` "Create a streak" `suggested-action` + `pill`, margin-top 4 → `win.new-streak`.
@@ -356,7 +358,7 @@ Only these classes; everything else must be a libadwaita style class:
 colour on dots and swatches — `theme.colour_class(stored_hex)`; never an inline provider, so the dark hues apply),
 `badge` (pill count), `catchup-banner` (+ `.title`), `catchup-day` (+ `.missed`, `.header`, `.date`, `.status`),
 `catchup-goals`, `catchup-goal` (+ `.ticked`, `.missed`), `colour-swatch` (+ `:checked` ring), `stat-accent`
-(`#1a68c7` number), `strike` (strike-through label), `goal-bar.low` (amber), `chart-legend-swatch`, `sidebar-footer`.
+(accent number), `strike` (strike-through label), `goal-bar.low` (amber), `chart-legend-swatch`, `sidebar-footer`.
 Cards use `card`; section headings use `caption-heading dim-label`.
 Every colour in the stylesheet is a `:root` CSS variable with its dark value in the
 `@media (prefers-color-scheme: dark)` block at the end — add new colours the same way.
