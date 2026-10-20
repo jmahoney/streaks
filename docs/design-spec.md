@@ -160,7 +160,7 @@ column that currently has fewer rows (fixture: 75 Hard left; Gym, No snoozing, C
   `#c0bfbc` border; checked: accent bg, white ✓) — use `Gtk.CheckButton` with `selection-mode` style — label 13.5;
   when done: label at 50 % with strike-through, plus right caption with time done `HH:MM` (11 at 38 %).
 - Footer (padding 11 16, bg `#fcfcfc`, gap 10): `Gtk.ProgressBar` (6px, radius 3, track `#e6e4e1`, fill accent),
-  caption "3 of 5", flat link-styled button "Mark day missed" (12.5, `#1c71d8`). Footer only for daily/weekday cards
+  caption "3 of 5", flat link-styled button "Mark day missed" (12.5, accent). Footer only for daily/weekday cards
   with >1 goal; single-goal cards have no footer.
 
 **Single-goal card** (a streak with exactly one active goal, when due): one row, padding 12 16, gap 12. A 24×24 check box (`selection-mode`), then a vertical box: [8×8 colour dot, gap 8, name bold 14 (`heading`)] over a subtitle caption 11.5 at 50 % (margin-top 2). There's no header separator and no footer. Subtitle `"{period} · {status}"`, where status is `"done {HH:MM}"` when ticked today, otherwise daily/weekdays `"day {k}"`, n_per_week `"{done} of {N} this week"`, monthly `"{n} days left"` (`"done this month"` once the month is done). When ticked, the name gets `strike` + `dim-label`. Activating the row toggles the check. A weekday streak that isn't due today keeps the "Not today" card. A goal removed mid-period still counts for that period, so a streak collapsed to one goal shows its multi card until the period ends.
@@ -212,7 +212,7 @@ An ended streak's first tile reads "days, last run". Unconfirmed days show only 
   "no check-in yet — unconfirmed", "missed — run ended", "upcoming".
 - Legend (margin-top 14, gap 16): 11×11 radius 3 squares + 11px captions: full accent "all five" (word for goal count;
   "all {n}" → "all five", "done" when 1 goal), accent × 0.5 "some", outlined "unconfirmed", grey with red border "missed". Spacer.
-  Right: link button 12 `#1c71d8` "4 days unconfirmed — catch up" (hidden when 0) → Catch-up dialog.
+  Right: link button 12 accent "4 days unconfirmed — catch up" (hidden when 0) → Catch-up dialog.
 
 **Lower grid** (columns 1.1fr / 1fr, gap 18):
 - **Per goal, all time** card: header row padding 12 16 bold 13.5. Rows (padding 10 16): goal name 13 (ellipsized),

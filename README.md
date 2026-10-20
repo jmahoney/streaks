@@ -31,7 +31,7 @@ The philosophy behind Streaks is that **you know** if you're sticking to your ha
 | ![Streak history](docs/screenshots/streak.png) Streak history — stats, heatmap, per-goal bars | ![New streak](docs/screenshots/new-streak.png) New/Edit streak dialog — single goal |
 | ![New streak, multi-goal](docs/screenshots/new-streak-goals.png) New/Edit streak dialog — "Add more goals" | ![Catch up](docs/screenshots/catch-up.png) Catch-up dialog |
 | ![Preferences](docs/screenshots/preferences.png) Preferences | ![Edit streak, multi-goal](docs/screenshots/edit-streak-goals.png) Editing a streak into a checklist |
-| ![Today, dark](docs/screenshots/dark/today.png) Dark style — amber accent | ![Streak history, dark](docs/screenshots/dark/streak.png) Dark style — amber chart scale |
+| ![Today, dark](docs/screenshots/dark/today.png) Dark style | ![Streak history, dark](docs/screenshots/dark/streak.png) Dark style — chart in the system accent |
 
 More in [`docs/screenshots/`](docs/screenshots/).
 

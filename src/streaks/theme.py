@@ -73,12 +73,17 @@ def _palette_for(accent_hex: str, dark: bool) -> dict[str, str]:
     return palette
 
 
-def chart_palette(accent: Gdk.RGBA, dark: bool) -> dict[str, str]:
-    """Token -> colour for every chart token, with the ramp derived from ``accent``."""
+def _cached_palette(accent: Gdk.RGBA, dark: bool) -> dict[str, str]:
+    """The shared cached palette for ``accent``; callers must not mutate it."""
     accent_hex = "#{:02x}{:02x}{:02x}".format(
         *(int(channel * 255 + 0.5) for channel in (accent.red, accent.green, accent.blue))
     )
-    return dict(_palette_for(accent_hex, dark))
+    return _palette_for(accent_hex, dark)
+
+
+def chart_palette(accent: Gdk.RGBA, dark: bool) -> dict[str, str]:
+    """Token -> colour for every chart token, with the ramp derived from ``accent``."""
+    return dict(_cached_palette(accent, dark))
 
 
 def accent_rgba() -> Gdk.RGBA:
@@ -106,7 +111,7 @@ def resolve(token: str) -> str:
 
     Anything that is not a known token is returned untouched, so plain hex still works.
     """
-    return chart_palette(accent_rgba(), is_dark()).get(token, token)
+    return _cached_palette(accent_rgba(), is_dark()).get(token, token)
 
 
 def colour_class(colour: str) -> str:
