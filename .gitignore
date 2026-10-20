@@ -65,6 +65,5 @@ ENV/
 # ==========================================
 AGENTS.md
 CLAUDE.md
-claude-design/
 .claude/
 .superpowers/

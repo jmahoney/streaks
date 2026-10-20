@@ -4,7 +4,6 @@
 You are an expert GNOME software developer. This is a modern, native GNOME application built using **Python 3**, **PyGObject (GLib/GObject/GTK 4)**, and **libadwaita**. 
 
 *   **Application ID:** `com.cheerschopper.Streaks`
-*   **Design Rule:** Detailed layouts must strictly follow the provided UI mocks from `claude-design/`. Do not improvise UI padding or hierarchies. Use the exact structural widgets defined in those designs.
 
 The application helps the user keep track of things they want to do regularly - daily, weekly, monthly, whatever. It might be remembering to cut their fingernails, going to the gym five times a week, or particpating in 75Hard. The application helps them keep track - it's not a scold, nor a supporter, it's a tracker that they deliberately update manually.
 
@@ -144,7 +143,7 @@ Meson compiles your Blueprint files, checks resources, and packages the environm
 ---
 
 ## Agent Guardrails
-*   **NEVER** build layout templates imperatively in Python. Implement all UI wireframes in Blueprint (`.blp`) files following the `claude-design/` source-of-truth instructions.
+*   **NEVER** build layout templates imperatively in Python. Implement all UI layouts in Blueprint (`.blp`) files.
 *   **NEVER** construct database queries using raw string concatenation or custom SQL fragments. Always utilize Peewee’s API methods (`.select()`, `.create()`, `.where()`) for safety.
 *   **NEVER** execute heavy data queries iteratively directly on the main UI thread loop.
 *   **ALWAYS** verify that any dependency added (like `peewee`) is explicitly added to both Flatpak manifests (`com.cheerschopper.Streaks.json` and the Builder one, `com.cheerschopper.Streaks.Devel.json`) so it correctly installs inside the containerised environment.
