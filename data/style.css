@@ -20,13 +20,8 @@
   --today-dot-color: rgba(0, 0, 0, .55);
   --ended-dot-color: #c0bfbc;
 
-  --catchup-banner-bg-color: #f4f8fe;
-  --catchup-banner-border-color: #bcd4f2;
-  --catchup-banner-title-color: #1a5fb4;
-
   --checkin-footer-bg-color: #fcfcfc;
 
-  --stat-accent-color: #1a68c7;
   --goal-bar-low-color: #e5a50a;
 
   --catchup-missed-bg-color: #fdf2f2;
@@ -76,14 +71,14 @@
 }
 
 .catchup-banner {
-  background-color: var(--catchup-banner-bg-color);
-  border: 1px solid var(--catchup-banner-border-color);
+  background-color: color-mix(in srgb, var(--accent-bg-color) 6%, var(--card-bg-color));
+  border: 1px solid color-mix(in srgb, var(--accent-bg-color) 30%, var(--card-bg-color));
   border-radius: 12px;
   padding: 14px 16px;
 }
 
 .catchup-banner .title {
-  color: var(--catchup-banner-title-color);
+  color: var(--accent-color);
 }
 
 .strike {
@@ -129,7 +124,7 @@
 }
 
 .stat-accent {
-  color: var(--stat-accent-color);
+  color: var(--accent-color);
 }
 
 progressbar.low > trough > progress {
@@ -189,16 +184,12 @@ progressbar.low > trough > progress {
   color: var(--catchup-missed-fg-color);
 }
 
-/* Dark scheme. Blue at small sizes goes muddy on the #1e1e20 ground, so dark runs on amber:
- * #ffa348 fills with dark ink, #ffbe6f for accent-coloured text. Streak dots move to the dark
- * Adwaita hues. Only colours change between schemes — layout never does. */
+/* Dark scheme. Only the streak hues and neutral surfaces change; the accent comes from the
+ * system (libadwaita) in both schemes. Streak dots move to the dark Adwaita hues. Only colours
+ * change between schemes — layout never does. */
 @media (prefers-color-scheme: dark) {
   :root {
-    --accent-bg-color: #ffa348;
-    --accent-fg-color: #2a1c09;
-    --accent-color: #ffbe6f;
-
-    --streak-blue: #ffa348;
+    --streak-blue: #99c1f1;
     --streak-green: #8ff0a4;
     --streak-yellow: #f9f06b;
     --streak-red: #e01b24;
@@ -207,13 +198,8 @@ progressbar.low > trough > progress {
     --today-dot-color: rgba(255, 255, 255, .61);
     --ended-dot-color: #5c5c63;
 
-    --catchup-banner-bg-color: #332a1c;
-    --catchup-banner-border-color: #5e4a2b;
-    --catchup-banner-title-color: #ffbe6f;
-
     --checkin-footer-bg-color: #35353a;
 
-    --stat-accent-color: #ffa348;
     --goal-bar-low-color: #c9822c;
 
     --catchup-missed-bg-color: #3a2224;

@@ -46,9 +46,9 @@ _accent_pin: Gtk.CssProvider | None = None
 def set_colour_scheme(dark: bool) -> None:
     """Force the light or dark scheme.
 
-    In light the accent is pinned to GNOME's default blue regardless of the host session's accent
-    colour (libadwaita reads it from the portal or GSettings; the design assumes blue). In dark
-    the pin is dropped so the app's own dark accent (amber, in `data/style.css`) applies.
+    In both schemes the accent is pinned to GNOME's default blue regardless of the host session's
+    accent colour (libadwaita reads it from the portal or GSettings), because the stylesheet and
+    the chart palette follow the system accent and the goldens must not depend on the host.
     """
     global _accent_pin
     style_manager = Adw.StyleManager.get_default()
@@ -56,13 +56,12 @@ def set_colour_scheme(dark: bool) -> None:
     if _accent_pin is not None:
         Gtk.StyleContext.remove_provider_for_display(display, _accent_pin)
         _accent_pin = None
-    if dark:
-        style_manager.set_color_scheme(Adw.ColorScheme.FORCE_DARK)
-        return
-    style_manager.set_color_scheme(Adw.ColorScheme.FORCE_LIGHT)
+    style_manager.set_color_scheme(
+        Adw.ColorScheme.FORCE_DARK if dark else Adw.ColorScheme.FORCE_LIGHT
+    )
     _accent_pin = Gtk.CssProvider()
     _accent_pin.load_from_string(
-        ":root { --accent-bg-color: #3584e4; --accent-fg-color: #ffffff; --accent-color: #1c71d8; }"
+        ":root { --accent-bg-color: #3584e4; --accent-fg-color: #ffffff; }"
     )
     Gtk.StyleContext.add_provider_for_display(
         display, _accent_pin, Gtk.STYLE_PROVIDER_PRIORITY_USER
