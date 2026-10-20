@@ -83,6 +83,13 @@ def configure_for_rendering() -> None:
 
     set_colour_scheme(dark=False)
 
+    # Headless libadwaita reports a non-default accent (#ed5b00 here); goldens need GNOME's blue.
+    from streaks import theme
+
+    blue = Gdk.RGBA()
+    blue.parse("#3584e4")
+    theme.accent_rgba = lambda: blue
+
     # Background for detached dialog children (see screens.build_screen), matching the colours
     # `Adw.Dialog` gives its sheet.
     dialog_host = Gtk.CssProvider()

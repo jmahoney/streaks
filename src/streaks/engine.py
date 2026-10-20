@@ -276,6 +276,7 @@ CHART_FULL = "chart-full"
 CHART_HOLLOW = "chart-hollow"
 CHART_UNCONFIRMED_BORDER = "chart-unconfirmed-border"
 CHART_MISSED = "chart-missed"
+CHART_MISSED_BORDER = "chart-missed-border"
 CHART_UPCOMING = "chart-upcoming"
 
 
@@ -716,7 +717,7 @@ def _hollow_cell(pr: PeriodResult) -> Cell:
 
 def _cell_for_result(pr: PeriodResult) -> Cell:
     if pr.status == Status.MISSED:
-        return Cell(CHART_MISSED, None, _tooltip_for(pr))
+        return Cell(CHART_MISSED, CHART_MISSED_BORDER, _tooltip_for(pr))
     if _is_unconfirmed_like(pr):
         return _hollow_cell(pr)
     ratio = pr.ratio
@@ -1148,7 +1149,7 @@ def _legend(n_goals: int) -> list[LegendEntry]:
         LegendEntry(CHART_FULL, None, all_label),
         LegendEntry(CHART_MID, None, _("some")),
         LegendEntry(CHART_HOLLOW, CHART_UNCONFIRMED_BORDER, _("unconfirmed")),
-        LegendEntry(CHART_MISSED, None, _("missed")),
+        LegendEntry(CHART_MISSED, CHART_MISSED_BORDER, _("missed")),
     ]
 
 

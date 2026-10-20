@@ -30,6 +30,3 @@ def test_empty_view_grid_cells(app, process_events):
     assert len(cells) == 28
     assert all(c.fill == engine.CHART_ZERO for c in cells[:-1])
     assert cells[-1].fill == theme.CHART_EMPTY_HINT
-    # Light reuses the low chart step; dark gets its own warmer hint.
-    assert theme.LIGHT_PALETTE[theme.CHART_EMPTY_HINT] == "#cfe2f8"
-    assert theme.DARK_PALETTE[theme.CHART_EMPTY_HINT] == "#7a4d18"

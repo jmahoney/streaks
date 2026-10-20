@@ -1,7 +1,8 @@
-"""Colour scheme support. The dark scheme uses an amber accent.
+"""Colour scheme and accent support.
 
-* The chart palettes. The engine describes chart cells with scheme-agnostic tokens
-  (``engine.CHART_*``); ``resolve()`` turns a token into the hex for the current scheme.
+* The chart palette. The engine describes chart cells with scheme-agnostic tokens
+  (``engine.CHART_*``); ``resolve()`` turns a token into the hex for the current scheme, with
+  the ramp mixed from the system accent colour (``chart_palette()``).
 * The stored streak colours. Streaks are saved with their light-scheme hex (``models.COLOURS``);
   ``colour_class()`` names the CSS class that paints that colour in either scheme (the
   ``streak-*`` rules and their ``prefers-color-scheme: dark`` overrides in ``data/style.css``).
@@ -9,14 +10,16 @@
 
 from __future__ import annotations
 
+import functools
 from collections.abc import Callable
 
 import gi
 
+gi.require_version("Gdk", "4.0")
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 
-from gi.repository import Adw, Gtk
+from gi.repository import Adw, Gdk, Gtk
 
 from streaks.engine import (
     CHART_FULL,
@@ -25,40 +28,63 @@ from streaks.engine import (
     CHART_LOW,
     CHART_MID,
     CHART_MISSED,
+    CHART_MISSED_BORDER,
     CHART_UNCONFIRMED_BORDER,
     CHART_UPCOMING,
     CHART_ZERO,
 )
 from streaks.models import COLOURS
 
-# The empty state's single "hint" cell: light reuses the low chart step.
+# The empty state's single "hint" cell: a step of the accent ramp.
 CHART_EMPTY_HINT = "chart-empty-hint"
 
-LIGHT_PALETTE: dict[str, str] = {
-    CHART_ZERO: "#e9e9e7",
-    CHART_LOW: "#cfe2f8",
-    CHART_MID: "#92bdf0",
-    CHART_HIGH: "#4b8fdb",
-    CHART_FULL: "#1a68c7",
-    CHART_HOLLOW: "#ffffff",
-    CHART_UNCONFIRMED_BORDER: "#a9c9ef",
-    CHART_MISSED: "#f3c0c4",
-    CHART_UPCOMING: "#f4f4f2",
-    CHART_EMPTY_HINT: "#cfe2f8",
-}
+_LIGHT_BASE = (0xFF, 0xFF, 0xFF)
+_DARK_BASE = (0x2C, 0x2C, 0x30)
 
-DARK_PALETTE: dict[str, str] = {
-    CHART_ZERO: "#2c2c30",
-    CHART_LOW: "#4a3a22",
-    CHART_MID: "#8a5f22",
-    CHART_HIGH: "#c9822c",
-    CHART_FULL: "#ffa348",
-    CHART_HOLLOW: "rgba(0, 0, 0, 0)",
-    CHART_UNCONFIRMED_BORDER: "#6b5230",
-    CHART_MISSED: "#8e4a50",
-    CHART_UPCOMING: "#232326",
-    CHART_EMPTY_HINT: "#7a4d18",
-}
+# Ramp weights of the accent mixed over the scheme's base.
+_RAMP: dict[str, float] = {CHART_LOW: 0.25, CHART_MID: 0.5, CHART_HIGH: 0.75, CHART_FULL: 1.0}
+
+
+def _mix(accent: tuple[int, int, int], base: tuple[int, int, int], weight: float) -> str:
+    """Plain per-channel sRGB mix of ``accent`` over ``base``, as lowercase ``#rrggbb``."""
+    r, g, b = (int(a * weight + c * (1 - weight) + 0.5) for a, c in zip(accent, base, strict=True))
+    return f"#{r:02x}{g:02x}{b:02x}"
+
+
+@functools.lru_cache(maxsize=32)
+def _palette_for(accent_hex: str, dark: bool) -> dict[str, str]:
+    accent = (int(accent_hex[1:3], 16), int(accent_hex[3:5], 16), int(accent_hex[5:7], 16))
+    base = _DARK_BASE if dark else _LIGHT_BASE
+    palette = {token: _mix(accent, base, weight) for token, weight in _RAMP.items()}
+    zero = "#2c2c30" if dark else "#e9e9e7"
+    palette.update(
+        {
+            CHART_ZERO: zero,
+            CHART_HOLLOW: "rgba(0, 0, 0, 0)" if dark else "#ffffff",
+            CHART_UNCONFIRMED_BORDER: _mix(accent, base, 0.45 if dark else 0.4),
+            # A miss is a neutral cell with a red border, so it stays distinct from the
+            # accent ramp whatever hue the accent is.
+            CHART_MISSED: zero,
+            CHART_MISSED_BORDER: "#ff938a" if dark else "#c01c28",
+            CHART_UPCOMING: "#232326" if dark else "#f4f4f2",
+            CHART_EMPTY_HINT: _mix(accent, base, 0.5 if dark else 0.25),
+        }
+    )
+    return palette
+
+
+def chart_palette(accent: Gdk.RGBA, dark: bool) -> dict[str, str]:
+    """Token -> colour for every chart token, with the ramp derived from ``accent``."""
+    accent_hex = "#{:02x}{:02x}{:02x}".format(
+        *(int(channel * 255 + 0.5) for channel in (accent.red, accent.green, accent.blue))
+    )
+    return dict(_palette_for(accent_hex, dark))
+
+
+def accent_rgba() -> Gdk.RGBA:
+    """The system accent colour libadwaita is currently following."""
+    return Adw.StyleManager.get_default().get_accent_color_rgba()
+
 
 # Stored (light) streak colour -> CSS class carrying both schemes' hues, in ``COLOURS`` order.
 _COLOUR_CLASSES: dict[str, str] = dict(
@@ -80,8 +106,7 @@ def resolve(token: str) -> str:
 
     Anything that is not a known token is returned untouched, so plain hex still works.
     """
-    palette = DARK_PALETTE if is_dark() else LIGHT_PALETTE
-    return palette.get(token, token)
+    return chart_palette(accent_rgba(), is_dark()).get(token, token)
 
 
 def colour_class(colour: str) -> str:
@@ -104,7 +129,7 @@ def set_colour_class(widget: Gtk.Widget, colour: str | None, *other_classes: str
 
 
 def watch(widget: Gtk.Widget, callback: Callable[[], None]) -> None:
-    """Run ``callback`` whenever the scheme flips while ``widget`` is realized.
+    """Run ``callback`` whenever the scheme or accent colour changes while ``widget`` is realized.
 
     The handler is connected on realize and dropped on unrealize, so a discarded widget never
     keeps itself alive through the ``Adw.StyleManager`` singleton.
@@ -113,7 +138,8 @@ def watch(widget: Gtk.Widget, callback: Callable[[], None]) -> None:
     handler_ids: list[int] = []
 
     def on_realize(_widget: Gtk.Widget) -> None:
-        handler_ids.append(manager.connect("notify::dark", lambda *_args: callback()))
+        for signal in ("notify::dark", "notify::accent-color-rgba"):
+            handler_ids.append(manager.connect(signal, lambda *_args: callback()))
 
     def on_unrealize(_widget: Gtk.Widget) -> None:
         for handler_id in handler_ids:

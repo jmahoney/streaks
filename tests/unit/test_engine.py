@@ -22,6 +22,7 @@ from streaks.engine import (
     CHART_LOW,
     CHART_MID,
     CHART_MISSED,
+    CHART_MISSED_BORDER,
     CHART_UNCONFIRMED_BORDER,
     CHART_UPCOMING,
     WEEKDAYS_MON_TO_FRI,
@@ -595,7 +596,7 @@ def test_history_chart_fill_by_ratio_and_status():
 
     saturday = week[5]
     assert saturday.fill == CHART_MISSED
-    assert saturday.border is None
+    assert saturday.border == CHART_MISSED_BORDER
     assert saturday.tooltip == "missed — run ended"
 
     sunday = week[6]
@@ -618,6 +619,7 @@ def test_run_chart_ends_with_the_miss_that_ended_it():
     week = h.weeks[0]
     assert [c.fill for c in week[:2]] == [CHART_FULL, CHART_FULL]
     assert week[2].fill == CHART_MISSED
+    assert week[2].border == CHART_MISSED_BORDER
     assert week[2].tooltip == "missed — run ended"
     assert week[3].fill == CHART_UPCOMING
 
