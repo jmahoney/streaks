@@ -491,3 +491,56 @@ def test_no_quiet_days_variant(seeded_state, seeded_window, process_events):
     today_view = _today_view(window)
     assert today_view.banners_box.get_first_child() is None
     assert today_view.subtitle_label.get_label() == "2 check-ins open"
+
+
+def test_picking_today_in_the_calendar_returns_to_today(seeded_window, process_events):
+    window = seeded_window
+
+    today_view = _today_view(window)
+    today_view.day_calendar.select_day(GLib.DateTime.new_local(2026, 9, 12, 0, 0, 0))
+    process_events()
+    today_view.day_calendar.select_day(GLib.DateTime.new_local(2026, 9, 13, 0, 0, 0))
+    process_events()
+
+    view = _engine_view(window.state)
+    assert today_view.title_label.get_label() == view.title
+    assert today_view.subtitle_label.get_label() == view.subtitle
+    assert not today_view.back_to_today_button.get_visible()
+
+
+def test_day_rollover_moves_today_to_the_new_day(seeded_window, process_events, monkeypatch):
+    window = seeded_window
+    today_view = _today_view(window)
+
+    monkeypatch.setenv("STREAKS_FAKE_TODAY", "2026-09-14")
+    assert window.state.check_day()
+    process_events()
+
+    assert today_view.title_label.get_label() == _engine_view(window.state).title
+    assert window.content_title.get_subtitle() == "Monday 14 September"
+    assert today_view.day_calendar.get_date().get_day_of_month() == 14
+    assert not today_view.back_to_today_button.get_visible()
+
+
+def test_day_rollover_keeps_an_earlier_day_being_checked_in(
+    seeded_window, process_events, monkeypatch
+):
+    window = seeded_window
+    today_view = _today_view(window)
+    today_view.show_day(date(2026, 9, 12))
+    process_events()
+
+    monkeypatch.setenv("STREAKS_FAKE_TODAY", "2026-09-14")
+    window.state.check_day()
+    process_events()
+
+    assert today_view.title_label.get_label() == "Saturday 12 September"
+    assert today_view.back_to_today_button.get_visible()
+
+
+def test_check_day_is_quiet_when_the_day_has_not_changed(seeded_state):
+    emitted = []
+    seeded_state.connect("changed", lambda _s: emitted.append(True))
+
+    assert not seeded_state.check_day()
+    assert emitted == []

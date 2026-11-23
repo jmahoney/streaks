@@ -75,9 +75,6 @@ class StreaksTodayView(Adw.Bin):
     def set_state(self, state: AppState) -> None:
         """Bind to ``state``, pin the calendar to "today", and rebuild on every change."""
         self.state = state
-        today = state.today()
-        gdate = GLib.DateTime.new_local(today.year, today.month, today.day, 0, 0, 0)
-        self.day_calendar.select_day(gdate)
         self._day_selected_id = self.day_calendar.connect("day-selected", self._on_day_selected)
         state.connect("changed", self._on_state_changed)
         self._rebuild()
@@ -86,14 +83,20 @@ class StreaksTodayView(Adw.Bin):
         self._rebuild()
 
     def show_day(self, day: date | None) -> None:
-        """Show ``day`` (``None`` = today) in the content pane, with the calendar on that day."""
+        """Show ``day`` (``None`` = today) in the content pane, with the calendar on that day.
+
+        Today itself is stored as ``None`` so the view keeps following today, including across
+        a day rollover.
+        """
+        if self.state is not None and day == self.state.today():
+            day = None
         self._shown_day = day
-        if self.state is not None:
-            shown = day or self.state.today()
-            gdate = GLib.DateTime.new_local(shown.year, shown.month, shown.day, 0, 0, 0)
-            with self.day_calendar.handler_block(self._day_selected_id):
-                self.day_calendar.select_day(gdate)
         self._rebuild()
+
+    def _select_calendar_day(self, day: date) -> None:
+        gdate = GLib.DateTime.new_local(day.year, day.month, day.day, 0, 0, 0)
+        with self.day_calendar.handler_block(self._day_selected_id):
+            self.day_calendar.select_day(gdate)
 
     def scroll_to_streak(self, streak_id: int) -> None:
         """Focus the check-in card for ``streak_id``, if it is currently shown.
@@ -128,6 +131,7 @@ class StreaksTodayView(Adw.Bin):
         )
 
         display_day = self._shown_day or today
+        self._select_calendar_day(display_day)
         view = engine.today_view(self.state.streaks, display_day, settings)
 
         viewing_past = self._shown_day is not None

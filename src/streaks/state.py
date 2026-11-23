@@ -39,6 +39,7 @@ class AppState(GObject.Object):
         if models.db.database is None:
             models.init_db()
         self.streaks: list[StreakData] = []
+        self._today = self.today()
         self.reload()
 
     def close(self) -> None:
@@ -65,6 +66,17 @@ class AppState(GObject.Object):
         """Today's check-in day, honouring the configured day-start and the test clock."""
         return clock.today(self.settings.to_engine().day_start_minutes)
 
+    def check_day(self) -> bool:
+        """Emit ``changed`` if the check-in day has rolled over since views last derived.
+
+        Nothing else notices midnight (or the configured day-start) passing while the app is
+        open, so the window calls this on a timer and whenever it regains focus.
+        """
+        if self.today() == self._today:
+            return False
+        self.notify_changed()
+        return True
+
     def streak(self, streak_id: int) -> StreakData | None:
         """The loaded streak with this id, or ``None`` if it isn't (any more)."""
         return next((s for s in self.streaks if s.id == streak_id), None)
@@ -72,6 +84,7 @@ class AppState(GObject.Object):
     def reload(self) -> list[StreakData]:
         """Reload every streak from the database and notify subscribers."""
         self.streaks = models.load_all()
+        self._today = self.today()
         self.emit("changed")
         return self.streaks
 
@@ -85,4 +98,5 @@ class AppState(GObject.Object):
         Settings only change derived values (run counts, which section a streak sits in), never
         the loaded rows. Data writes call ``reload()`` instead.
         """
+        self._today = self.today()
         self.emit("changed")

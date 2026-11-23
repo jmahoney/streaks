@@ -59,6 +59,10 @@ class StreaksWindow(Adw.ApplicationWindow):
         # Break `AppState`'s GSettings subscription once this window is done with it — see
         # `AppState.close()`.
         self.connect("destroy", self._on_destroy)
+        # Notice the check-in day rolling over while the app stays open: on a timer, and as
+        # soon as the window is focused again (e.g. after waking from suspend).
+        self._day_check_id = GLib.timeout_add_seconds(60, self._on_day_check_tick)
+        self.connect("notify::is-active", self._on_is_active_changed)
 
         self._current_streak_id = 0
         self._current_streak_ended = False
@@ -382,5 +386,16 @@ class StreaksWindow(Adw.ApplicationWindow):
     def _on_state_changed(self, _state: AppState) -> None:
         self._rebuild_sidebar()
 
+    def _on_day_check_tick(self) -> bool:
+        self.state.check_day()
+        return GLib.SOURCE_CONTINUE
+
+    def _on_is_active_changed(self, *_args) -> None:
+        if self.is_active():
+            self.state.check_day()
+
     def _on_destroy(self, *_args) -> None:
+        if self._day_check_id:
+            GLib.source_remove(self._day_check_id)
+            self._day_check_id = 0
         self.state.close()
