@@ -43,6 +43,11 @@
     <color type="primary" scheme_preference="dark">#5c3c00</color>
   </branding>
   <releases>
+    <release version="0.3.7" date="2026-11-23">
+      <description>
+        <p>Choosing today in the calendar now returns to today, and the Today view moves on to the new day by itself if Streaks is left open overnight.</p>
+      </description>
+    </release>
     <release version="0.3.6" date="2026-10-20">
       <description>
         <p>Every goal's all-time progress bar now uses your accent colour, rather than turning amber below 75 %.</p>
